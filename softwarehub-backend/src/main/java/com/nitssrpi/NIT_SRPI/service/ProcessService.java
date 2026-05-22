@@ -2,11 +2,13 @@ package com.nitssrpi.NIT_SRPI.service;
 
 import com.nitssrpi.NIT_SRPI.Infra.security.SecurityService;
 import com.nitssrpi.NIT_SRPI.controller.dto.OperationNotAllowedException;
+import com.nitssrpi.NIT_SRPI.controller.dto.ProcessClassificationRequestDTO;
 import com.nitssrpi.NIT_SRPI.controller.dto.ProcessStatusCountDTO;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.NullListException;
 import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.model.Process;
 import com.nitssrpi.NIT_SRPI.repository.IpTypesRepository;
+import com.nitssrpi.NIT_SRPI.repository.NiceClassificationRepository;
 import com.nitssrpi.NIT_SRPI.repository.ProcessRepository;
 import com.nitssrpi.NIT_SRPI.repository.UserRepository;
 import com.nitssrpi.NIT_SRPI.repository.specs.ProcessSpecs;
@@ -30,12 +32,11 @@ public class ProcessService {
 
     private final ProcessRepository repository;
     private final IpTypesRepository ipTypesRepository;
-    private final UserRepository userRepository;
+    private final NiceClassificationRepository niceClassificationRepository;
     private final SecurityService securityService;
 
     @Transactional
     public Process save(Process process) {
-
         User user = securityService.getAuthenticatedUser();
         System.out.println(user.getEmail()+ " " + user.getFullName());
         process.setCreator(user);
@@ -62,6 +63,20 @@ public class ProcessService {
         // 3. Ao salvar o processo, o JPA salvará os Attachments automaticamente
         // (se você tiver o CascadeType.ALL ou PERSIST no mapeamento da lista de attachments)
         return repository.save(process);
+    }
+
+    @Transactional
+    public void classifyProcess(Long processId, ProcessClassificationRequestDTO requestDTO){
+        Process process = repository.findById(processId).orElseThrow(() ->
+                new EntityNotFoundException("Processo não encontrado")
+        );
+        NiceClassification niceClassification =
+                niceClassificationRepository.findById(requestDTO.niceClassCode())
+                        .orElseThrow(() ->
+                                new EntityNotFoundException("Classe NICE não encontrada")
+                        );
+        process.setNiceClassification(niceClassification);
+        repository.save(process);
     }
 
     public void update(Process process){

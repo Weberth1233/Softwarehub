@@ -75,4 +75,7 @@ public class Process {
     @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Justification> justifications = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "nice_class_code", nullable = true)
+    private NiceClassification niceClassification;
 }

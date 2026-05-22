@@ -4,6 +4,7 @@ import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
 import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.repository.ExternalAuthorRepository;
 import com.nitssrpi.NIT_SRPI.repository.specs.ExternalAuthorSpecs;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +36,7 @@ public class ExternalAuthorService {
 
     public void update(ExternalAuthor externalAuthor){
         if(externalAuthor.getId() == null){
-            throw new IllegalArgumentException("Para atualizar é necessário que o usuário esteja cadastrado!");
+            throw new EntityNotFoundException("Para atualizar é necessário que o usuário esteja cadastrado!");
         }
         repository.save(externalAuthor);
     }

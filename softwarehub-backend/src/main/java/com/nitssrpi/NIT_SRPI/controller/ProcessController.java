@@ -56,7 +56,7 @@ public class ProcessController implements GenericController{
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
             @ApiResponse(responseCode = "404", description = "Processo não encontrado!"),
     })
-    public ResponseEntity<Object> updateProcess
+    public ResponseEntity<Object> update
     (@RequestBody @Valid ProcessRequestDTO dto, @PathVariable("id") String id ) {
         var idIpTypes = Long.parseLong(id);
         //Buscando na base se existe alguem com esse id
@@ -161,7 +161,7 @@ public class ProcessController implements GenericController{
             @ApiResponse(responseCode = "204", description = "Deletar realizada com sucesso!"),
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado!"),
     })
-    public ResponseEntity<Object> deleteIpTypes
+    public ResponseEntity<Object> delete
             (@PathVariable("id") String id) {
         var idProcess = Long.parseLong(id);
         //Buscando na base se existe alguem com esse id
@@ -185,5 +185,17 @@ public class ProcessController implements GenericController{
             @RequestBody StatusUpdateDTO dto) {
         service.updateStatus(id, dto.status());
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/classification")
+    @Operation(summary = "Classificar classe nice do processo", description = "Atualizar status de um processo passando o id como parâmetro")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Classificado com sucesso!"),
+    })
+    public ResponseEntity<Void> classifyProcess(
+            @PathVariable Long id,
+            @RequestBody @Valid ProcessClassificationRequestDTO request){
+        service.classifyProcess(id, request);
+        return  ResponseEntity.noContent().build();
     }
 }
