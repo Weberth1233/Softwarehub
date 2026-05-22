@@ -4,6 +4,7 @@ import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
 import com.nitssrpi.NIT_SRPI.model.User;
 import com.nitssrpi.NIT_SRPI.repository.UserRepository;
 import com.nitssrpi.NIT_SRPI.repository.specs.UserSpecs;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -90,7 +91,7 @@ public class UserService {
 
     public void update(User user){
         if(user.getId() == null){
-            throw new IllegalArgumentException("Para atualizar é necessário que o usuário esteja cadastrado!");
+            throw new EntityNotFoundException("Para atualizar é necessário que o usuário esteja cadastrado!");
         }
 
 //        if(repository.existsByCpf(user.getCpf())){

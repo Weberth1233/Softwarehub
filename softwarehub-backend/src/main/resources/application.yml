@@ -1,5 +1,5 @@
-#server:
-#  port: 8081
+server:
+  port: 8081
 
 # Configurações Customizadas do Sistema
 file:
@@ -23,8 +23,8 @@ spring:
 
   # Banco de Dados PostgreSQL
   datasource:
-#    url: jdbc:postgresql://localhost:5432/nitsrpi
-    url: jdbc:postgresql://postgres:5432/nitsrpi
+    url: jdbc:postgresql://localhost:5432/nitsrpi
+#    url: jdbc:postgresql://postgres:5432/nitsrpi
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver

@@ -5,6 +5,7 @@ import com.nitssrpi.NIT_SRPI.model.Process;
 import com.nitssrpi.NIT_SRPI.model.StatusProcess;
 import com.nitssrpi.NIT_SRPI.repository.JustificationRepository;
 import com.nitssrpi.NIT_SRPI.repository.ProcessRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class JustificationService {
 
     public Justification save(Long processId, String reason) {
         Process process = processRepository.findById(processId)
-                .orElseThrow(() -> new RuntimeException("Processo não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
         process.setStatus(StatusProcess.CORRECAO);
         Justification justification = new Justification();
         justification.setReason(reason);
@@ -34,7 +35,7 @@ public class JustificationService {
 
     public void update(Justification justification){
         if(justification.getId() == null){
-            throw new IllegalArgumentException("Para atualizar é necessário que a justificativa esteja cadastrado!");
+            throw new EntityNotFoundException("Para atualizar é necessário que a justificativa esteja cadastrado!");
         }
         repository.save(justification);
     }

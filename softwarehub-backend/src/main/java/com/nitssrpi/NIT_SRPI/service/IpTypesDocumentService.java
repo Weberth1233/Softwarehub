@@ -3,6 +3,7 @@ package com.nitssrpi.NIT_SRPI.service;
 import com.nitssrpi.NIT_SRPI.model.IpTypeDocument;
 import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.repository.IpTypesDocumentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,7 @@ public class IpTypesDocumentService {
 
     public void update(IpTypeDocument ipTypeDocument){
         if(ipTypeDocument.getId() == null){
-            throw new IllegalArgumentException("Para atualizar é necessário que o usuário esteja cadastrado!");
+            throw new EntityNotFoundException("Para atualizar é necessário que o usuário esteja cadastrado!");
         }
         repository.save(ipTypeDocument);
     }

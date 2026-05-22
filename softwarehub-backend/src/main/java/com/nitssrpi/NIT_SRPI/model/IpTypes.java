@@ -26,4 +26,10 @@ public class IpTypes {
     // Ex: Software exige "Termo de Cessão" e "Declaração de Veracidade".
     @OneToMany(mappedBy = "ipType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<IpTypeDocument> requiredDocuments;
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JoinColumn(name = "consent_term_id")
+    private ConsentTerm consentTerm;
 }
