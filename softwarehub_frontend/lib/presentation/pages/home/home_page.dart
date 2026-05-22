@@ -7,7 +7,6 @@ import 'package:nit_sgpi_frontend/infra/datasources/auth_local_datasource.dart';
 import 'controllers/home_controller.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/widgets/shared_background.dart';
-
 import 'widgets/footer.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,14 +14,14 @@ class HomePage extends StatelessWidget {
 
   final processController = Get.find<ProcessController>();
   final authLocalDataSource = Get.find<AuthLocalDataSource>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     String status = "";
-
     Color color = Colors.green;
-
     final theme = Theme.of(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFCBD5E1),
       appBar: PreferredSize(
@@ -41,7 +40,6 @@ class HomePage extends StatelessWidget {
                 ),
               ],
             ),
-
             child: AppBar(
               backgroundColor: Colors.transparent,
               foregroundColor: theme.colorScheme.primary,
@@ -74,9 +72,7 @@ class HomePage extends StatelessWidget {
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontSize: 35,
                                   fontWeight: FontWeight.w300,
-                                  color: theme.colorScheme.primary.withOpacity(
-                                    0.6,
-                                  ),
+                                  color: theme.colorScheme.primary.withOpacity(0.6),
                                   letterSpacing: -0.5,
                                 ),
                               ),
@@ -85,9 +81,7 @@ class HomePage extends StatelessWidget {
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontSize: 35,
                                   fontWeight: FontWeight.w900,
-                                  color: theme.colorScheme.primary.withOpacity(
-                                    0.9,
-                                  ),
+                                  color: theme.colorScheme.primary.withOpacity(0.9),
                                   letterSpacing: -0.5,
                                 ),
                               ),
@@ -119,19 +113,12 @@ class HomePage extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withOpacity(
-                                0.08,
-                              ),
+                              color: theme.colorScheme.primary.withOpacity(0.08),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: theme.colorScheme.primary.withOpacity(
-                                  0.2,
-                                ),
+                                color: theme.colorScheme.primary.withOpacity(0.2),
                                 width: 1,
                               ),
                             ),
@@ -186,10 +173,7 @@ class HomePage extends StatelessWidget {
                               ),
                             ),
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -205,7 +189,6 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-
       body: Stack(
         children: [
           Positioned.fill(
@@ -216,335 +199,256 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-
-          SingleChildScrollView(
-            child: Padding(
-              padding: Responsive.getPadding(context),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 24),
-
-                  Container(
-                    padding: const EdgeInsets.all(33),
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.40),
-                          blurRadius: 8,
-                          offset: const Offset(0, 9),
+          Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true,
+            interactive: true,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Padding(
+                padding: Responsive.getPadding(context),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(33),
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.40),
+                            blurRadius: 8,
+                            offset: const Offset(0, 9),
+                          ),
+                        ],
+                        border: Border.all(
+                          color: Colors.grey.withOpacity(0.2),
+                          width: 1,
                         ),
-                      ],
-                      border: Border.all(
-                        color: Colors.grey.withOpacity(0.2),
-                        width: 1,
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Painel de Processos",
-                                    style: theme.textTheme.headlineLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: -0.5,
-                                          color: Colors.black87,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    "Sistema de Gestão de Propriedade Intelectual",
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontSize: 17,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            ElevatedButton(
-                              onPressed: () {
-                                Get.toNamed("/process");
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 18,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 3,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.add, size: 22),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    "NOVO PROCESSO",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Obx(() {
-                            if (processController.isLoadingProcessCount.value) {
-                              return const CircularProgressIndicator();
-                            }
-
-                            if (processController.processesStatus.isEmpty) {
-                              return const Text("Nenhum dado encontrado");
-                            }
-
-                            return Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: processController.processesStatus.map((
-                                item,
-                              ) {
-                                if (item.status == "CORRECAO") {
-                                  status = "CORREÇÃO";
-                                  color = Colors.red;
-                                } else if (item.status == "EM_ANDAMENTO") {
-                                  status = " EM ANDAMENTO";
-                                  color = const Color.fromARGB(
-                                    255,
-                                    228,
-                                    206,
-                                    11,
-                                  );
-                                } else {
-                                  status = item.status;
-                                  color = Colors.green;
-                                }
-                                return Container(
-                                  height: 55,
-                                  width: 260,
-                                  padding: const EdgeInsets.only(
-                                    left: 20,
-                                    right: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(30),
-                                    border: Border.all(
-                                      color: Colors.grey.shade400,
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.15),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          status,
-                                          style: const TextStyle(
-                                            decorationColor:
-                                                ThemeColor.greyColor,
-                                            fontSize: 19,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Container(
-                                        width: 42,
-                                        height: 42,
-                                        decoration: BoxDecoration(
-                                          color: color,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          item.amount.toString().padLeft(
-                                            2,
-                                            '0',
-                                          ),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            );
-                          }),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        const FilterHeader(),
-                        const SizedBox(height: 24),
-
-                        Obx(() {
-                          final list = processController.processes.toList();
-
-                          if (processController.isLoadingList.value) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-
-                          if (list.isEmpty) {
-                            return Center(
-                              child: Text(
-                                "Sem resultados!",
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: theme.colorScheme.error,
-                                ),
-                              ),
-                            );
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Wrap(
-                                  spacing: 20,
-                                  runSpacing: 20,
-                                  children: list
-                                      .map((item) => ProcessCard(item: item))
-                                      .toList(),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Obx(() {
-                                final current =
-                                    processController.currentPage.value;
-                                final total =
-                                    processController.totalPages.value;
-
-                                if (total <= 1) return const SizedBox();
-
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ElevatedButton(
-                                      onPressed: current > 0
-                                          ? processController.previousPage
-                                          : null,
-                                      child: Text(
-                                        "Anterior",
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                                    Text(
+                                      "Painel de Processos",
+                                      style: theme.textTheme.headlineLarge?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.5,
+                                        color: Colors.black87,
                                       ),
                                     ),
-
-                                    const SizedBox(width: 16),
-
+                                    const SizedBox(height: 2),
                                     Text(
-                                      "Página ${current + 1} de $total",
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-
-                                    const SizedBox(width: 16),
-
-                                    ElevatedButton(
-                                      onPressed: current < total - 1
-                                          ? processController.nextPage
-                                          : null,
-                                      child: Text(
-                                        "Próxima",
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                            ),
+                                      "Sistema de Gestão de Propriedade Intelectual",
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontSize: 17,
+                                        color: theme.colorScheme.primary,
                                       ),
                                     ),
                                   ],
-                                );
-                              }),
-                              // Obx(() {
-                              //   final isLoadingMore =
-                              //       processController.isLoadingMore.value;
-
-                              //   return ElevatedButton(
-                              //     onPressed: isLoadingMore
-                              //         ? null
-                              //         : () => processController.fetchProcesses(
-                              //             loadMore: true,
-                              //           ),
-                              //     style: ElevatedButton.styleFrom(
-                              //       padding: const EdgeInsets.symmetric(
-                              //         horizontal: 24,
-                              //         vertical: 12,
-                              //       ),
-                              //     ),
-                              //     child: isLoadingMore
-                              //         ? const SizedBox(
-                              //             height: 20,
-                              //             width: 20,
-                              //             child: CircularProgressIndicator(
-                              //               strokeWidth: 2,
-                              //             ),
-                              //           )
-                              //         : Text(
-                              //             "Ver mais",
-                              //             style: theme.textTheme.bodyMedium
-                              //                 ?.copyWith(
-                              //                   color: theme
-                              //                       .colorScheme
-                              //                       .onSecondary,
-                              //                   fontWeight: FontWeight.bold,
-                              //                 ),
-                              //           ),
-                              //   );
-                              // }),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Get.toNamed("/process");
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: theme.colorScheme.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 3,
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.add, size: 22),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      "NOVO PROCESSO",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
-                          );
-                        }),
-                      ],
+                          ),
+                          const SizedBox(height: 32),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Obx(() {
+                              if (processController.isLoadingProcessCount.value) {
+                                return const CircularProgressIndicator();
+                              }
+                              if (processController.processesStatus.isEmpty) {
+                                return const Text("Nenhum dado encontrado");
+                              }
+                              return Wrap(
+                                spacing: 16,
+                                runSpacing: 16,
+                                children: processController.processesStatus.map((item) {
+                                  if (item.status == "CORRECAO") {
+                                    status = "CORREÇÃO";
+                                    color = Colors.red;
+                                  } else if (item.status == "EM_ANDAMENTO") {
+                                    status = " EM ANDAMENTO";
+                                    color = const Color.fromARGB(255, 228, 206, 11);
+                                  } else {
+                                    status = item.status;
+                                    color = Colors.green;
+                                  }
+                                  return Container(
+                                    height: 55,
+                                    width: 260,
+                                    padding: const EdgeInsets.only(left: 20, right: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(
+                                        color: Colors.grey.shade400,
+                                        width: 1.5,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.15),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            status,
+                                            style: const TextStyle(
+                                              decorationColor: ThemeColor.greyColor,
+                                              fontSize: 19,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            color: color,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            item.amount.toString().padLeft(2, '0'),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 32),
+                          const FilterHeader(),
+                          const SizedBox(height: 24),
+                          Obx(() {
+                            final list = processController.processes.toList();
+                            if (processController.isLoadingList.value) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (list.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  "Sem resultados!",
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                              );
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Wrap(
+                                    spacing: 20,
+                                    runSpacing: 20,
+                                    children: list.map((item) => ProcessCard(item: item)).toList(),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Obx(() {
+                                  final current = processController.currentPage.value;
+                                  final total = processController.totalPages.value;
+                                  if (total <= 1) return const SizedBox();
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: current > 0 ? processController.previousPage : null,
+                                        child: Text(
+                                          "Anterior",
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Text(
+                                        "Página ${current + 1} de $total",
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      ElevatedButton(
+                                        onPressed: current < total - 1 ? processController.nextPage : null,
+                                        child: Text(
+                                          "Próxima",
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  const Footer(),
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 32),
+                    const Footer(),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),
@@ -553,7 +457,6 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-// ============================================================================
 
 class FilterHeader extends StatefulWidget {
   const FilterHeader({super.key});
@@ -586,32 +489,32 @@ class _FilterHeaderState extends State<FilterHeader> {
     return SizedBox(
       child: isMobile
           ? Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _title(context),
+          const SizedBox(height: 12),
+          _buildFilters(context),
+          const SizedBox(height: 12),
+          _buildSearch(context, controller),
+        ],
+      )
+          : Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _title(context),
                 const SizedBox(height: 12),
                 _buildFilters(context),
-                const SizedBox(height: 12),
-                _buildSearch(context, controller),
-              ],
-            )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _title(context),
-                      const SizedBox(height: 12),
-                      _buildFilters(context),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 24),
-                SizedBox(width: 280, child: _buildSearch(context, controller)),
               ],
             ),
+          ),
+          const SizedBox(width: 24),
+          SizedBox(width: 280, child: _buildSearch(context, controller)),
+        ],
+      ),
     );
   }
 
@@ -680,9 +583,7 @@ class _FilterHeaderState extends State<FilterHeader> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.white,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Colors.white,
                 borderRadius: radius,
               ),
               child: Text(
