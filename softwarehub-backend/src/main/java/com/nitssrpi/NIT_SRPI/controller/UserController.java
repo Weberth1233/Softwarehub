@@ -4,6 +4,7 @@ import com.nitssrpi.NIT_SRPI.controller.dto.UserResponseDTO;
 import com.nitssrpi.NIT_SRPI.controller.dto.UserUpdateDTO;
 import com.nitssrpi.NIT_SRPI.controller.mappers.UserMapper;
 import com.nitssrpi.NIT_SRPI.controller.mappers.UserUpdateMapper;
+import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.model.User;
 import com.nitssrpi.NIT_SRPI.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("users")
@@ -27,20 +29,19 @@ public class UserController  implements GenericController{
     private final UserMapper mapper;
     private final UserUpdateMapper userUpdateMapper;
 
-    @PostMapping
-    @Operation(summary = "Salvar", description = "Cadastrar novo usuário")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
-            @ApiResponse(responseCode = "422", description = "Erro de validação!"),
-            @ApiResponse(responseCode = "409", description = "Usuário já cadastrado!"),
-    })
-    public ResponseEntity<Object> save(@RequestBody @Valid UserRequestDTO dto) {
-        User user = mapper.toEntity(dto);
-        service.save(user);
-        URI location = generateHeaderLocation(user.getId());
-        return ResponseEntity.created(location).build();
-    }
-
+//    @PostMapping
+//    @Operation(summary = "Salvar", description = "Cadastrar novo usuário")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
+//            @ApiResponse(responseCode = "422", description = "Erro de validação!"),
+//            @ApiResponse(responseCode = "409", description = "Usuário já cadastrado!"),
+//    })
+//    public ResponseEntity<Object> save(@RequestBody @Valid UserRequestDTO dto) {
+//        User user = mapper.toEntity(dto);
+//        service.save(user);
+//        URI location = generateHeaderLocation(user.getId());
+//        return ResponseEntity.created(location).build();
+//    }
 
     //Obter autor pelo id
     @GetMapping("{id}")
@@ -58,7 +59,6 @@ public class UserController  implements GenericController{
             return ResponseEntity.ok(dto);
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
-
 
     @PutMapping("{id}")
     @Operation(summary = "Atualizar", description = "Atualizar usuário passando o ID")
@@ -106,7 +106,6 @@ public class UserController  implements GenericController{
 
     }
 
-
     @GetMapping("/logged")
     @Operation(summary = "Obter dados ", description = "Obter dados do usuario logado")
     @ApiResponses({
@@ -129,5 +128,26 @@ public class UserController  implements GenericController{
         Page<User> resultPage = service.searchUsers(search, page, pageSize);
         Page<UserResponseDTO> result = resultPage.map(mapper::toDTO);
         return ResponseEntity.ok(result);
+    }
+
+    //Obter autor pelo id
+    @DeleteMapping("{id}")
+    @Operation(summary = "Deletar", description = "Deletar passando o ID como paramêtro")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Deletado com sucesso!"),
+            @ApiResponse(responseCode = "404", description = "Item não encontrado!"),
+    })
+    public ResponseEntity<Object> delete
+    (@PathVariable("id") String id) {
+        var userId = Long.parseLong(id);
+        //Buscando na base se existe alguem com esse id
+        Optional<User> userOptional = service.getUserById(userId);
+        //Se for vazio eu retorno notFound
+        if(userOptional.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        //Se não eu deleto
+        service.delete(userOptional.get());
+        return ResponseEntity.noContent().build();
     }
 }

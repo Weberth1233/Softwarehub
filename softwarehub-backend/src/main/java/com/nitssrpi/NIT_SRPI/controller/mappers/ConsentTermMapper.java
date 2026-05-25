@@ -7,12 +7,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring",  uses = {IpTypesMapper.class})
-public abstract class ConsentTermMapper {
-    @Autowired
-    IpTypesRepository ipTypesRepository;
+@Mapper(componentModel = "spring")
+//        uses = {IpTypesMapper.class})
+public interface ConsentTermMapper {
+//    @Autowired
+//    IpTypesRepository ipTypesRepository;
 
-    @Mapping(target = "ipType", expression = "java( ipTypesRepository.findById(dto.ipTypeId()).orElse(null))")
-    public abstract ConsentTerm toEntity(ConsentTermRequestDTO dto);
-    public abstract ConsentTermResponseDTO toDTO(ConsentTerm consentTerm);
+//    @Mapping(target = "ipType", expression = "java( ipTypesRepository.findById(dto.ipTypeId()).orElse(null))")
+    ConsentTerm toEntity(ConsentTermRequestDTO dto);
+    ConsentTermResponseDTO toDTO(ConsentTerm consentTerm);
 }

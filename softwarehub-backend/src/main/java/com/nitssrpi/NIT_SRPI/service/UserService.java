@@ -1,7 +1,10 @@
 package com.nitssrpi.NIT_SRPI.service;
 import com.nitssrpi.NIT_SRPI.Infra.security.SecurityService;
+import com.nitssrpi.NIT_SRPI.controller.dto.UserEducationalInstitutionLinkResponseDTO;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
+import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.model.User;
+import com.nitssrpi.NIT_SRPI.model.UserEducationalInstitutionLink;
 import com.nitssrpi.NIT_SRPI.repository.UserRepository;
 import com.nitssrpi.NIT_SRPI.repository.specs.UserSpecs;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,31 +32,20 @@ public class UserService {
             //Diz para o endereço quem é o dono dele
             user.getAddress().setUser(user);
         }
+        if(user.getUserEducationalInstitutionLinks() != null){
+            for(UserEducationalInstitutionLink link: user.getUserEducationalInstitutionLinks()){
+                link.setUser(user);
+            }
+        }
         if(repository.existsByCpf(user.getCpf())){
             throw new DuplicateRecordException("O CPF " + user.getCpf() + " já está cadastrado no sistema!.");
         }
-        if(repository.existsByEmail(user.getEmail())){
+        if(repository.existsByEmail(user.getEmail())) {
             throw new DuplicateRecordException("O Email " + user.getEmail() + " já está cadastrado no sistema!.");
         }
-        //Todos os usuarios cadastrados vão iniciar com a Role USER
-//        if(user.getRole() == null){
-//            user.setRole("USER");
-//        }
+
         return repository.save(user);
     }
-
-//    public Optional<User> getLoggedUserData() {
-//        Authentication authentication =
-//                SecurityContextHolder.getContext().getAuthentication();
-//
-//        if (authentication == null || !authentication.isAuthenticated()) {
-//            return Optional.empty();
-//        }
-//
-//        String email = authentication.getName();
-//
-//        return repository.findByEmail(email);
-//    }
 
     public User getLoggedUser() {
         Authentication authentication =
@@ -105,4 +97,9 @@ public class UserService {
 //        }
         repository.save(user);
     }
+
+    public void delete(User user){
+        repository.delete(user);
+    }
+
 }
