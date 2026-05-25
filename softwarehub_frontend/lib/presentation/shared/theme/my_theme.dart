@@ -16,33 +16,61 @@ class MyTheme {
     scaffoldBackgroundColor: ThemeColor.primaryColor,
     cardTheme: CardThemeData(color: ThemeColor.primaryColor, elevation: 2),
     colorScheme: const ColorScheme.light(
-      primary: ThemeColor.primaryColor ,
-      secondary: ThemeColor.secondaryColor,
-      onSecondary: ThemeColor.colorVariantWhite,
-      tertiary: ThemeColor.colorVarianteBlack,
-      onSurface: ThemeColor.greyColor
+        primary: ThemeColor.primaryColor ,
+        secondary: ThemeColor.secondaryColor,
+        onSecondary: ThemeColor.colorVariantWhite,
+        tertiary: ThemeColor.colorVarianteBlack,
+        onSurface: ThemeColor.greyColor
     ),
     iconTheme: IconThemeData(color: ThemeColor.iconColor, size: 40),
     textTheme: _textTheme,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: ThemeColor.primaryColor,
-        shape: const RoundedRectangleBorder( 
-                        borderRadius: BorderRadius.horizontal(
-                          left: Radius.circular(5),
-                          right: Radius.circular(5),
-                        ), // 👈 sem arredondamento
-                      ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.horizontal(
+            left: Radius.circular(5),
+            right: Radius.circular(5),
+          ),
+        ),
       ),
     ),
+
     scrollbarTheme: ScrollbarThemeData(
-      thumbColor: WidgetStateProperty.all(ThemeColor.greyColor), // cor da "alça" do scroll
-      trackColor: WidgetStateProperty.all(ThemeColor.greyColor), // fundo da barra
-      trackBorderColor: WidgetStateProperty.all(ThemeColor.greyColor),
-      thickness: WidgetStateProperty.all(8), // espessura
-      radius: const Radius.circular(10), // bordas arredondadas
-      thumbVisibility: WidgetStateProperty.all(true), // sempre visível (opcional)
+      // COR DA ALÇA (Thumb)
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.dragged)) {
+          return ThemeColor.secondaryColor; // Destaque máximo (sólido) ao arrastar
+        }
+        if (states.contains(WidgetState.hovered)) {
+          return ThemeColor.primaryColor.withOpacity(0.85); // Forte no hover
+        }
+        // Estado normal: 55% de opacidade para aparecer bem contra o fundo da Home
+        return ThemeColor.primaryColor.withOpacity(0.55);
+      }),
+
+      // FUNDO DA TRILHA (Track)
+      // Usando um tom leve escurecido para criar um "trilho" discreto sempre visível
+      trackColor: WidgetStateProperty.all(Colors.black.withOpacity(0.04)),
+
+      // ESPESSURA DINÂMICA
+      thickness: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.hovered) || states.contains(WidgetState.dragged)) {
+          return 10.0; // Fica mais grossa para facilitar o clique/arrasto
+        }
+        return 6.0; // Fina e elegante no estado de repouso
+      }),
+
+      trackBorderColor: WidgetStateProperty.all(Colors.transparent),
+
+      // Arredondamento total para combinar com os botões e tags arredondadas da sua UI
+      radius: const Radius.circular(99),
+
+      // VISIBILIDADE
+      thumbVisibility: WidgetStateProperty.all(true),
+      trackVisibility: WidgetStateProperty.all(true),
     ),
+
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
@@ -55,7 +83,7 @@ class MyTheme {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
         borderSide: const BorderSide(
-          color: ThemeColor.primaryColor, // ou ThemeColor.secondaryColor
+          color: ThemeColor.primaryColor,
           width: 2,
         ),
       ),

@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f8257618-1329-4d8d-a065-e148448811e8" name="Changes" comment="" />
+    <list default="true" id="f8257618-1329-4d8d-a065-e148448811e8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/softwarehub-backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub-backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/home/home_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/home/home_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/shared/theme/my_theme.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/shared/theme/my_theme.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -112,7 +117,10 @@
       <workItem from="1775594755967" duration="1551000" />
       <workItem from="1775752679333" duration="13347000" />
       <workItem from="1775843164536" duration="10169000" />
-      <workItem from="1776184807454" duration="7078000" />
+      <workItem from="1776184807454" duration="7372000" />
+      <workItem from="1776366420128" duration="1132000" />
+      <workItem from="1778093714596" duration="3127000" />
+      <workItem from="1779468089632" duration="9173000" />
     </task>
     <servers />
   </component>
