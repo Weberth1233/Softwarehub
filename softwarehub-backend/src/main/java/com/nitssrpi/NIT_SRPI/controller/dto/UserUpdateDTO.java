@@ -3,11 +3,17 @@ package com.nitssrpi.NIT_SRPI.controller.dto;
 import com.nitssrpi.NIT_SRPI.controller.dto.AddressRequestDTO;
 import com.nitssrpi.NIT_SRPI.model.UserRole;
 import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.br.CPF;
+
 import java.time.LocalDate;
 
 public record UserUpdateDTO(
         @NotBlank(message = "Campo obrigatório!")
         String userName,
+
+        @NotBlank(message = "O CPF é obrigatório")
+        @CPF(message = "CPF inválido")
+        String cpf,
 
         @Email(message = "Email inválido!")
         String email,

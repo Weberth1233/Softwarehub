@@ -77,6 +77,7 @@ public class AuthenticationController implements GenericController{
         if(this.service.findByEmail(dto.email()) != null) return ResponseEntity.badRequest().build();
         String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
         User user = mapper.toEntity(dto);
+        System.out.println(user.getUsername());
         user.setPassword(encryptedPassword);
 
         this.service.save(user);

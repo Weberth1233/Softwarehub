@@ -15,5 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 )
 public interface UserMapper {
     User toEntity(UserRequestDTO dto);
+    @Mapping(target = "userName", source = "username")
     UserResponseDTO toDTO(User user);
 }

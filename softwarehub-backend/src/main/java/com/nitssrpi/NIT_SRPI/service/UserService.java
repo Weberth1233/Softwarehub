@@ -38,12 +38,11 @@ public class UserService {
             }
         }
         if(repository.existsByCpf(user.getCpf())){
-            throw new DuplicateRecordException("O CPF " + user.getCpf() + " já está cadastrado no sistema!.");
+            throw new DuplicateRecordException("O CPF já está cadastrado no sistema!.");
         }
         if(repository.existsByEmail(user.getEmail())) {
-            throw new DuplicateRecordException("O Email " + user.getEmail() + " já está cadastrado no sistema!.");
+            throw new DuplicateRecordException("O email já está cadastrado no sistema!.");
         }
-
         return repository.save(user);
     }
 
@@ -85,21 +84,29 @@ public class UserService {
         if(user.getId() == null){
             throw new EntityNotFoundException("Para atualizar é necessário que o usuário esteja cadastrado!");
         }
-
-//        if(repository.existsByCpf(user.getCpf())){
-//            throw new DuplicateRecordException("O CPF " + user.getCpf() + " já está cadastrado no sistema!.");
-//        }
-//        if(repository.existsByEmail(user.getEmail())){
-//            throw new DuplicateRecordException("O Email " + user.getEmail() + " já está cadastrado no sistema!.");
-//        }
-//        if(user.getRole() == null){
-//            user.setRole("USER");
-//        }
+        validateDuplicateCpfOrEmailForUpdate(user.getCpf(), user.getEmail(), user.getId());
         repository.save(user);
     }
 
     public void delete(User user){
         repository.delete(user);
+    }
+
+    private void validateDuplicateCpfOrEmailForUpdate(
+            String cpf,
+            String email,
+            Long id
+    ) {
+        if (repository.existsByCpfAndIdNot(cpf, id)) {
+            throw new DuplicateRecordException(
+                    "Já existe um cpf cadastrado!"
+            );
+        }
+        if (repository.existsByEmailAndIdNot(email, id)) {
+            throw new DuplicateRecordException(
+                    "Já existe um email cadastrado!"
+            );
+        }
     }
 
 }
