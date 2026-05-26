@@ -1,6 +1,7 @@
 package com.nitssrpi.NIT_SRPI.controller;
 import com.nitssrpi.NIT_SRPI.controller.dto.*;
 import com.nitssrpi.NIT_SRPI.controller.mappers.ConsentTermMapper;
+import com.nitssrpi.NIT_SRPI.model.Attachment;
 import com.nitssrpi.NIT_SRPI.model.ConsentTerm;
 import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.service.ConsentTermService;
@@ -26,6 +27,21 @@ public class ConsentTermController implements GenericController{
     private final IpTypesService ipTypesService;
     private final ConsentTermMapper mapper;
 
+    @PostMapping
+    @Operation(summary = "Salvar", description = "Cadastrar novo termo de consentimento")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
+            @ApiResponse(responseCode = "422", description = "Erro de validação!"),
+            @ApiResponse(responseCode = "409", description = "Conflito!"),
+//            @ApiResponse(responseCode = "422", description = "Erro de validação!"),
+    })
+    public ResponseEntity<Object> save(@RequestBody @Valid ConsentTermRequestDTO dto) {
+        ConsentTerm consentTerm = mapper.toEntity(dto);
+        service.save(consentTerm);
+        URI location = generateHeaderLocation(consentTerm.getId());
+        return ResponseEntity.created(location).build();
+    }
+
     @GetMapping
     @Operation(summary = "Obter", description = "Obter todos os termos de consentimento")
     @ApiResponses({
@@ -37,24 +53,12 @@ public class ConsentTermController implements GenericController{
         return ResponseEntity.ok(list);
     }
 
-    @PostMapping
-    @Operation(summary = "Salvar", description = "Cadastrar novo termo de consentimento")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
-            @ApiResponse(responseCode = "422", description = "Erro de validação!"),
-    })
-    public ResponseEntity<Object> save(@RequestBody @Valid ConsentTermRequestDTO dto) {
-        ConsentTerm consentTerm = mapper.toEntity(dto);
-        service.save(consentTerm);
-        URI location = generateHeaderLocation(consentTerm.getId());
-        return ResponseEntity.created(location).build();
-    }
-
     @PutMapping("{id}")
     @Operation(summary = "Atualizar", description = "Atualizar termo passando o ID como paramêtro")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Atualizado com sucesso!"),
             @ApiResponse(responseCode = "404", description = "Termo não encontrado!"),
+            @ApiResponse(responseCode = "409", description = "Conflito!"),
     })
     public ResponseEntity<Object> updateConsentTerm
             (@RequestBody @Valid ConsentTermRequestDTO dto, @PathVariable("id") String id ) {
@@ -110,5 +114,17 @@ public class ConsentTermController implements GenericController{
             ConsentTermResponseDTO dto = mapper.toDTO(consentTerm);
             return ResponseEntity.ok(dto);
         }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/ip_types/{id}")
+    @Operation(summary = "Obter um termo de consentimento", description = "Obter um termo de consentimento passando o id do tipo de propriedade")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sucesso no busca!"),
+            @ApiResponse(responseCode = "404", description = "Item não encontrados!"),
+    })
+    public ResponseEntity<ConsentTermResponseDTO> getByIpTypeId(@PathVariable Long id) {
+        ConsentTerm result = service.getByIpTypeId(id);
+        ConsentTermResponseDTO responseDTO = mapper.toDTO(result);
+        return ResponseEntity.ok(responseDTO);
     }
 }

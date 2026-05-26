@@ -22,6 +22,7 @@ public class ConsentTerm {
     @CreatedDate
     private LocalDateTime createdAt;
     private Integer version;
-    @ManyToOne
+    @OneToOne
+    @JoinColumn(name = "ip_type_id", unique = true)
     private IpTypes ipType;
 }
