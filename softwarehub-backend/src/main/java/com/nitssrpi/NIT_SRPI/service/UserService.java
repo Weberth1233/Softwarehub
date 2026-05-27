@@ -2,9 +2,7 @@ package com.nitssrpi.NIT_SRPI.service;
 import com.nitssrpi.NIT_SRPI.Infra.security.SecurityService;
 import com.nitssrpi.NIT_SRPI.controller.dto.UserEducationalInstitutionLinkResponseDTO;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
-import com.nitssrpi.NIT_SRPI.model.IpTypes;
-import com.nitssrpi.NIT_SRPI.model.User;
-import com.nitssrpi.NIT_SRPI.model.UserEducationalInstitutionLink;
+import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.repository.UserRepository;
 import com.nitssrpi.NIT_SRPI.repository.specs.UserSpecs;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +23,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
+    private final EducationalInstitutionService educationalInstitutionService;
+    private final TypesLinkService typesLinkService;
 
     @Transactional
     public User save(User user){
@@ -33,7 +33,37 @@ public class UserService {
             user.getAddress().setUser(user);
         }
         if(user.getUserEducationalInstitutionLinks() != null){
-            for(UserEducationalInstitutionLink link: user.getUserEducationalInstitutionLinks()){
+            for(UserEducationalInstitutionLink link : user.getUserEducationalInstitutionLinks()){
+                if(link.getEducationalInstitution() == null ||
+                        link.getEducationalInstitution().getId() == null){
+                    throw new IllegalArgumentException(
+                            "Instituição de ensino é obrigatória"
+                    );
+                }
+                if(link.getTypesLink() == null ||
+                        link.getTypesLink().getId() == null){
+                    throw new IllegalArgumentException(
+                            "Vínculo é obrigatório"
+                    );
+                }
+                EducationalInstitution institution =
+                        educationalInstitutionService
+                                .getById(link.getEducationalInstitution().getId())
+                                .orElseThrow(() ->
+                                        new EntityNotFoundException(
+                                                "Instituição de ensino não encontrada!"
+                                        )
+                                );
+                TypesLink typesLink =
+                        typesLinkService
+                                .getById(link.getTypesLink().getId())
+                                .orElseThrow(() ->
+                                        new EntityNotFoundException(
+                                                "Vínculo não encontrado!"
+                                        )
+                                );
+                link.setEducationalInstitution(institution);
+                link.setTypesLink(typesLink);
                 link.setUser(user);
             }
         }

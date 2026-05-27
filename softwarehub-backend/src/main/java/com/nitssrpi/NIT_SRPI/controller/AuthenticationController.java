@@ -71,10 +71,11 @@ public class AuthenticationController implements GenericController{
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
+            @ApiResponse(responseCode = "404", description = "Valor não encontrado!"),
 
     })
     public ResponseEntity<Object> save(@RequestBody @Valid UserRequestDTO dto) {
-        if(this.service.findByEmail(dto.email()) != null) return ResponseEntity.badRequest().build();
+       // if(this.service.findByEmail(dto.email()) != null) return ResponseEntity.badRequest().build();
         String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
         User user = mapper.toEntity(dto);
         System.out.println(user.getUsername());

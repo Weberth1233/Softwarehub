@@ -194,8 +194,10 @@ public class ProcessController implements GenericController{
     })
     public ResponseEntity<Void> classifyProcess(
             @PathVariable Long id,
+
             @RequestBody @Valid ProcessClassificationRequestDTO request){
         service.classifyProcess(id, request);
         return  ResponseEntity.noContent().build();
     }
+
 }
