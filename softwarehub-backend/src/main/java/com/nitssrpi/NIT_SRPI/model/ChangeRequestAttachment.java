@@ -25,6 +25,12 @@ public class ChangeRequestAttachment {
     @Column(name = "file_path", nullable = false)
     private String filePath;
 
+    @Column(name = "content_type")
+    private String contentType;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

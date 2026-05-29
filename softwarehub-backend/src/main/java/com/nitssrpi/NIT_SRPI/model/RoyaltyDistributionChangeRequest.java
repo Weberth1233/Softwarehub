@@ -40,8 +40,8 @@ public class RoyaltyDistributionChangeRequest {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String justification;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "attachment_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attachment_id", nullable = false)
     private ChangeRequestAttachment attachment;
 
     @Enumerated(EnumType.STRING)

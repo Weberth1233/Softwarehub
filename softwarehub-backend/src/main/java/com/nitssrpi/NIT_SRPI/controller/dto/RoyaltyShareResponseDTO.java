@@ -1,4 +1,14 @@
 package com.nitssrpi.NIT_SRPI.controller.dto;
+import com.nitssrpi.NIT_SRPI.model.RoyaltyShareType;
+import java.math.BigDecimal;
 
-public record RoyaltyShareResponseDTO() {
+public record RoyaltyShareResponseDTO(
+        Long id,
+        RoyaltyShareType type,
+        Long userId,
+        String userName,
+        Long educationalInstitutionId,
+        String educationalInstitutionName,
+        BigDecimal percentage
+) {
 }

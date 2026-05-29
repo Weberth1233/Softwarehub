@@ -1,19 +1,16 @@
 package com.nitssrpi.NIT_SRPI.service;
 
 import com.nitssrpi.NIT_SRPI.Infra.security.SecurityService;
-import com.nitssrpi.NIT_SRPI.controller.dto.OperationNotAllowedException;
+import com.nitssrpi.NIT_SRPI.controller.exceptions.OperationNotAllowedException;
 import com.nitssrpi.NIT_SRPI.controller.dto.ProcessClassificationRequestDTO;
 import com.nitssrpi.NIT_SRPI.controller.dto.ProcessStatusCountDTO;
-import com.nitssrpi.NIT_SRPI.controller.exceptions.NullListException;
 import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.model.Process;
 import com.nitssrpi.NIT_SRPI.repository.IpTypesRepository;
 import com.nitssrpi.NIT_SRPI.repository.NiceClassificationRepository;
 import com.nitssrpi.NIT_SRPI.repository.ProcessRepository;
-import com.nitssrpi.NIT_SRPI.repository.UserRepository;
 import com.nitssrpi.NIT_SRPI.repository.specs.ProcessSpecs;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

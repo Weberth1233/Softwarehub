@@ -1,11 +1,10 @@
 package com.nitssrpi.NIT_SRPI.controller.common;
 import com.nitssrpi.NIT_SRPI.controller.dto.ErroCampo;
 import com.nitssrpi.NIT_SRPI.controller.dto.ErrorResposta;
-import com.nitssrpi.NIT_SRPI.controller.dto.ExceptionTradingRule;
+import com.nitssrpi.NIT_SRPI.controller.exceptions.ExceptionTradingRule;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.NullListException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.Null;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestControllerAdvice
