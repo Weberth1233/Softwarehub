@@ -9,7 +9,7 @@ import '../../../../infra/datasources/auth_local_datasource.dart';
 import '../../../../infra/datasources/process_remote_datasource.dart';
 import '../../../../infra/repositories/process_repository_impl.dart';
 import '../../process/controllers/process_post_controller.dart';
-import '../controllers/Ip_types_form_controller.dart';
+import '../controllers/ip_types_form_controller.dart';
 
 class IpTypesFormBinding extends Bindings {
   @override

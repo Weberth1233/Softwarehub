@@ -1,5 +1,5 @@
 import '../../../domain/entities/ip_types/ip_type_entity.dart';
-import 'Ip_type_structure_model.dart';
+import 'ip_type_structure_model.dart';
 
 class IpTypeModel {
   final int id;
@@ -17,18 +17,20 @@ class IpTypeModel {
   factory IpTypeModel.fromJson(Map<String, dynamic> json) {
     return IpTypeModel(
       id: json['id'],
-      name: json['name'],
-      color: json['color'],
-      formStructure: IpTypeStructureModel.fromJson(json['formStructure']),
+      name: json['name'] ?? '',
+      color: json['color'] ?? '',
+      formStructure: IpTypeStructureModel.fromJson(
+        json['formStructure'] ?? {'fields': []},
+      ),
     );
   }
 
   factory IpTypeModel.fromEntity(IpTypeEntity entity) {
     return IpTypeModel(
       id: entity.id,
-      formStructure: IpTypeStructureModel.fromEntity(entity.formStructure),
-      name: entity.name, 
+      name: entity.name,
       color: entity.color,
+      formStructure: IpTypeStructureModel.fromEntity(entity.formStructure),
     );
   }
 
@@ -36,12 +38,11 @@ class IpTypeModel {
     return {
       'id': id,
       'name': name,
-      'color':color,
+      'color': color,
       'formStructure': formStructure.toJson(),
     };
   }
 
-  /// 🔥 Model -> Entity
   IpTypeEntity toEntity() {
     return IpTypeEntity(
       id: id,

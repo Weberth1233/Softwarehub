@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/widgets/custom_text_field.dart';
-import 'controllers/Ip_types_form_controller.dart';
+
+import 'controllers/ip_types_form_controller.dart';
 
 class IpTypesForm extends GetView<IpTypesFormController> {
   const IpTypesForm({super.key});
@@ -11,14 +12,10 @@ class IpTypesForm extends GetView<IpTypesFormController> {
     final secondaryStage = controller.secondStageProcess;
     final theme = Theme.of(context);
 
-
     const primaryColor = Color(0xFF094E9A);
 
     return Scaffold(
-
       backgroundColor: const Color(0xFFCBD5E1),
-
-      // 2. AppBar padronizado (Igual a ProcessPage)
       appBar: AppBar(
         elevation: 0,
         backgroundColor: primaryColor,
@@ -59,10 +56,8 @@ class IpTypesForm extends GetView<IpTypesFormController> {
           ],
         ),
       ),
-
       body: Stack(
         children: [
-          // 3. Linhas de fundo no padrão sutil (preto com opacidade quase zero)
           Positioned.fill(
             child: CustomPaint(
               painter: _DiagonalLinesPainter(
@@ -70,7 +65,6 @@ class IpTypesForm extends GetView<IpTypesFormController> {
               ),
             ),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
@@ -97,7 +91,6 @@ class IpTypesForm extends GetView<IpTypesFormController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Título interno do Container
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -121,56 +114,68 @@ class IpTypesForm extends GetView<IpTypesFormController> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 40),
+                        Obx(() {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: controller.fields.map((field) {
+                              if (!controller.isFieldVisible(field)) {
+                                return const SizedBox.shrink();
+                              }
 
-                        // LÓGICA MANTIDA: Geração dinâmica dos campos
-                        ...secondaryStage.item.formStructure.fields.map((field) {
-                          final textController = controller.controllers[field.name]!;
-                          final isDescription = field.name.toLowerCase().contains('descri');
+                              final textController =
+                                  controller.controllers[field.key]!;
 
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Design de input mais limpo (Flat)
-                                Text(
-                                  field.name,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
+                              final errorText =
+                                  controller.fieldErrors[field.key];
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
+                                        text: field.name,
+                                        style:
+                                            theme.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                        children: [
+                                          if (field.requiredField)
+                                            const TextSpan(
+                                              text: ' *',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _buildDynamicField(
+                                      context: context,
+                                      field: field,
+                                      textController: textController,
+                                      errorText: errorText,
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  // Altura específica apenas se for caixa de descrição
-                                  height: isDescription ? 150 : null,
-                                  child: CustomTextField(
-                                    controller: textController,
-                                    label: "", // Rótulo movido para fora para maior clareza visual
-                                    hintText: "Digite aqui...",
-                                    keyboardType: isDescription
-                                        ? TextInputType.multiline
-                                        : (field.type == 'number'
-                                        ? TextInputType.number
-                                        : TextInputType.text),
-                                    expands: isDescription,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              );
+                            }).toList(),
                           );
                         }),
-
                         const SizedBox(height: 32),
-
-                        // 4. Botão modernizado com Glow e mesma padronagem
                         Align(
                           alignment: Alignment.centerRight,
                           child: ElevatedButton.icon(
                             onPressed: controller.submit,
-                            icon: const Icon(Icons.check_circle_outline, size: 22),
+                            icon: const Icon(
+                              Icons.check_circle_outline,
+                              size: 22,
+                            ),
                             label: Text(
                               "ENVIAR INFORMAÇÕES",
                               style: theme.textTheme.bodyMedium?.copyWith(
@@ -182,9 +187,12 @@ class IpTypesForm extends GetView<IpTypesFormController> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryColor,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                                vertical: 16,
+                              ),
                               elevation: 4,
-                              shadowColor: primaryColor.withOpacity(0.5), // Efeito Glow
+                              shadowColor: primaryColor.withOpacity(0.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -202,12 +210,220 @@ class IpTypesForm extends GetView<IpTypesFormController> {
       ),
     );
   }
+
+  Widget _buildDynamicField({
+    required BuildContext context,
+    required dynamic field,
+    required TextEditingController textController,
+    String? errorText,
+  }) {
+    final type = field.type.toString().toLowerCase();
+
+    switch (type) {
+      case 'textarea':
+      case 'text_area':
+        return SizedBox(
+          height: errorText == null ? 150 : 175,
+          child: CustomTextField(
+            controller: textController,
+            label: "",
+            hintText: field.placeholder ?? "Digite aqui...",
+            keyboardType: TextInputType.multiline,
+            expands: true,
+            errorText: errorText,
+            onChanged: (value) {
+              controller.updateFieldValue(field.key, value);
+            },
+          ),
+        );
+
+      case 'number':
+        return CustomTextField(
+          controller: textController,
+          label: "",
+          hintText: field.placeholder ?? "Digite um número...",
+          keyboardType: TextInputType.number,
+          errorText: errorText,
+          onChanged: (value) {
+            controller.updateFieldValue(field.key, value);
+          },
+        );
+
+      case 'date':
+        return CustomTextField(
+          controller: textController,
+          label: "",
+          hintText: field.placeholder ?? "Selecione uma data...",
+          keyboardType: TextInputType.datetime,
+          readOnly: true,
+          errorText: errorText,
+          onTap: () async {
+            final selectedDate = await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime(1900),
+              lastDate: DateTime(2100),
+            );
+
+            if (selectedDate != null) {
+              final formattedDate = _formatDate(selectedDate);
+
+              controller.updateFieldValue(
+                field.key,
+                formattedDate,
+                updateController: true,
+              );
+            }
+          },
+        );
+
+      case 'select':
+        return _buildSelectField(
+          field: field,
+          textController: textController,
+          errorText: errorText,
+        );
+
+      case 'text':
+      default:
+        return CustomTextField(
+          controller: textController,
+          label: "",
+          hintText: field.placeholder ?? "Digite aqui...",
+          keyboardType: TextInputType.text,
+          errorText: errorText,
+          onChanged: (value) {
+            controller.updateFieldValue(field.key, value);
+          },
+        );
+    }
+  }
+
+  Widget _buildSelectField({
+    required dynamic field,
+    required TextEditingController textController,
+    String? errorText,
+  }) {
+    final currentValue = textController.text.trim().isEmpty
+        ? null
+        : textController.text.trim();
+
+    final options = field.options;
+
+    return DropdownButtonFormField<String>(
+      value: currentValue,
+      isExpanded: true,
+      dropdownColor: Colors.white,
+      style: const TextStyle(
+        color: Colors.black87,
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+      ),
+      iconEnabledColor: Colors.black87,
+      iconDisabledColor: Colors.grey,
+      decoration: InputDecoration(
+        hintText: field.placeholder ?? "Selecione uma opção",
+        errorText: errorText,
+        hintStyle: TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: 15,
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: Colors.grey.shade400,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: errorText == null ? Colors.grey.shade400 : Colors.red,
+            width: errorText == null ? 1 : 1.5,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: errorText == null ? const Color(0xFF094E9A) : Colors.red,
+            width: 1.5,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 1.5,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 1.5,
+          ),
+        ),
+      ),
+      selectedItemBuilder: (context) {
+        return options.map<Widget>((option) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              option.label,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        }).toList();
+      },
+      items: options.map<DropdownMenuItem<String>>((option) {
+        return DropdownMenuItem<String>(
+          value: option.value,
+          child: Text(
+            option.label,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value == null) return;
+
+        controller.updateFieldValue(
+          field.key,
+          value,
+          updateController: true,
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+
+    return '$year-$month-$day';
+  }
 }
 
-// Painter padronizado igual ao das outras telas
 class _DiagonalLinesPainter extends CustomPainter {
   final Color color;
-  _DiagonalLinesPainter({required this.color});
+
+  _DiagonalLinesPainter({
+    required this.color,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -216,6 +432,7 @@ class _DiagonalLinesPainter extends CustomPainter {
       ..strokeWidth = 1.0;
 
     const spacing = 80.0;
+
     for (double i = -size.height; i < size.width; i += spacing) {
       canvas.drawLine(
         Offset(i, 0),

@@ -1,4 +1,5 @@
 import 'address_entity.dart';
+import 'user_educational_institution_link_entity.dart';
 
 class UserEntity {
   final int? id;
@@ -12,6 +13,7 @@ class UserEntity {
   final String fullName;
   final String role;
   final bool isEnabled;
+  final List<UserEducationalInstitutionLinkEntity> userEducationalInstitutionLinks;
   final AddressEntity address;
 
   UserEntity({
@@ -26,6 +28,7 @@ class UserEntity {
     required this.fullName,
     required this.role,
     required this.isEnabled,
+    required this.userEducationalInstitutionLinks,
     required this.address,
   });
 }

@@ -21,11 +21,11 @@ class CustomTextField extends StatelessWidget {
   final String? hintText;
   final void Function(String)? onChanged;
 
-  // ✅ Parâmetros de tamanho
+  final String? errorText;
+
   final int? maxLines;
   final int? minLines;
 
-  // ✅ Novas propriedades de UX adicionadas
   final TextCapitalization textCapitalization;
   final TextInputAction? textInputAction;
 
@@ -46,10 +46,11 @@ class CustomTextField extends StatelessWidget {
     this.inputFormatters,
     this.hintText,
     this.onChanged,
+    this.errorText,
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
-    this.textCapitalization = TextCapitalization.none, // Padrão do Flutter (não afeta outros usos)
+    this.textCapitalization = TextCapitalization.none,
     this.textInputAction,
   });
 
@@ -57,12 +58,11 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // ✅ 1. Isolamos o TextFormField para poder envolvê-lo no Expanded dinamicamente
+    final hasError = errorText != null && errorText!.trim().isNotEmpty;
+
     Widget textField = TextFormField(
-      // Se for expansível, o texto DEVE começar no topo, senão fica flutuando no meio
-      textAlignVertical: expands
-          ? TextAlignVertical.top
-          : TextAlignVertical.center,
+      textAlignVertical:
+          expands ? TextAlignVertical.top : TextAlignVertical.center,
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
@@ -72,29 +72,29 @@ class CustomTextField extends StatelessWidget {
       onFieldSubmitted: onFieldSubmitted,
       inputFormatters: inputFormatters,
       onChanged: onChanged,
-
-      // ✅ Repassando as novas propriedades para o TextFormField interno
       textCapitalization: textCapitalization,
       textInputAction: textInputAction,
-
-      // ✅ 2. A regra de ouro do Flutter: se usa 'expands: true', maxLines e minLines PRECISAM ser nulos
       expands: expands,
       maxLines: expands ? null : (obscureText ? 1 : maxLines),
       minLines: expands ? null : minLines,
-
       style: context.textTheme.bodyMedium!.copyWith(
         color: theme.colorScheme.tertiary,
       ),
-
       decoration: InputDecoration(
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 16, // Simétrico para garantir que o texto não corte
+          vertical: 16,
         ),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         hintText: hintText,
+        errorText: errorText,
+        errorStyle: const TextStyle(
+          color: Colors.red,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
         hintStyle: TextStyle(
           color: theme.colorScheme.tertiary.withOpacity(0.5),
           fontSize: 14,
@@ -102,21 +102,32 @@ class CustomTextField extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: theme.colorScheme.tertiary.withOpacity(0.2),
-            width: 1.5,
+            color: hasError
+                ? Colors.red
+                : theme.colorScheme.tertiary.withOpacity(0.2),
+            width: hasError ? 1.5 : 1.5,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2.0),
+          borderSide: BorderSide(
+            color: hasError ? Colors.red : theme.colorScheme.primary,
+            width: 2.0,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 1.5,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2.0),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 2.0,
+          ),
         ),
       ),
     );
@@ -137,7 +148,6 @@ class CustomTextField extends StatelessWidget {
           ),
           const SizedBox(height: 7),
         ],
-
         if (expands)
           Expanded(child: textField)
         else

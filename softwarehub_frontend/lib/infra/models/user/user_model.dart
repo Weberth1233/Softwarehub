@@ -1,4 +1,6 @@
 import 'package:nit_sgpi_frontend/infra/models/user/address_model.dart';
+import 'package:nit_sgpi_frontend/infra/models/user/user_educational_institution_link_model.dart';
+
 import '../../../domain/entities/user/user_entity.dart';
 
 class UserModel {
@@ -13,6 +15,7 @@ class UserModel {
   final String fullName;
   final String role;
   final bool isEnabled;
+  final List<UserEducationalInstitutionLinkModel> userEducationalInstitutionLinks;
   final AddressModel address;
 
   UserModel({
@@ -27,34 +30,41 @@ class UserModel {
     required this.fullName,
     required this.role,
     required this.isEnabled,
+    required this.userEducationalInstitutionLinks,
     required this.address,
   });
 
-  /// Converte JSON -> Model (se você realmente precisar disso)
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? '',
-      userName: json['userName'],
-      cpf: json['cpf'],
-      email: json['email'],
-      password: json['password'],
-      phoneNumber: json['phoneNumber'],
-      birthDate: json['birthDate'],
-      profession: json['profession'],
-      fullName: json['fullName'],
-      role: json['role'],
-      isEnabled: json['isEnabled'],
+      id: json['id'],
+      userName: json['userName'] ?? '',
+      email: json['email'] ?? '',
+      cpf: json['cpf'] ?? '',
+      password: json['password'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? '',
+      birthDate: json['birthDate'] ?? '',
+      profession: json['profession'] ?? '',
+      fullName: json['fullName'] ?? '',
+      role: json['role'] ?? '',
+      isEnabled: json['isEnabled'] ?? false,
+      userEducationalInstitutionLinks:
+          (json['userEducationalInstitutionLinks'] as List<dynamic>? ?? [])
+              .map(
+                (item) => UserEducationalInstitutionLinkModel.fromJson(
+                  item as Map<String, dynamic>,
+                ),
+              )
+              .toList(),
       address: AddressModel.fromJson(json['address']),
     );
   }
 
-  /// Converte Model -> JSON (pra API)
   Map<String, dynamic> toJson() {
     return {
-      "id": id ?? '',
+      "id": id,
       "userName": userName,
       "email": email,
-      "cpf":cpf,
+      "cpf": cpf,
       "password": password,
       "phoneNumber": phoneNumber,
       "birthDate": birthDate,
@@ -62,17 +72,19 @@ class UserModel {
       "fullName": fullName,
       "role": role,
       "isEnabled": isEnabled,
+      "userEducationalInstitutionLinks": userEducationalInstitutionLinks
+          .map((item) => item.toJson())
+          .toList(),
       "address": address.toJson(),
     };
   }
 
-  /// Converte Entity -> Model (pra enviar pra API)
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       id: entity.id,
       userName: entity.userName,
-      cpf: entity.cpf,
       email: entity.email,
+      cpf: entity.cpf,
       password: entity.password,
       phoneNumber: entity.phoneNumber,
       birthDate: entity.birthDate,
@@ -80,23 +92,29 @@ class UserModel {
       fullName: entity.fullName,
       role: entity.role,
       isEnabled: entity.isEnabled,
+      userEducationalInstitutionLinks: entity.userEducationalInstitutionLinks
+          .map(UserEducationalInstitutionLinkModel.fromEntity)
+          .toList(),
       address: AddressModel.fromEntity(entity.address),
     );
   }
-  
+
   UserEntity toEntity() {
     return UserEntity(
       id: id,
       userName: userName,
       email: email,
       cpf: cpf,
-      birthDate: birthDate,
-      fullName: fullName,
       password: password,
       phoneNumber: phoneNumber,
+      birthDate: birthDate,
       profession: profession,
-      isEnabled: isEnabled,
+      fullName: fullName,
       role: role,
+      isEnabled: isEnabled,
+      userEducationalInstitutionLinks: userEducationalInstitutionLinks
+          .map((item) => item.toEntity())
+          .toList(),
       address: address.toEntity(),
     );
   }

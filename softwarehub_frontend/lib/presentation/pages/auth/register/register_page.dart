@@ -730,6 +730,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                                       .role
                                                 : 'USER',
                                             isEnabled: true,
+                                            userEducationalInstitutionLinks: [],
                                             address: AddressEntity(
                                               zipCode: cepController.text,
                                               street: streetController.text,
@@ -740,6 +741,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                                   neighborhoodController.text,
                                               city: cityController.text,
                                               state: stateController.text,
+                                            
                                             ),
                                           );
                                           print(userEntityToSave.role);
