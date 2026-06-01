@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("consent_term")
+@RequestMapping("/consent-term")
 @RequiredArgsConstructor
 @Tag(name = "Termo de Consentimento")
 public class ConsentTermController implements GenericController{
@@ -116,7 +116,7 @@ public class ConsentTermController implements GenericController{
         }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/ip_types/{id}")
+    @GetMapping("/ip-types/{id}")
     @Operation(summary = "Obter um termo de consentimento", description = "Obter um termo de consentimento passando o id do tipo de propriedade")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Sucesso no busca!"),

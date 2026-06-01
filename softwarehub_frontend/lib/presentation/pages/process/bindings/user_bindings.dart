@@ -5,7 +5,7 @@ import 'package:nit_sgpi_frontend/domain/usecases/get_users.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_user_controller.dart';
 import '../../../../infra/core/network/api_client.dart';
 import '../../../../infra/datasources/auth_local_datasource.dart';
-import '../../../../infra/datasources/user_remote_datasources.dart';
+import '../../../../infra/datasources/user_remote_datasource.dart';
 import '../../../../infra/repositories/user_repository_impl.dart';
 class UserBindings extends Bindings {
   @override

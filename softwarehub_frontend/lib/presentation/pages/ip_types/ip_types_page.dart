@@ -71,7 +71,6 @@ class IpTypesPage extends StatelessWidget {
         titleSpacing: 12,
         title: Row(
           children: [
-
             SizedBox(
               height: 46,
               width: 46,
@@ -103,7 +102,7 @@ class IpTypesPage extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 23,
                     ),
-                    ),
+                  ),
                 ],
               ),
             ),
@@ -154,18 +153,30 @@ class IpTypesPage extends StatelessWidget {
 
                     return Scrollbar(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(4, 24, 4, 32), // Aumentei o padding superior para descolar do AppBar
+                        padding: const EdgeInsets.fromLTRB(
+                          4,
+                          24,
+                          4,
+                          32,
+                        ), // Aumentei o padding superior para descolar do AppBar
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Center(
                               child: Container(
-                                constraints: const BoxConstraints(maxWidth: 600),
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                constraints: const BoxConstraints(
+                                  maxWidth: 600,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.9),
                                   borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(color: Colors.grey.shade200),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -180,7 +191,9 @@ class IpTypesPage extends StatelessWidget {
                                       child: Text(
                                         "Escolha e clique em uma categoria para avançar.",
                                         style: textTheme.bodyMedium?.copyWith(
-                                          color: _backgroundColor.withOpacity(0.9),
+                                          color: _backgroundColor.withOpacity(
+                                            0.9,
+                                          ),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -199,18 +212,27 @@ class IpTypesPage extends StatelessWidget {
                                   title: item.name,
                                   dominantColor: _backgroundColor,
                                   onTap: () {
-                                    final secondStageProcess = SecondStageProcess(
-                                      firstStageProcess: auxProcess,
-                                      item: item,
-                                      isEdit: auxProcess.isEdit,
-                                      originalIpTypeId: auxProcess.originalIpTypeId,
-                                      originalFormData: auxProcess.originalFormData,
-                                    );
+                                    final secondStageProcess =
+                                        SecondStageProcess(
+                                          firstStageProcess: auxProcess,
+                                          item: item,
+                                          isEdit: auxProcess.isEdit,
+                                          originalIpTypeId:
+                                              auxProcess.originalIpTypeId,
+                                          originalFormData:
+                                              auxProcess.originalFormData,
+                                        );
 
                                     Get.toNamed(
+                                      '/consent-term',
+                                      arguments: {
+                                        'ipTypeId': secondStageProcess.item.id,
+                                      },
+                                    );
+                                    /*Get.toNamed(
                                       "/process/ip_types/form",
                                       arguments: secondStageProcess,
-                                    );
+                                    );*/
                                   },
                                 );
                               }).toList(),
@@ -252,7 +274,10 @@ class _LoadingState extends StatelessWidget {
           SizedBox(height: 16),
           Text(
             "Carregando categorias...",
-            style: TextStyle(color: IpTypesPage._backgroundColor, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: IpTypesPage._backgroundColor,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -292,7 +317,9 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             message,
-            style: textTheme.bodyMedium?.copyWith(color: IpTypesPage._backgroundColor.withOpacity(0.7)),
+            style: textTheme.bodyMedium?.copyWith(
+              color: IpTypesPage._backgroundColor.withOpacity(0.7),
+            ),
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[
@@ -358,7 +385,10 @@ class _IpTypeCard extends StatelessWidget {
           splashColor: dominantColor.withOpacity(0.06),
           highlightColor: dominantColor.withOpacity(0.03),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20.0,
+              vertical: 24.0,
+            ),
             child: Row(
               children: [
                 Container(

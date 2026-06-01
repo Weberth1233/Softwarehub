@@ -3,7 +3,7 @@ import 'package:nit_sgpi_frontend/domain/core/errors/failures.dart';
 import 'package:nit_sgpi_frontend/domain/entities/paged_result_entity.dart';
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
 import 'package:nit_sgpi_frontend/domain/repositories/iuser_repository.dart';
-import 'package:nit_sgpi_frontend/infra/datasources/user_remote_datasources.dart';
+import 'package:nit_sgpi_frontend/infra/datasources/user_remote_datasource.dart';
 import '../../domain/core/errors/exceptions.dart';
 
 class UserRepositoryImpl implements IUserRepository{
