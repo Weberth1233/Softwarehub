@@ -97,7 +97,7 @@ public class UserController  implements GenericController{
     })
     //logged-in user
     public ResponseEntity<UserResponseDTO> getLoggedUser() {
-            UserResponseDTO dto = mapper.toDTO(service.getLoggedUser());
+            UserResponseDTO dto = mapper.toDTO(service.getLoggedUserData());
             return ResponseEntity.ok(dto);
     }
 

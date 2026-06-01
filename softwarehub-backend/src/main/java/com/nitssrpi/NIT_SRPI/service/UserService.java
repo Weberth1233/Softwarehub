@@ -1,6 +1,7 @@
 package com.nitssrpi.NIT_SRPI.service;
 import com.nitssrpi.NIT_SRPI.Infra.security.SecurityService;
 import com.nitssrpi.NIT_SRPI.controller.dto.UserEducationalInstitutionLinkResponseDTO;
+import com.nitssrpi.NIT_SRPI.controller.dto.UserResponseDTO;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
 import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.repository.UserRepository;
@@ -76,7 +77,15 @@ public class UserService {
         return repository.save(user);
     }
 
-    public User getLoggedUser() {
+    @Transactional(readOnly = true)
+    public User getLoggedUserData() {
+        Long userId = getLoggedUserId();
+
+        return repository.findByIdWithRelations(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
+    }
+
+    public Long getLoggedUserId() {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
@@ -84,7 +93,9 @@ public class UserService {
             throw new RuntimeException("Usuário não autenticado");
         }
 
-        return (User) authentication.getPrincipal();
+        User user = (User) authentication.getPrincipal();
+
+        return user.getId();
     }
 
     public Optional<User> getUserById(Long id){
