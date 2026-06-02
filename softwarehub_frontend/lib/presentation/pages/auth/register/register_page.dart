@@ -560,69 +560,40 @@ class _RegisterPageState extends State<RegisterPage> {
                                         Icons.pin_drop_outlined,
                                       ),
                                     ),
-                                    SizedBox(width: 20),
+
+                                    const SizedBox(width: 20),
 
                                     ElevatedButton(
                                       onPressed: () async {
-                                        final address = await registerController
-                                            .getByZipCode(cepController.text);
+                                        final address = await registerController.getByZipCode(
+                                          cepController.text,
+                                        );
 
                                         if (address != null) {
-                                          streetController.text =
-                                              address.street;
-                                          neighborhoodController.text =
-                                              address.neighborhood;
+                                          streetController.text = address.street;
+                                          neighborhoodController.text = address.neighborhood;
                                           cityController.text = address.city;
                                           stateController.text = address.state;
                                         }
                                       },
-
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.search,
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.search,
+                                            color: Colors.white,
+                                            size: 18,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Buscar CEP",
+                                            style: textTheme.bodySmall?.copyWith(
+                                              fontWeight: FontWeight.w700,
                                               color: Colors.white,
-                                              size: 18, // Tamanho do icone
                                             ),
-                                            const SizedBox(width: 8), // Um pequeno respiro entre o ícone e o texto
-                                            Text(
-                                              "Buscar por CEP",
-                                              style: textTheme.bodySmall?.copyWith(
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                    ),
-                                  ],
-                                ),
-
-                                CustomTextField(
-                                  controller: streetController,
-                                  label: "Rua",
-                                  size: 500,
-                                  validator: Validators.required,
-                                  prefixIcon: const Icon(
-                                    Icons.signpost_outlined,
-                                  ),
-                                ),
-                                _gap(),
-
-                                Row(
-                                  children: [
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: CustomTextField(
-                                        controller: complementController,
-                                        label: "Complemento (opcional)",
-                                        size: 500,
-                                        validator: (v) => null,
-                                        prefixIcon: const Icon(
-                                          Icons.add_location_alt_outlined,
-                                        ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -632,10 +603,25 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                 CustomTextField(
                                   controller: neighborhoodController,
-                                  label: "Setor / Bairro",
+                                  label: "Bairro / Setor",
                                   size: 500,
                                   validator: Validators.required,
-                                  prefixIcon: const Icon(Icons.map_outlined),
+                                  prefixIcon: const Icon(
+                                    Icons.map_outlined,
+                                  ),
+                                ),
+
+                                _gap(),
+
+                                CustomTextField(
+                                  controller: complementController,
+                                  label: "Complemento",
+                                  hintText: "Opcional",
+                                  size: 500,
+                                  validator: (v) => null,
+                                  prefixIcon: const Icon(
+                                    Icons.location_on_outlined,
+                                  ),
                                 ),
 
                                 _gap(),
@@ -645,7 +631,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     Expanded(
                                       child: CustomTextField(
                                         controller: cityController,
-                                        label: "Cidade",
+                                        label: "Município",
                                         size: 500,
                                         validator: Validators.required,
                                         prefixIcon: const Icon(
@@ -659,7 +645,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     Expanded(
                                       child: CustomTextField(
                                         controller: stateController,
-                                        label: "Estado",
+                                        label: "Estado (UF)",
                                         size: 500,
                                         validator: Validators.required,
                                         prefixIcon: const Icon(
