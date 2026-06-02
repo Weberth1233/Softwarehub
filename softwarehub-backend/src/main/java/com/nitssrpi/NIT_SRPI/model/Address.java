@@ -13,7 +13,7 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String street;
-    private String number;
+   // private String number;
     private String complement;
     private String neighborhood;
     private String city;

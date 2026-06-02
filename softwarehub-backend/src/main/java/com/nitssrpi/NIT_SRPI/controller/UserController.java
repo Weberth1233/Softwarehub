@@ -78,7 +78,7 @@ public class UserController  implements GenericController{
             user.setIsEnabled(auxUser.getIsEnabled());
 
             user.getAddress().setStreet(auxUser.getAddress().getStreet());
-            user.getAddress().setNumber(auxUser.getAddress().getNumber());
+           // user.getAddress().setNumber(auxUser.getAddress().getNumber());
             user.getAddress().setComplement(auxUser.getAddress().getComplement());
             user.getAddress().setNeighborhood(auxUser.getAddress().getNeighborhood());
             user.getAddress().setCity(auxUser.getAddress().getCity());
