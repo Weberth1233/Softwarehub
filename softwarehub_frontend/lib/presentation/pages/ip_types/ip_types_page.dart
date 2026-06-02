@@ -5,6 +5,8 @@ import 'package:nit_sgpi_frontend/presentation/pages/ip_types/controllers/ip_typ
 import 'package:nit_sgpi_frontend/presentation/pages/process/process_page.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/responsive.dart';
 
+import '../consent_term/controllers/consent_term_controller.dart';
+
 class SecondStageProcess {
   final FirstStageProcess firstStageProcess;
   final IpTypeEntity item;
@@ -21,7 +23,6 @@ class SecondStageProcess {
   });
 }
 
-// CustomPainter para as linhas diagonais de fundo
 class _DiagonalLinesPainter extends CustomPainter {
   final Color color;
 
@@ -61,8 +62,6 @@ class IpTypesPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Color(0xFFCBD5E1),
-
-      // --- SEU NOVO APPBAR AQUI ---
       appBar: AppBar(
         elevation: 0,
         backgroundColor: _backgroundColor,
@@ -224,11 +223,14 @@ class IpTypesPage extends StatelessWidget {
                                         );
 
                                     Get.toNamed(
-                                      '/consent-term',
+                                      '/consent-term-check',
                                       arguments: {
                                         'ipTypeId': secondStageProcess.item.id,
+                                        'nextRoute': '/process/ip_types/form',
+                                        'nextArguments': secondStageProcess,
                                       },
                                     );
+
                                     /*Get.toNamed(
                                       "/process/ip_types/form",
                                       arguments: secondStageProcess,
@@ -251,8 +253,6 @@ class IpTypesPage extends StatelessWidget {
     );
   }
 }
-
-/* ------------------------------ UI pieces ------------------------------ */
 
 class _LoadingState extends StatelessWidget {
   const _LoadingState();

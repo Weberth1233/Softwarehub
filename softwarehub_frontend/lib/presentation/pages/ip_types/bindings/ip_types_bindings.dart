@@ -12,15 +12,11 @@ class IpTypesBindings extends Bindings{
 
   @override
   void dependencies() {
-    // Http client puro
     Get.lazyPut<http.Client>(() => http.Client());
-    // Local datasource (token)
     Get.lazyPut<AuthLocalDataSource>(() => AuthLocalDataSource());
-    // ApiClient (usa http.Client + AuthLocalDataSource)
     Get.lazyPut<ApiClient>(
       () => ApiClient(
         Get.find<http.Client>(),
-        // Get.find<AuthLocalDataSource>(),
       ),
     );
     Get.lazyPut<IIpTypesRemoteDataSource>(
@@ -37,6 +33,5 @@ class IpTypesBindings extends Bindings{
     Get.lazyPut<IpTypesController>(
       () => IpTypesController(Get.find<GetIptypes>()),
     );
-    
   }
 }

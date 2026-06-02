@@ -21,6 +21,7 @@ import 'package:nit_sgpi_frontend/presentation/pages/auth/register/bindings/regi
 import 'package:nit_sgpi_frontend/presentation/pages/auth/register/register_page.dart';
 import '../../middlewares/auth_middleware.dart';
 import '../../pages/consent_term/bindings/consent_term_bindings.dart';
+import '../../pages/consent_term/consent_term_check_page.dart';
 import '../../pages/consent_term/consent_term_page.dart';
 import '../../pages/home/bindings/home_bindings.dart';
 import '../../pages/home/home_page.dart';
@@ -126,6 +127,20 @@ class MyRoutes {
       name: '/process/ip_types/form',
       page: () => IpTypesForm(),
       binding: IpTypesFormBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    GetPage(
+      name: '/consent-term',
+      page: () => const ConsentTermPage(),
+      binding: ConsentTermBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
+    
+    GetPage(
+      name: '/consent-term-check',
+      page: () => const ConsentTermCheckPage(),
+      binding: ConsentTermBindings(),
       middlewares: [AuthMiddleware()],
     ),
 

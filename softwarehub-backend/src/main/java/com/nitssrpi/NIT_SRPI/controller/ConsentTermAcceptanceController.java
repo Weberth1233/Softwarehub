@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("consent_term_acceptance")
+@RequestMapping("/consent-term-acceptance")
 @RequiredArgsConstructor
 @Tag(name = "Aceitação dos Termos de Consentimento")
 
@@ -42,7 +42,7 @@ public class ConsentTermAcceptanceController implements GenericController{
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("consert_term/{id}")
+    @GetMapping("consert-term/{id}")
     @Operation(summary = "Usuário assinou o termo", description = "Obter confirmação de o termo foi assinado ou não pelo usuário logado")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Encontrado com sucesso!"),

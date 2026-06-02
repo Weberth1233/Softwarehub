@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'controllers/consent_term_controller.dart';
+import '../../../../domain/entities/consent_term_entity.dart';
 
 class ConsentTermPage extends GetView<ConsentTermController> {
   const ConsentTermPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final int ipTypeId = Get.arguments['ipTypeId'];
+    final args = Get.arguments as Map<String, dynamic>;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controller.consentTerm.value == null && !controller.isLoading.value) {
-        controller.fetchConsentTermByIpTypesId(ipTypeId);
-      }
-    });
+    final ConsentTermEntity consentTerm =
+        args['consentTerm'] as ConsentTermEntity;
+
+    final String nextRoute = args['nextRoute'] as String;
+    final dynamic nextArguments = args['nextArguments'];
 
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -23,7 +23,7 @@ class ConsentTermPage extends GetView<ConsentTermController> {
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Color(0xFFCBD5E1),
+        backgroundColor: const Color(0xFFCBD5E1),
         automaticallyImplyLeading: false,
         toolbarHeight: 74,
         titleSpacing: 12,
@@ -39,7 +39,10 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  icon: Icon(Icons.arrow_back, color: Colors.grey.shade900),
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.grey.shade900,
+                  ),
                   onPressed: () => Get.back(),
                   tooltip: "Voltar",
                 ),
@@ -47,7 +50,6 @@ class ConsentTermPage extends GetView<ConsentTermController> {
             ),
             const SizedBox(width: 16),
 
-            // Textos do Header integrados ao AppBar
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,44 +69,15 @@ class ConsentTermPage extends GetView<ConsentTermController> {
           ],
         ),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                controller.errorMessage.value,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          );
-        }
-
-        final consentTerm = controller.consentTerm.value;
-
-        if (consentTerm == null) {
-          return const Center(
-            child: Text('Nenhum termo encontrado.'),
-          );
-        }
-
-        return Padding(
+      body: Obx(
+        () => Padding(
           padding: const EdgeInsets.all(24),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
               child: Card(
                 elevation: 3,
+                color: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -151,7 +124,7 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                           style: const TextStyle(
                             fontSize: 16,
                             height: 1.6,
-                            color: Colors.white70,
+                            color: Color(0xFF1F2937),
                           ),
                         ),
                       ),
@@ -163,47 +136,81 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         children: [
-                          Obx(
-                            () => CheckboxListTile(
-                              value: controller.accepted.value,
-                              controlAffinity: ListTileControlAffinity.leading,
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text(
-                                'Li e aceito os termos apresentados acima.',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
+                          CheckboxListTile(
+                            value: controller.accepted.value,
+                            controlAffinity: ListTileControlAffinity.leading,
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text(
+                              'Li e aceito os termos apresentados acima.',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF1F2937),
+                              ),
+                            ),
+                            onChanged: controller.isPosting.value
+                                ? null
+                                : (value) {
+                                    controller.accepted.value = value ?? false;
+                                  },
+                          ),
+
+                          if (controller.errorMessage.value.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Text(
+                                controller.errorMessage.value,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 14,
                                 ),
                               ),
-                              onChanged: (value) {
-                                controller.accepted.value = value ?? false;
-                              },
                             ),
-                          ),
 
                           const SizedBox(height: 16),
 
-                          Obx(
-                            () => SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: ElevatedButton(
-                                onPressed: controller.accepted.value
-                                    ? () {
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: ElevatedButton(
+                              onPressed: controller.accepted.value &&
+                                      !controller.isPosting.value
+                                  ? () async {
+                                      final success = await controller
+                                          .postConsentTermAcceptance(
+                                        consentTerm.id,
+                                      );
+
+                                      if (success) {
                                         Get.snackbar(
                                           'Termo aceito',
                                           'Você aceitou o termo de consentimento.',
                                           snackPosition: SnackPosition.BOTTOM,
                                         );
 
-                                        Get.back(result: true);
+                                        Get.offNamed(
+                                          nextRoute,
+                                          arguments: nextArguments,
+                                        );
                                       }
-                                    : null,
-                                child:  Text(
-                                  'Aceitar e continuar',
-                                  style: textTheme.bodyMedium!.copyWith(color: Colors.white60),
-                                ),
-                              ),
+                                    }
+                                  : null,
+                              child: controller.isPosting.value
+                                  ? const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Aceitar e continuar',
+                                      style: textTheme.bodyMedium!.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
@@ -214,8 +221,8 @@ class ConsentTermPage extends GetView<ConsentTermController> {
               ),
             ),
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }

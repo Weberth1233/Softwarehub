@@ -3,7 +3,6 @@ import 'package:nit_sgpi_frontend/domain/core/errors/failures.dart';
 import 'package:nit_sgpi_frontend/domain/entities/consent_term_entity.dart';
 import 'package:nit_sgpi_frontend/domain/repositories/iconsent_term_repository.dart';
 import 'package:nit_sgpi_frontend/infra/datasources/consent_term_remote_datasource.dart';
-
 import '../../domain/core/errors/exceptions.dart';
 
 class ConsentTermRepositoryImpl implements IConsentTermRepository{
