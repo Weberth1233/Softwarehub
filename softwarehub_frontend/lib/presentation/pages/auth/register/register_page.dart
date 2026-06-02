@@ -546,24 +546,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                 const SizedBox(height: 14),
 
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    CustomTextField(
-                                      controller: cepController,
-                                      label: "CEP",
-                                      hintText: "00000-000",
-                                      size: 500,
-                                      keyboardType: TextInputType.number,
-                                      validator: Validators.cep,
-                                      prefixIcon: const Icon(
-                                        Icons.pin_drop_outlined,
-                                      ),
-                                    ),
+                                CustomTextField(
+                                  controller: cepController,
+                                  label: "CEP",
+                                  hintText: "00000-000",
+                                  size: 500,
+                                  keyboardType: TextInputType.number,
+                                  validator: Validators.cep,
+                                  prefixIcon: const Icon(Icons.pin_drop_outlined),
 
-                                    const SizedBox(width: 20),
-
-                                    ElevatedButton(
+                                  suffixIcon: Padding(
+                                    padding: const EdgeInsets.all(6.0),
+                                    child: ElevatedButton(
                                       onPressed: () async {
                                         final address = await registerController.getByZipCode(
                                           cepController.text,
@@ -576,9 +570,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                           stateController.text = address.state;
                                         }
                                       },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: _primaryColor,
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 24,
+                                        ),
+                                        shape: const StadiumBorder(),
+                                      ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           const Icon(
                                             Icons.search,
@@ -596,8 +598,23 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ],
                                       ),
                                     ),
-                                  ],
+                                  ),
                                 ),
+                                _gap(),
+
+                                const SizedBox(width: 12),
+
+                                CustomTextField(
+                                  controller: streetController,
+                                  label: "Rua",
+                                  size: 500,
+                                  validator: Validators.required,
+                                  prefixIcon: const Icon(
+                                    Icons.signpost_outlined,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 12),
 
                                 _gap(),
 
@@ -670,7 +687,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   foregroundColor: theme.colorScheme.primary,
-                                  elevation: 2, // Ajustado para ser mais sutil
+                                  elevation: 2,
                                   shadowColor: Colors.black.withOpacity(0.2),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
