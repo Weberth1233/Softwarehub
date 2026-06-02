@@ -576,16 +576,30 @@ class _RegisterPageState extends State<RegisterPage> {
                                           stateController.text = address.state;
                                         }
                                       },
-                                      child: Text(
-                                        "Buscar por CEP",
-                                        style: textTheme.bodySmall?.copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
-                                      ),
+
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.search,
+                                              color: Colors.white,
+                                              size: 18, // Tamanho do icone
+                                            ),
+                                            const SizedBox(width: 8), // Um pequeno respiro entre o ícone e o texto
+                                            Text(
+                                              "Buscar por CEP",
+                                              style: textTheme.bodySmall?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        )
                                     ),
                                   ],
                                 ),
+
                                 CustomTextField(
                                   controller: streetController,
                                   label: "Rua",
@@ -599,21 +613,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                 Row(
                                   children: [
-                                    Expanded(
-                                      child: CustomTextField(
-                                        controller: numberController,
-                                        label: "Número",
-                                        size: 500,
-                                        keyboardType: TextInputType.number,
-                                        validator: Validators.required,
-                                        prefixIcon: const Icon(
-                                          Icons.confirmation_number_outlined,
-                                        ),
-                                      ),
-                                    ),
-
                                     const SizedBox(width: 10),
-
                                     Expanded(
                                       child: CustomTextField(
                                         controller: complementController,
