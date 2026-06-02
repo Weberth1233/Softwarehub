@@ -91,7 +91,7 @@ class _RegisterPageState extends State<RegisterPage> {
       // Tratando o endereço
       cepController.text = user.address.zipCode;
       streetController.text = user.address.street;
-      numberController.text = user.address.number;
+
       complementController.text = user.address.complement ?? '';
       neighborhoodController.text = user.address.neighborhood;
       cityController.text = user.address.city;
@@ -737,7 +737,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                             address: AddressEntity(
                                               zipCode: cepController.text,
                                               street: streetController.text,
-                                              number: numberController.text,
                                               complement:
                                                   complementController.text,
                                               neighborhood:

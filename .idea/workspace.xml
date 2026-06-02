@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f8257618-1329-4d8d-a065-e148448811e8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/domain/entities/user/address_entity.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/domain/entities/user/address_entity.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/infra/models/user/address_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/infra/models/user/address_model.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/register/register_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/register/register_page.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -118,7 +120,7 @@
       <workItem from="1776366420128" duration="1132000" />
       <workItem from="1778093714596" duration="3127000" />
       <workItem from="1779468089632" duration="9173000" />
-      <workItem from="1780424593453" duration="5637000" />
+      <workItem from="1780424593453" duration="6415000" />
     </task>
     <servers />
   </component>
