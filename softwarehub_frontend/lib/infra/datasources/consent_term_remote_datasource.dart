@@ -1,10 +1,7 @@
 import 'dart:convert';
-
 import 'package:nit_sgpi_frontend/domain/entities/consent_term_entity.dart';
 import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
 import 'package:nit_sgpi_frontend/infra/models/consent_term_model.dart';
-import 'package:nit_sgpi_frontend/infra/models/ip_types/ip_types_model.dart';
-
 import '../../domain/core/errors/exceptions.dart';
 import '../core/network/api_client.dart';
 

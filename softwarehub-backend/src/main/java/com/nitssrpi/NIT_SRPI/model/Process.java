@@ -78,4 +78,7 @@ public class Process {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nice_class_code", nullable = true)
     private NiceClassification niceClassification;
+
+    @OneToMany(mappedBy = "process", fetch = FetchType.LAZY)
+    private List<ProcessRoyaltyDistribution> royaltyDistributions = new ArrayList<>();
 }
