@@ -685,7 +685,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               height: 52,
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: theme.colorScheme.primary,
                                   foregroundColor: theme.colorScheme.primary,
                                   elevation: 2,
                                   shadowColor: Colors.black.withOpacity(0.2),
@@ -699,11 +699,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 icon: registerController.isLoading.value
                                     ? SizedBox(
-                                        width: 18,
-                                        height: 18,
+                                        width: 20,
+                                        height: 20,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          color: theme.colorScheme.primary,
+                                          color: theme.colorScheme.secondary,
                                         ),
                                       )
                                     : const Icon(Icons.save_outlined),
@@ -752,7 +752,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                             print(
                                               userControllerGet.user.value!.id!,
                                             );
-                                            // Chamar método de Update (certifique-se de que ele existe no seu RegisterController)
+                                            // Chamar método de Update
                                             registerController.updateUserLogged(
                                               userControllerGet.user.value!.id!,
                                               userEntityToSave,
@@ -775,7 +775,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                             ? "Atualizar Perfil"
                                             : "Salvar cadastro"),
                                   style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.primary,
+                                    color: Colors.white,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
