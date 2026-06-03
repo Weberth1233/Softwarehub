@@ -404,14 +404,37 @@ class _ProcessPageState extends State<ProcessPage> {
 
                                 final filter = SearchFieldHighlight(
                                   title: "Pesquise por colaboradores",
-                                  icon: Icons.search_outlined,
-                                  field: CustomTextField(
-                                    controller: searchController,
-                                    label: "",
-                                    hintText: "Procure por Nome, CPF ou email",
-                                    onChanged: onSearchChanged,
-                                    onFieldSubmitted: (_) => userController
-                                        .searchByFilter(searchController.text),
+                                  icon: Icons.people_alt,
+                                  field: Row(
+                                    children: [
+                                      Expanded(
+                                        child: CustomTextField(
+                                          controller: searchController,
+                                          label: "",
+                                          hintText: "Procure por Nome, CPF ou email",
+                                          onChanged: onSearchChanged,
+                                          onFieldSubmitted: (_) => userController
+                                              .searchByFilter(searchController.text),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        width: 47,
+                                        height: 42,
+                                        decoration: BoxDecoration(
+                                          color: ThemeColor.primaryColor,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: IconButton(
+                                          icon: const Icon(Icons.search, color: Colors.white),
+                                          iconSize: 25,
+                                          tooltip: "Buscar",
+                                          onPressed: () {
+                                            userController.searchByFilter(searchController.text);
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 );
 
