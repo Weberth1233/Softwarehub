@@ -7,7 +7,6 @@ import '../../../domain/entities/external_author/external_author_entity.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/widgets/custom_text_field.dart';
-import 'widgets/labeled_field_row.dart';
 import 'widgets/search_field_high_light.dart';
 
 class FirstStageProcess {
@@ -103,8 +102,7 @@ class _ProcessPageState extends State<ProcessPage> {
   Widget build(BuildContext context) {
     final userController = Get.find<ProcessUserController>();
     final theme = Theme.of(context);
-
-    // FUNÇÃO CALLBACK: passada para o painel de autores externos
+    
     void handleManageExternals() async {
       var result = await Get.toNamed(
         "/process/process-external-author",

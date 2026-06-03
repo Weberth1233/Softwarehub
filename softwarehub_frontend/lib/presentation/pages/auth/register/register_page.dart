@@ -26,26 +26,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final registerController = Get.find<RegisterController>();
   final userControllerGet = Get.find<UserLoggedController>();
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController userController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController cpfController = TextEditingController();
-  final TextEditingController professionController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
-  final TextEditingController cepController = TextEditingController();
-  final TextEditingController streetController = TextEditingController();
-  final TextEditingController numberController = TextEditingController();
-  final TextEditingController complementController = TextEditingController();
-  final TextEditingController neighborhoodController = TextEditingController();
-  final TextEditingController cityController = TextEditingController();
-  final TextEditingController stateController = TextEditingController();
-
-  final TextEditingController birthDayController = TextEditingController();
-  final TextEditingController birthMonthController = TextEditingController();
-  final TextEditingController birthYearController = TextEditingController();
-
   EducationalInstitutionEntity? selectedEducationalInstitution;
   TypesLinkEntity? selectedTypesLink;
 
@@ -61,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
     registerController.fetchInitialData();
 
     if (!widget.isEditMode) {
+      registerController.clearForm();
       registerController.clearEducationalInstitutionLinks();
     }
 
@@ -86,90 +67,36 @@ class _RegisterPageState extends State<RegisterPage> {
     final user = userControllerGet.user.value;
 
     if (user != null) {
-      nameController.text = user.fullName;
-      userController.text = user.userName;
-      emailController.text = user.email;
-      cpfController.text = user.cpf;
-      professionController.text = user.profession;
-      phoneController.text = user.phoneNumber;
+      registerController.nameController.text = user.fullName;
+      registerController.userController.text = user.userName;
+      registerController.emailController.text = user.email;
+      registerController.cpfController.text = user.cpf;
+      registerController.professionController.text = user.profession;
+      registerController.phoneController.text = user.phoneNumber;
 
       if (user.birthDate.isNotEmpty) {
         final parts = user.birthDate.split('-');
 
         if (parts.length == 3) {
-          birthYearController.text = parts[0];
-          birthMonthController.text = parts[1];
-          birthDayController.text = parts[2];
+          registerController.birthYearController.text = parts[0];
+          registerController.birthMonthController.text = parts[1];
+          registerController.birthDayController.text = parts[2];
         }
       }
 
-      cepController.text = user.address.zipCode;
-      streetController.text = user.address.street;
-      complementController.text = user.address.complement ?? '';
-      neighborhoodController.text = user.address.neighborhood;
-      cityController.text = user.address.city;
-      stateController.text = user.address.state;
+      registerController.cepController.text = user.address.zipCode;
+      registerController.streetController.text = user.address.street;
+      registerController.complementController.text =
+          user.address.complement ?? '';
+      registerController.neighborhoodController.text =
+          user.address.neighborhood;
+      registerController.cityController.text = user.address.city;
+      registerController.stateController.text = user.address.state;
 
       registerController.selectedEducationalInstitutionLinks.assignAll(
         user.userEducationalInstitutionLinks,
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _userWorker?.dispose();
-
-    nameController.dispose();
-    userController.dispose();
-    emailController.dispose();
-    cpfController.dispose();
-    professionController.dispose();
-    phoneController.dispose();
-    passwordController.dispose();
-
-    birthDayController.dispose();
-    birthMonthController.dispose();
-    birthYearController.dispose();
-
-    cepController.dispose();
-    streetController.dispose();
-    numberController.dispose();
-    complementController.dispose();
-    neighborhoodController.dispose();
-    cityController.dispose();
-    stateController.dispose();
-
-    super.dispose();
-  }
-
-  void clearForm() {
-    userController.clear();
-    nameController.clear();
-    emailController.clear();
-    cpfController.clear();
-    professionController.clear();
-    phoneController.clear();
-    passwordController.clear();
-
-    birthDayController.clear();
-    birthMonthController.clear();
-    birthYearController.clear();
-
-    cepController.clear();
-    streetController.clear();
-    numberController.clear();
-    complementController.clear();
-    neighborhoodController.clear();
-    cityController.clear();
-    stateController.clear();
-
-    registerController.clearEducationalInstitutionLinks();
-
-    setState(() {
-      selectedEducationalInstitution = null;
-      selectedTypesLink = null;
-    });
   }
 
   void _addEducationalInstitutionLink() {
@@ -623,7 +550,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Expanded(
                                       child: CustomTextField(
-                                        controller: nameController,
+                                        controller:
+                                            registerController.nameController,
                                         label: "Nome completo",
                                         hintText: "Seu nome aqui",
                                         size: 724,
@@ -641,7 +569,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                     Expanded(
                                       child: CustomTextField(
-                                        controller: userController,
+                                        controller:
+                                            registerController.userController,
                                         label: "Nome de usuário",
                                         size: 600,
                                         validator: (v) => Validators.required(
@@ -659,7 +588,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 CustomTextField(
-                                  controller: emailController,
+                                  controller:
+                                      registerController.emailController,
                                   label: "E-mail",
                                   hintText: "exemplo@outlook.com",
                                   size: 724,
@@ -669,7 +599,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
 
                                 CustomTextField(
-                                  controller: cpfController,
+                                  controller: registerController.cpfController,
                                   label: "CPF",
                                   hintText: "00000000000",
                                   size: 724,
@@ -684,7 +614,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Expanded(
                                       child: CustomTextField(
-                                        controller: professionController,
+                                        controller: registerController
+                                            .professionController,
                                         label: "Profissão",
                                         size: 724,
                                         validator: Validators.required,
@@ -698,7 +629,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                     Expanded(
                                       child: CustomTextField(
-                                        controller: phoneController,
+                                        controller:
+                                            registerController.phoneController,
                                         label: "Telefone",
                                         size: 200,
                                         hintText: "(dd) 0 0000 0000",
@@ -729,7 +661,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                     SizedBox(
                                       width: 100,
                                       child: CustomTextField(
-                                        controller: birthDayController,
+                                        controller: registerController
+                                            .birthDayController,
                                         label: "",
                                         hintText: "Dia",
                                         keyboardType: TextInputType.number,
@@ -758,7 +691,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                     SizedBox(
                                       width: 100,
                                       child: CustomTextField(
-                                        controller: birthMonthController,
+                                        controller: registerController
+                                            .birthMonthController,
                                         label: "",
                                         hintText: "Mês",
                                         keyboardType: TextInputType.number,
@@ -783,7 +717,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                     SizedBox(
                                       width: 150,
                                       child: CustomTextField(
-                                        controller: birthYearController,
+                                        controller: registerController
+                                            .birthYearController,
                                         label: "",
                                         hintText: "Ano",
                                         keyboardType: TextInputType.number,
@@ -812,7 +747,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 const SizedBox(height: 14),
 
                                 CustomTextField(
-                                  controller: passwordController,
+                                  controller: registerController.passwordController,
                                   label: widget.isEditMode
                                       ? "Nova Senha (deixe em branco para manter)"
                                       : "Senha",
@@ -872,7 +807,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 const SizedBox(height: 14),
 
                                 CustomTextField(
-                                  controller: cepController,
+                                  controller: registerController.cepController,
                                   label: "CEP",
                                   hintText: "00000-000",
                                   size: 500,
@@ -886,15 +821,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                     child: ElevatedButton(
                                       onPressed: () async {
                                         final address = await registerController
-                                            .getByZipCode(cepController.text);
+                                            .getByZipCode(registerController.cepController.text);
 
                                         if (address != null) {
-                                          streetController.text =
+                                          registerController.streetController.text =
                                               address.street;
-                                          neighborhoodController.text =
+                                          registerController.neighborhoodController.text =
                                               address.neighborhood;
-                                          cityController.text = address.city;
-                                          stateController.text = address.state;
+                                          registerController.cityController.text = address.city;
+                                          registerController.stateController.text = address.state;
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -932,7 +867,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 CustomTextField(
-                                  controller: streetController,
+                                  controller: registerController.streetController,
                                   label: "Rua",
                                   size: 500,
                                   validator: Validators.required,
@@ -944,7 +879,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 CustomTextField(
-                                  controller: neighborhoodController,
+                                  controller: registerController.neighborhoodController,
                                   label: "Bairro / Setor",
                                   size: 500,
                                   validator: Validators.required,
@@ -954,7 +889,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 CustomTextField(
-                                  controller: complementController,
+                                  controller: registerController.complementController,
                                   label: "Complemento",
                                   hintText: "Opcional",
                                   size: 500,
@@ -970,7 +905,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Expanded(
                                       child: CustomTextField(
-                                        controller: cityController,
+                                        controller:registerController. cityController,
                                         label: "Município",
                                         size: 500,
                                         validator: Validators.required,
@@ -984,7 +919,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                     Expanded(
                                       child: CustomTextField(
-                                        controller: stateController,
+                                        controller:registerController. stateController,
                                         label: "Estado (UF)",
                                         size: 500,
                                         validator: Validators.required,
@@ -1045,18 +980,18 @@ class _RegisterPageState extends State<RegisterPage> {
                                           }
 
                                           final userEntityToSave = UserEntity(
-                                            userName: userController.text,
-                                            email: emailController.text,
-                                            cpf: cpfController.text,
-                                            password: passwordController.text,
-                                            phoneNumber: phoneController.text,
+                                            userName: registerController.userController.text,
+                                            email: registerController.emailController.text,
+                                            cpf: registerController.cpfController.text,
+                                            password:registerController. passwordController.text,
+                                            phoneNumber:registerController. phoneController.text,
                                             birthDate:
-                                                "${birthYearController.text}-"
-                                                "${birthMonthController.text.padLeft(2, '0')}-"
-                                                "${birthDayController.text.padLeft(2, '0')}",
+                                                "${registerController.birthYearController.text}-"
+                                                "${registerController.birthMonthController.text.padLeft(2, '0')}-"
+                                                "${registerController.birthDayController.text.padLeft(2, '0')}",
                                             profession:
-                                                professionController.text,
-                                            fullName: nameController.text,
+                                                registerController.professionController.text,
+                                            fullName: registerController.nameController.text,
                                             role:
                                                 userControllerGet.user.value !=
                                                     null
@@ -1070,14 +1005,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                                 registerController
                                                     .getSelectedEducationalInstitutionLinks(),
                                             address: AddressEntity(
-                                              zipCode: cepController.text,
-                                              street: streetController.text,
+                                              zipCode: registerController.cepController.text,
+                                              street: registerController.streetController.text,
                                               complement:
-                                                  complementController.text,
+                                                  registerController.complementController.text,
                                               neighborhood:
-                                                  neighborhoodController.text,
-                                              city: cityController.text,
-                                              state: stateController.text,
+                                                  registerController.neighborhoodController.text,
+                                              city: registerController.cityController.text,
+                                              state: registerController.stateController.text,
                                             ),
                                           );
 
@@ -1094,8 +1029,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                             await registerController.post(
                                               userEntityToSave,
                                             );
-
-                                            clearForm();
                                           }
                                         }
                                       },

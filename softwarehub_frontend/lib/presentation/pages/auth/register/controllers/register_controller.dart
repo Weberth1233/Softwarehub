@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../../domain/core/errors/failures.dart';
 import '../../../../../domain/entities/address_api_entity.dart';
 import '../../../../../domain/entities/educational_institution_entity.dart';
@@ -27,6 +27,29 @@ class RegisterController extends GetxController {
     this._getTypesLinks,
   );
 
+  // Dados pessoais
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController userController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController cpfController = TextEditingController();
+  final TextEditingController professionController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  // Data de nascimento
+  final TextEditingController birthDayController = TextEditingController();
+  final TextEditingController birthMonthController = TextEditingController();
+  final TextEditingController birthYearController = TextEditingController();
+
+  // Endereço
+  final TextEditingController cepController = TextEditingController();
+  final TextEditingController streetController = TextEditingController();
+  final TextEditingController numberController = TextEditingController();
+  final TextEditingController complementController = TextEditingController();
+  final TextEditingController neighborhoodController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController stateController = TextEditingController();
+
   final RxBool isLoadingSubmit = false.obs;
   final RxBool isLoadingCep = false.obs;
   final RxBool isLoadingEducationalInstitutions = false.obs;
@@ -49,6 +72,61 @@ class RegisterController extends GetxController {
   void onInit() {
     super.onInit();
     fetchInitialData();
+  } 
+
+   void clearForm() {
+    userController.clear();
+    nameController.clear();
+    emailController.clear();
+    cpfController.clear();
+    professionController.clear();
+    phoneController.clear();
+    passwordController.clear();
+
+    birthDayController.clear();
+    birthMonthController.clear();
+    birthYearController.clear();
+
+    cepController.clear();
+    streetController.clear();
+    numberController.clear();
+    complementController.clear();
+    neighborhoodController.clear();
+    cityController.clear();
+    stateController.clear();
+
+    clearEducationalInstitutionLinks();
+  }
+
+  String get birthDateFormatted {
+    return "${birthYearController.text}-"
+        "${birthMonthController.text.padLeft(2, '0')}-"
+        "${birthDayController.text.padLeft(2, '0')}";
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    userController.dispose();
+    emailController.dispose();
+    cpfController.dispose();
+    professionController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+
+    birthDayController.dispose();
+    birthMonthController.dispose();
+    birthYearController.dispose();
+
+    cepController.dispose();
+    streetController.dispose();
+    numberController.dispose();
+    complementController.dispose();
+    neighborhoodController.dispose();
+    cityController.dispose();
+    stateController.dispose();
+
+    super.onClose();
   }
 
   Future<void> fetchInitialData() async {
@@ -66,10 +144,12 @@ class RegisterController extends GetxController {
 
       result.fold(
         (Failure failure) {
+
           message.value = failure.message;
         },
         (success) {
           message.value = success;
+          clearForm();
         },
       );
     } finally {
@@ -92,6 +172,7 @@ class RegisterController extends GetxController {
         },
         (success) {
           message.value = success;
+          clearForm();
         },
       );
     } finally {
