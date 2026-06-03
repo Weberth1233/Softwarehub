@@ -1,46 +1,27 @@
-import 'dart:convert';
-
-import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
-import 'package:nit_sgpi_frontend/infra/models/ip_types/ip_types_model.dart';
-
-import '../../domain/core/errors/exceptions.dart';
+import '../../domain/entities/ip_type_entity.dart';
 import '../core/network/api_client.dart';
+import '../core/network/base_url.dart';
+import '../core/network/remote_datasource_helper.dart';
+import '../models/ip_types/ip_types_model.dart';
+import 'igeneric_remote_datasource.dart';
 
-abstract class IIpTypesRemoteDataSource{
-  Future<List<IpTypeModel>> getIpTypes();
+abstract class IIpTypesRemoteDataSource extends IGenericRemoteDatasource<IpTypeEntity>{
 }
-class IpTypesRemoteDataSourceImpl implements IIpTypesRemoteDataSource{
-   final ApiClient apiClient;
 
-  IpTypesRemoteDataSourceImpl(this.apiClient);
-   
+class IpTypesRemoteDataSourceImpl implements IIpTypesRemoteDataSource {
+  final RemoteDatasourceHelper helper;
+
+  IpTypesRemoteDataSourceImpl(ApiClient apiClient)
+      : helper = RemoteDatasourceHelper(apiClient);
+
   @override
-  Future<List<IpTypeModel>> getIpTypes() async{
-    try {
-      final response = await apiClient.get(
-        "${BaseUrl.urlWithHttp}/ip_types",
-      );
-
-      if (response.statusCode == 200) {
-        final List decoded = json.decode(response.body) as List;
-
-        return decoded
-            .map(
-              (e) =>
-                  IpTypeModel.fromJson(e as Map<String, dynamic>),
-            )
-            .toList();
-      } else {
-        throw ServerException(
-          'Erro ${response.statusCode} ao buscar processos! - Detalhes: ${response.body}',
-        );
-      }
-    } on ServerException {
-      rethrow; // 👈 mantém a exception original
-    }
-    catch (e) {
-      throw NetworkException('Erro de conexão com o servidor!');
-    }
+  Future<List<IpTypeEntity>> getList() {
+    return helper.getList<IpTypeEntity>(
+      url: "${BaseUrl.urlWithHttp}/ip_types",
+      fromJson: (json){
+        return IpTypeModel.fromJson(json).toEntity();
+      },
+      errorMessage: 'Erro ao buscar tipos de propriedade intelectual!',
+    );
   }
-
 }

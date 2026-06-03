@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:nit_sgpi_frontend/infra/models/external_author/external_author_model.dart';
+import 'package:nit_sgpi_frontend/infra/models/external_author_model.dart';
 import '../../domain/core/errors/exceptions.dart';
 import '../../domain/entities/external_author/external_author_entity.dart';
 import '../../domain/entities/paged_result_entity.dart';

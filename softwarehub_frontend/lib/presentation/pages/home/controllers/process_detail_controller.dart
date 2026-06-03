@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/delete_justification.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_process_by_id.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/update_status_process.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/justification/delete_justification.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process/get_process_by_id.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process/update_status_process.dart';
 import '../../../../domain/core/errors/failures.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../infra/datasources/auth_local_datasource.dart';

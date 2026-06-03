@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_status_count_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/delete_process.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_process_status_count.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process/delete_process.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process/get_process_status_count.dart';
 import '../../../../domain/core/errors/failures.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
-import '../../../../domain/usecases/get_process.dart';
+import '../../../../domain/usecases/process/get_process.dart';
 class ProcessController extends GetxController {
   final GetProcesses _getProcesses;
   final GetProcessStatusCount _getProcessStatusCount;

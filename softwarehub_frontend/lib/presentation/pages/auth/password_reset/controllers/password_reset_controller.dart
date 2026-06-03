@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/password_reset.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/auth/password_reset.dart';
 
 import '../../../../../domain/core/errors/failures.dart';
 

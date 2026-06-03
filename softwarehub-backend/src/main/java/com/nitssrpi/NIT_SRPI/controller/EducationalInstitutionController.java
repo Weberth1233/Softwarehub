@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("educational_institution")
+@RequestMapping("educational-institution")
 @RequiredArgsConstructor
 @Tag(name = "Instituição Educacional")
 public class EducationalInstitutionController extends GenericController<EducationalInstitution, EducationalInstitutionRequestDTO, EducationalInstitutionResponseDTO, Long> {

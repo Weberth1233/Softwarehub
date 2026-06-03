@@ -2,7 +2,7 @@ import 'package:nit_sgpi_frontend/domain/entities/external_author/external_autho
 import 'package:nit_sgpi_frontend/domain/entities/process/process_justification_entity.dart';
 
 import '../attachment_entity.dart';
-import '../ip_types/ip_type_entity.dart';
+import '../ip_type_entity.dart';
 import 'process_user_entity.dart';
 
 class ProcessResponseEntity {

@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_consent_term_was_accepted.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/post_consent_term_acceptance.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/consent_term/get_consent_term_was_accepted.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/consent_term/post_consent_term_acceptance.dart';
 import '../../../../domain/entities/consent_term_entity.dart';
-import '../../../../domain/usecases/get_consent_term_by_iptypes.dart';
+import '../../../../domain/usecases/consent_term/get_consent_term_by_iptypes.dart';
 
 class ConsentTermController extends GetxController {
   final GetConsentTermByIpTypes _getConsentTermByIpTypes;

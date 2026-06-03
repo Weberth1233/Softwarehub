@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/external_author/external_author_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/delete_external_author.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_external_authors.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/put_external_author.dart';
-import '../../../../domain/usecases/post_external_author.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/external_author/delete_external_author.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/external_author/get_external_authors.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/external_author/put_external_author.dart';
+import '../../../../domain/usecases/external_author/post_external_author.dart';
 
 class ProcessExternalAuthorController extends GetxController {
   final GetExternalAuthors _getExternalAuthors;

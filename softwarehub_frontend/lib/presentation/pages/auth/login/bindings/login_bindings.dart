@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http show Client;
 import '../../../../../domain/repositories/auth_repository.dart';
-import '../../../../../domain/usecases/login_usecase.dart';
+import '../../../../../domain/usecases/auth/login_usecase.dart';
 import '../../../../../infra/datasources/auth_local_datasource.dart';
 import '../../../../../infra/datasources/auth_remote_datasource.dart';
 import '../../../../../infra/repositories/auth_repository_impl.dart';

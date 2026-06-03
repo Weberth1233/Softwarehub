@@ -3,7 +3,6 @@ import '../../../domain/entities/user/address_entity.dart';
 class AddressModel {
   final String zipCode;
   final String street;
-
   final String complement;
   final String neighborhood;
   final String city;

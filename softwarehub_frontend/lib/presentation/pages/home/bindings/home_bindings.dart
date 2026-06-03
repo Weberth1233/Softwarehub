@@ -1,69 +1,42 @@
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http show Client;
-import 'package:nit_sgpi_frontend/domain/usecases/delete_process.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_process.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_process_status_count.dart';
-import 'package:nit_sgpi_frontend/infra/datasources/process_remote_datasource.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/home/controllers/home_controller.dart';
 import '../../../../domain/repositories/iprocess_repository.dart';
+import '../../../../domain/usecases/process/delete_process.dart';
+import '../../../../domain/usecases/process/get_process.dart';
+import '../../../../domain/usecases/process/get_process_status_count.dart';
 import '../../../../infra/core/network/api_client.dart';
-import '../../../../infra/datasources/auth_local_datasource.dart';
+import '../../../../infra/datasources/process_remote_datasource.dart';
 import '../../../../infra/repositories/process_repository_impl.dart';
+import '../../../core/bindigs/core_bindings.dart';
+import '../controllers/home_controller.dart';
+
 class HomeBindings extends Bindings {
   @override
   void dependencies() {
-    // Http client puro
-    Get.lazyPut<http.Client>(() => http.Client());
+    CoreBinding.dependencies();
 
-    // Local datasource (token)
-    Get.lazyPut<AuthLocalDataSource>(() => AuthLocalDataSource());
-
-    // ApiClient (usa http.Client + AuthLocalDataSource)
-    Get.lazyPut<ApiClient>(
-      () => ApiClient(
-        Get.find<http.Client>(),
-        // Get.find<AuthLocalDataSource>(),
-      ),
-    );
-
-    // Remote datasource
     Get.lazyPut<IProcessRemoteDataSource>(
       () => ProcessRemoteDataSourceImpl(Get.find<ApiClient>()),
     );
-
-    // Repository
     Get.lazyPut<IProcessRepository>(
       () => ProcessRepositoryImpl(
         remoteDataSource: Get.find<IProcessRemoteDataSource>(),
       ),
     );
-
-    // UseCase
     Get.lazyPut<GetProcesses>(
-      () => GetProcesses(
-        repository: Get.find<IProcessRepository>(),
-      ),
+      () => GetProcesses(repository: Get.find<IProcessRepository>()),
     );
-
     Get.lazyPut<GetProcessStatusCount>(
-      () => GetProcessStatusCount(
-        repository: Get.find<IProcessRepository>(),
-      ),
+      () => GetProcessStatusCount(repository: Get.find<IProcessRepository>()),
     );
-
-     Get.lazyPut<DeleteProcess>(
-      () => DeleteProcess(
-        repository: Get.find<IProcessRepository>(),
-      ),
+    Get.lazyPut<DeleteProcess>(
+      () => DeleteProcess(repository: Get.find<IProcessRepository>()),
     );
-
-    // Controller
     Get.lazyPut<ProcessController>(
-      () => ProcessController(Get.find<GetProcesses>(), Get.find<GetProcessStatusCount>(), Get.find<DeleteProcess>()),
+      () => ProcessController(
+        Get.find<GetProcesses>(),
+        Get.find<GetProcessStatusCount>(),
+        Get.find<DeleteProcess>(),
+      ),
     );
-
-
-
-
   }
 }

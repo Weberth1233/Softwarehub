@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/post_process.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/put_process.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process/post_process.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process/put_process.dart';
 
 import '../../../../domain/core/errors/failures.dart';
 

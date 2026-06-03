@@ -47,6 +47,16 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.POST, "api/auth/forgot-password").permitAll()
                                 .requestMatchers(HttpMethod.POST, "api/auth/reset-password").permitAll()
 
+                                .requestMatchers(HttpMethod.GET, "educational-institution").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/educational-institution/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/educational-institution/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/educational-institution/**").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.GET, "types-link").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/types-link/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/types-link/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/types-link/**").hasRole("ADMIN")
+
                         // IpTypes - ROLES
                         .requestMatchers(HttpMethod.GET, "/ip_types/**").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, "/ip_types/**").hasRole("ADMIN")

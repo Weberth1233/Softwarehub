@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("types_link")
+@RequestMapping("types-link")
 @RequiredArgsConstructor
 @Tag(name = "Tipos de vínculos")
 public class TypesLinkController extends GenericController<TypesLink, TypesLinkRequestDTO, TypesLinkResponseDTO, Long> {

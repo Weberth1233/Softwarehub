@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http show Client;
 import 'package:nit_sgpi_frontend/domain/repositories/iuser_repository.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_users.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/users/get_users.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_user_controller.dart';
 import '../../../../infra/core/network/api_client.dart';
 import '../../../../infra/datasources/auth_local_datasource.dart';

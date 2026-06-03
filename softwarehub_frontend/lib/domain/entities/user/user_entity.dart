@@ -1,5 +1,5 @@
 import 'address_entity.dart';
-import 'user_educational_institution_link_entity.dart';
+import '../user_educational_institution_link_entity.dart';
 
 class UserEntity {
   final int? id;

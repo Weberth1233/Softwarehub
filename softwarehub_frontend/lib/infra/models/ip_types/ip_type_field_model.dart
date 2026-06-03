@@ -1,4 +1,4 @@
-import '../../../domain/entities/ip_types/ip_type_entity.dart';
+import '../../../domain/entities/ip_type_entity.dart';
 import 'ip_type_field_conditional_model.dart';
 import 'ip_type_field_option_model.dart';
 import 'ip_type_field_validation_model.dart';

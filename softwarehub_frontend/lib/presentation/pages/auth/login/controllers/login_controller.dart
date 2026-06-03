@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/core/errors/failures.dart';
-import '../../../../../domain/usecases/login_usecase.dart';
+import '../../../../../domain/usecases/auth/login_usecase.dart';
 import '../../../../shared/controller/auth_controller.dart';
 
 class LoginController extends GetxController {

@@ -107,14 +107,12 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
     required String fileName
   }) async {
     try {
-      // Chama o método .upload do seu ApiClient (que criamos no passo anterior)
-      // Note que passamos os parâmetros opcionais
       final response = await apiClient.upload(
         "${BaseUrl.urlWithHttp}/attachments/upload/$id",
         filePath: filePath,
         fileBytes: fileBytes,
         fileName: fileName,
-        fieldName: 'file', // Nome do campo no backend
+        fieldName: 'file',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -125,7 +123,7 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
         );
       }
     }on ServerException {
-      rethrow; // 👈 mantém a exception original
+      rethrow;
     } catch (e) {
       if (e is ServerException) rethrow;
       throw NetworkException('Erro de conexão ao tentar enviar o arquivo.');

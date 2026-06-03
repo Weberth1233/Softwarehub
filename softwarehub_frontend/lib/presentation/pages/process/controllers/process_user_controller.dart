@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_users.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/users/get_users.dart';
 
 class ProcessUserController extends GetxController {
   final GetUsers getUsers;

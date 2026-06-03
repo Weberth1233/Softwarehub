@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/user/address_entity.dart';
-import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/auth/register/controllers/register_controller.dart';
-import 'package:nit_sgpi_frontend/presentation/shared/widgets/custom_text_field.dart';
+import '../../../../domain/entities/educational_institution_entity.dart';
+import '../../../../domain/entities/types_link_entity.dart';
+import '../../../../domain/entities/user/address_entity.dart';
+import '../../../../domain/entities/user/user_entity.dart';
 import '../../../shared/utils/responsive.dart';
 import '../../../shared/utils/validators.dart';
-import 'package:flutter/services.dart';
-
+import '../../../shared/widgets/custom_text_field.dart';
 import '../../users/controllers/user_logged_controller.dart';
+import 'controllers/register_controller.dart';
 
 class RegisterPage extends StatefulWidget {
   final bool isEditMode;
@@ -41,25 +42,33 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController cityController = TextEditingController();
   final TextEditingController stateController = TextEditingController();
 
-  // Data de nascimento (manual)
   final TextEditingController birthDayController = TextEditingController();
   final TextEditingController birthMonthController = TextEditingController();
   final TextEditingController birthYearController = TextEditingController();
 
+  EducationalInstitutionEntity? selectedEducationalInstitution;
+  TypesLinkEntity? selectedTypesLink;
+
   bool _showPassword = false;
   Worker? _userWorker;
 
-  // Cor padrão da barra azul definida aqui para uso no AppBar
   static const Color _primaryColor = Color(0xFF004294);
 
   @override
   void initState() {
     super.initState();
-    // Se for modo de edição, carrega os dados do usuário logado nos controllers
+
+    registerController.fetchInitialData();
+
+    if (!widget.isEditMode) {
+      registerController.clearEducationalInstitutionLinks();
+    }
+
     if (widget.isEditMode) {
       if (userControllerGet.user.value != null) {
         _loadUserData();
       }
+
       _userWorker = ever(userControllerGet.user, (user) {
         if (user != null) {
           _loadUserData();
@@ -68,8 +77,14 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  TextStyle textThemeSafe(BuildContext context) {
+    return Theme.of(context).textTheme.bodyMedium ??
+        const TextStyle(color: Colors.black87, fontSize: 15);
+  }
+
   void _loadUserData() {
     final user = userControllerGet.user.value;
+
     if (user != null) {
       nameController.text = user.fullName;
       userController.text = user.userName;
@@ -78,9 +93,9 @@ class _RegisterPageState extends State<RegisterPage> {
       professionController.text = user.profession;
       phoneController.text = user.phoneNumber;
 
-      // Tratando a data de nascimento assumindo formato YYYY-MM-DD
       if (user.birthDate.isNotEmpty) {
         final parts = user.birthDate.split('-');
+
         if (parts.length == 3) {
           birthYearController.text = parts[0];
           birthMonthController.text = parts[1];
@@ -88,20 +103,23 @@ class _RegisterPageState extends State<RegisterPage> {
         }
       }
 
-      // Tratando o endereço
       cepController.text = user.address.zipCode;
       streetController.text = user.address.street;
-
       complementController.text = user.address.complement ?? '';
       neighborhoodController.text = user.address.neighborhood;
       cityController.text = user.address.city;
       stateController.text = user.address.state;
+
+      registerController.selectedEducationalInstitutionLinks.assignAll(
+        user.userEducationalInstitutionLinks,
+      );
     }
   }
 
   @override
   void dispose() {
     _userWorker?.dispose();
+
     nameController.dispose();
     userController.dispose();
     emailController.dispose();
@@ -133,6 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
     professionController.clear();
     phoneController.clear();
     passwordController.clear();
+
     birthDayController.clear();
     birthMonthController.clear();
     birthYearController.clear();
@@ -144,11 +163,36 @@ class _RegisterPageState extends State<RegisterPage> {
     neighborhoodController.clear();
     cityController.clear();
     stateController.clear();
+
+    registerController.clearEducationalInstitutionLinks();
+
+    setState(() {
+      selectedEducationalInstitution = null;
+      selectedTypesLink = null;
+    });
   }
 
-  // =======================
-  // UI helpers
-  // =======================
+  void _addEducationalInstitutionLink() {
+    if (selectedEducationalInstitution == null || selectedTypesLink == null) {
+      Get.snackbar(
+        "Atenção",
+        "Selecione uma instituição e um tipo de vínculo.",
+        snackPosition: SnackPosition.TOP,
+      );
+      return;
+    }
+
+    registerController.addEducationalInstitutionLink(
+      educationalInstitution: selectedEducationalInstitution!,
+      typesLink: selectedTypesLink!,
+    );
+
+    setState(() {
+      selectedEducationalInstitution = null;
+      selectedTypesLink = null;
+    });
+  }
+
   Widget _sectionHeader(BuildContext context, String title, String subtitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,10 +212,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _cardSection(BuildContext context, {required Widget child}) {
     final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface, // Branco
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -187,6 +232,272 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _gap() => const SizedBox(height: 10);
+
+  Widget _dropdownField<T>({
+    required String label,
+    required String hint,
+    required T? value,
+    required List<T> items,
+    required String Function(T item) itemLabel,
+    required void Function(T? value) onChanged,
+    IconData icon = Icons.arrow_drop_down_circle_outlined,
+  }) {
+    final theme = Theme.of(context);
+
+    return DropdownButtonFormField<T>(
+      value: value,
+      isExpanded: true,
+      dropdownColor: Colors.white,
+      iconEnabledColor: _primaryColor,
+      style: textThemeSafe(context).copyWith(
+        color: Colors.black87,
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey.shade600),
+        labelStyle: TextStyle(
+          color: Colors.grey.shade800,
+          fontWeight: FontWeight.w500,
+        ),
+        prefixIcon: Icon(icon, color: _primaryColor),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.dividerColor.withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _primaryColor, width: 1.5),
+        ),
+      ),
+      items: items.map((item) {
+        return DropdownMenuItem<T>(
+          value: item,
+          child: Text(
+            itemLabel(item),
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        );
+      }).toList(),
+      selectedItemBuilder: (context) {
+        return items.map((item) {
+          return Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              itemLabel(item),
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        }).toList();
+      },
+      onChanged: onChanged,
+    );
+  }
+
+  Widget _institutionalLinksSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    return _cardSection(
+      context,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionHeader(
+            context,
+            "Vínculo institucional",
+            widget.isEditMode
+                ? "Atualize seus vínculos com instituições."
+                : "Adicione uma ou mais instituições e seus tipos de vínculo.",
+          ),
+
+          const SizedBox(height: 14),
+
+          if ((registerController.isLoadingEducationalInstitutions.value ||
+                  registerController.isLoadingTypesLinks.value) &&
+              (registerController.educationalInstitutions.isEmpty ||
+                  registerController.typesLinks.isEmpty))
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _dropdownField<EducationalInstitutionEntity>(
+                        label: "Instituição educacional",
+                        hint: "Selecione uma instituição",
+                        value: selectedEducationalInstitution,
+                        items: registerController.educationalInstitutions,
+                        itemLabel: (item) => item.name,
+                        icon: Icons.account_balance_outlined,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedEducationalInstitution = value;
+                          });
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(width: 10),
+
+                    Expanded(
+                      child: _dropdownField<TypesLinkEntity>(
+                        label: "Tipo de vínculo",
+                        hint: "Selecione o vínculo",
+                        value: selectedTypesLink,
+                        items: registerController.typesLinks,
+                        itemLabel: (item) => item.name,
+                        icon: Icons.link_outlined,
+                        onChanged: (value) {
+                          setState(() {
+                            selectedTypesLink = value;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    onPressed: _addEducationalInstitutionLink,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add),
+                    label: const Text(
+                      "Adicionar vínculo",
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                Obx(() {
+                  final links =
+                      registerController.selectedEducationalInstitutionLinks;
+
+                  if (links.isEmpty) {
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.2),
+                        ),
+                      ),
+                      child: Text(
+                        "Nenhum vínculo adicionado ainda.",
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: links.map((link) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.dividerColor.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.account_balance_outlined,
+                              color: _primaryColor,
+                            ),
+
+                            const SizedBox(width: 12),
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    link.educationalInstitution.name,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    link.typesLink.name,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            IconButton(
+                              onPressed: () {
+                                registerController
+                                    .removeEducationalInstitutionLink(link);
+                              },
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              tooltip: "Remover vínculo",
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  );
+                }),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,15 +517,14 @@ class _RegisterPageState extends State<RegisterPage> {
             margin: const EdgeInsets.all(12),
             borderRadius: 12,
           );
+
           registerController.message.value = "";
         });
       }
 
       return Scaffold(
-        // Fundo claro para contrastar com os cartões e destacar a textura
-        backgroundColor: Color(0xFFCBD5E1),
+        backgroundColor: const Color(0xFFCBD5E1),
 
-        // ===== NOVO APPBAR (BARRA AZUL) =====
         appBar: AppBar(
           elevation: 0,
           backgroundColor: _primaryColor,
@@ -239,7 +549,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
               ),
+
               const SizedBox(width: 16),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,14 +583,12 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
 
-        // ===== CORPO DA PÁGINA (COM BACKGROUND TEXTURIZADO) =====
         body: Stack(
           children: [
-            // 1. Textura de fundo (Diagonal Lines)
             Positioned.fill(
               child: CustomPaint(
                 painter: _DiagonalLinesPainter(
-                  color: Colors.black.withOpacity(0.04), // Textura sutil
+                  color: Colors.black.withOpacity(0.04),
                 ),
               ),
             ),
@@ -383,7 +693,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ),
                                       ),
                                     ),
+
                                     const SizedBox(width: 10),
+
                                     Expanded(
                                       child: CustomTextField(
                                         controller: phoneController,
@@ -402,7 +714,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                 _gap(),
 
-                                // ===== Data de nascimento (manual: Dia/Mês/Ano)
                                 Text(
                                   "Data de nascimento :",
                                   style: Theme.of(context).textTheme.bodyMedium
@@ -411,6 +722,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                         color: theme.colorScheme.tertiary,
                                       ),
                                 ),
+
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -428,8 +740,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ],
                                         validator: (v) {
                                           final d = int.tryParse(v ?? "");
+
                                           if (d == null) return "Inválido";
                                           if (d < 1 || d > 31) return "1-31";
+
                                           return null;
                                         },
                                         prefixIcon: const Icon(
@@ -440,6 +754,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ),
 
                                     const SizedBox(width: 10),
+
                                     SizedBox(
                                       width: 100,
                                       child: CustomTextField(
@@ -454,14 +769,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ],
                                         validator: (v) {
                                           final m = int.tryParse(v ?? "");
+
                                           if (m == null) return "Inválido";
                                           if (m < 1 || m > 12) return "1-12";
+
                                           return null;
                                         },
                                       ),
                                     ),
 
                                     const SizedBox(width: 10),
+
                                     SizedBox(
                                       width: 150,
                                       child: CustomTextField(
@@ -477,10 +795,13 @@ class _RegisterPageState extends State<RegisterPage> {
                                         validator: (v) {
                                           final y = int.tryParse(v ?? "");
                                           final nowY = DateTime.now().year;
+
                                           if (y == null) return "Inválido";
+
                                           if (y < 1900 || y > nowY) {
                                             return "1900-$nowY";
                                           }
+
                                           return null;
                                         },
                                       ),
@@ -490,7 +811,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                 const SizedBox(height: 14),
 
-                                // ===== Senha
                                 CustomTextField(
                                   controller: passwordController,
                                   label: widget.isEditMode
@@ -500,11 +820,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                   size: 270,
                                   obscureText: !_showPassword,
                                   validator: (v) {
-                                    // Se estiver editando e o campo estiver vazio, não valida a senha
                                     if (widget.isEditMode &&
                                         (v == null || v.isEmpty)) {
                                       return null;
                                     }
+
                                     return Validators.minLength(
                                       v,
                                       6,
@@ -514,9 +834,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                   },
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   suffixIcon: IconButton(
-                                    onPressed: () => setState(() {
-                                      _showPassword = !_showPassword;
-                                    }),
+                                    onPressed: () {
+                                      setState(() {
+                                        _showPassword = !_showPassword;
+                                      });
+                                    },
                                     icon: Icon(
                                       _showPassword
                                           ? Icons.visibility_off_outlined
@@ -530,7 +852,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
                           const SizedBox(height: 16),
 
-                          // ===== Seção: Endereço
+                          _institutionalLinksSection(context),
+
+                          const SizedBox(height: 16),
+
                           _cardSection(
                             context,
                             child: Column(
@@ -553,19 +878,21 @@ class _RegisterPageState extends State<RegisterPage> {
                                   size: 500,
                                   keyboardType: TextInputType.number,
                                   validator: Validators.cep,
-                                  prefixIcon: const Icon(Icons.pin_drop_outlined),
-
+                                  prefixIcon: const Icon(
+                                    Icons.pin_drop_outlined,
+                                  ),
                                   suffixIcon: Padding(
                                     padding: const EdgeInsets.all(6.0),
                                     child: ElevatedButton(
                                       onPressed: () async {
-                                        final address = await registerController.getByZipCode(
-                                          cepController.text,
-                                        );
+                                        final address = await registerController
+                                            .getByZipCode(cepController.text);
 
                                         if (address != null) {
-                                          streetController.text = address.street;
-                                          neighborhoodController.text = address.neighborhood;
+                                          streetController.text =
+                                              address.street;
+                                          neighborhoodController.text =
+                                              address.neighborhood;
                                           cityController.text = address.city;
                                           stateController.text = address.state;
                                         }
@@ -590,19 +917,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                           const SizedBox(width: 8),
                                           Text(
                                             "Buscar CEP",
-                                            style: textTheme.bodySmall?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white,
-                                            ),
+                                            style: textTheme.bodySmall
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                ),
                                           ),
                                         ],
                                       ),
                                     ),
                                   ),
                                 ),
-                                _gap(),
 
-                                const SizedBox(width: 12),
+                                _gap(),
 
                                 CustomTextField(
                                   controller: streetController,
@@ -614,8 +941,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                 ),
 
-                                const SizedBox(height: 12),
-
                                 _gap(),
 
                                 CustomTextField(
@@ -623,9 +948,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   label: "Bairro / Setor",
                                   size: 500,
                                   validator: Validators.required,
-                                  prefixIcon: const Icon(
-                                    Icons.map_outlined,
-                                  ),
+                                  prefixIcon: const Icon(Icons.map_outlined),
                                 ),
 
                                 _gap(),
@@ -678,7 +1001,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                           const SizedBox(height: 24),
 
-                          // ===== CTA
                           Obx(() {
                             return SizedBox(
                               width: double.infinity,
@@ -686,7 +1008,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: theme.colorScheme.primary,
-                                  foregroundColor: theme.colorScheme.primary,
+                                  foregroundColor: Colors.white,
                                   elevation: 2,
                                   shadowColor: Colors.black.withOpacity(0.2),
                                   shape: RoundedRectangleBorder(
@@ -697,7 +1019,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ),
                                   ),
                                 ),
-                                icon: registerController.isLoading.value
+                                icon: registerController.isLoadingSubmit.value
                                     ? SizedBox(
                                         width: 20,
                                         height: 20,
@@ -707,10 +1029,21 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ),
                                       )
                                     : const Icon(Icons.save_outlined),
-                                onPressed: registerController.isLoading.value
+                                onPressed:
+                                    registerController.isLoadingSubmit.value
                                     ? null
-                                    : () {
+                                    : () async {
                                         if (_formKey.currentState!.validate()) {
+                                          if (!registerController
+                                              .hasEducationalInstitutionLinks) {
+                                            Get.snackbar(
+                                              "Atenção",
+                                              "Adicione pelo menos um vínculo institucional.",
+                                              snackPosition: SnackPosition.TOP,
+                                            );
+                                            return;
+                                          }
+
                                           final userEntityToSave = UserEntity(
                                             userName: userController.text,
                                             email: emailController.text,
@@ -733,7 +1066,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                                       .role
                                                 : 'USER',
                                             isEnabled: true,
-                                            userEducationalInstitutionLinks: [],
+                                            userEducationalInstitutionLinks:
+                                                registerController
+                                                    .getSelectedEducationalInstitutionLinks(),
                                             address: AddressEntity(
                                               zipCode: cepController.text,
                                               street: streetController.text,
@@ -743,36 +1078,35 @@ class _RegisterPageState extends State<RegisterPage> {
                                                   neighborhoodController.text,
                                               city: cityController.text,
                                               state: stateController.text,
-                                            
                                             ),
                                           );
-                                          print(userEntityToSave.role);
+
                                           if (widget.isEditMode) {
-                                            print(
-                                              userControllerGet.user.value!.id!,
-                                            );
-                                            // Chamar método de Update
-                                            registerController.updateUserLogged(
-                                              userControllerGet.user.value!.id!,
-                                              userEntityToSave,
-                                            );
+                                            await registerController
+                                                .updateUserLogged(
+                                                  userControllerGet
+                                                      .user
+                                                      .value!
+                                                      .id!,
+                                                  userEntityToSave,
+                                                );
                                           } else {
-                                            registerController.post(
+                                            await registerController.post(
                                               userEntityToSave,
                                             );
+
                                             clearForm();
                                           }
                                         }
                                       },
-
                                 label: Text(
-                                  registerController.isLoading.value
-                                      ? (widget.isEditMode
+                                  registerController.isLoadingSubmit.value
+                                      ? widget.isEditMode
                                             ? "Atualizando..."
-                                            : "Salvando...")
-                                      : (widget.isEditMode
-                                            ? "Atualizar Perfil"
-                                            : "Salvar cadastro"),
+                                            : "Salvando..."
+                                      : widget.isEditMode
+                                      ? "Atualizar Perfil"
+                                      : "Salvar cadastro",
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -796,9 +1130,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 }
 
-// =======================
-// Custom Painter: Linhas Diagonais
-// =======================
 class _DiagonalLinesPainter extends CustomPainter {
   final Color color;
 
@@ -809,7 +1140,9 @@ class _DiagonalLinesPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..strokeWidth = 1;
+
     const spacing = 80.0;
+
     for (double i = -size.height; i < size.width; i += spacing) {
       canvas.drawLine(
         Offset(i, 0),

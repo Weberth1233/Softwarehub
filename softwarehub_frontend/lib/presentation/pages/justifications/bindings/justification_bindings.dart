@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:nit_sgpi_frontend/domain/repositories/ijustification_repository.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/post_justification.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/put_justification.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/justification/post_justification.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/justification/put_justification.dart';
 import 'package:nit_sgpi_frontend/infra/datasources/justiification_remote_datasource.dart';
 import 'package:nit_sgpi_frontend/infra/repositories/justification_repository_impl.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/justifications/controllers/justification_controller.dart';

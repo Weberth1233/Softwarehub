@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/justification_request_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/post_justification.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/put_justification.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/justification/post_justification.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/justification/put_justification.dart';
 import '../../../../domain/core/errors/failures.dart';
 
 class JustificationController extends GetxController {

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nit_sgpi_frontend/domain/usecases/forgot_password.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/auth/forgot_password.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/auth/password_reset/controllers/forgot_password_controller.dart';
 
 import '../../../../../domain/repositories/auth_repository.dart';

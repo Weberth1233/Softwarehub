@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/ip_types/ip_type_entity.dart';
+import 'package:nit_sgpi_frontend/domain/entities/ip_type_entity.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/ip_types/controllers/ip_types_controller.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process/process_page.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/responsive.dart';

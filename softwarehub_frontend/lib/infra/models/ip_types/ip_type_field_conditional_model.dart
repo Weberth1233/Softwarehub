@@ -1,4 +1,4 @@
-import '../../../domain/entities/ip_types/ip_type_entity.dart';
+import '../../../domain/entities/ip_type_entity.dart';
 
 class IpTypeFieldConditionalModel {
   final String dependsOn;

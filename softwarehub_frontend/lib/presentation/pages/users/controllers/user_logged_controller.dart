@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_user_logged.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/users/get_user_logged.dart';
 
 import '../../../../domain/entities/user/user_entity.dart';
 

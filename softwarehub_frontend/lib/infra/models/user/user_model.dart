@@ -1,7 +1,6 @@
-import 'package:nit_sgpi_frontend/infra/models/user/address_model.dart';
-import 'package:nit_sgpi_frontend/infra/models/user/user_educational_institution_link_model.dart';
-
 import '../../../domain/entities/user/user_entity.dart';
+import 'address_model.dart';
+import 'user_educational_institution_link_model.dart';
 
 class UserModel {
   final int? id;
@@ -15,7 +14,8 @@ class UserModel {
   final String fullName;
   final String role;
   final bool isEnabled;
-  final List<UserEducationalInstitutionLinkModel> userEducationalInstitutionLinks;
+  final List<UserEducationalInstitutionLinkModel>
+  userEducationalInstitutionLinks;
   final AddressModel address;
 
   UserModel({
@@ -61,11 +61,10 @@ class UserModel {
 
   Map<String, dynamic> toJson() {
     return {
-      "id": id,
       "userName": userName,
       "email": email,
-      "cpf": cpf,
       "password": password,
+      "cpf": cpf,
       "phoneNumber": phoneNumber,
       "birthDate": birthDate,
       "profession": profession,
@@ -73,7 +72,11 @@ class UserModel {
       "role": role,
       "isEnabled": isEnabled,
       "userEducationalInstitutionLinks": userEducationalInstitutionLinks
-          .map((item) => item.toJson())
+          .map(
+            (link) => UserEducationalInstitutionLinkModel.fromEntity(
+              link.toEntity(),
+            ).toRequestJson(),
+          )
           .toList(),
       "address": address.toJson(),
     };

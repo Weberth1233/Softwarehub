@@ -1,5 +1,5 @@
 import 'package:nit_sgpi_frontend/infra/models/base_model.dart';
-import 'package:nit_sgpi_frontend/infra/models/external_author/external_author_model.dart';
+import 'package:nit_sgpi_frontend/infra/models/external_author_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/ip_types/ip_types_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/process/process_justification_model.dart';
 

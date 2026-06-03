@@ -1,7 +1,6 @@
-import 'educational_institution_model.dart';
-import 'types_link_model.dart';
-
-import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
+import '../educational_institution_model.dart';
+import '../types_link_model.dart';
+import '../../../domain/entities/user_educational_institution_link_entity.dart';
 
 class UserEducationalInstitutionLinkModel {
   final int? id;
@@ -41,6 +40,13 @@ class UserEducationalInstitutionLinkModel {
       "typesLink": typesLink.toJson(),
       "createdAt": createdAt,
       "updatedAt": updatedAt,
+    };
+  }
+
+  Map<String, dynamic> toRequestJson() {
+    return {
+      "educationalInstitutionId": educationalInstitution.id,
+      "typesLinkId": typesLink.id,
     };
   }
 

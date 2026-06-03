@@ -3,9 +3,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/attachment_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/get_attachments.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/upload_file.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/open_attachment.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/attachments/get_attachments.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/attachments/upload_file.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/attachments/open_attachment.dart';
 import '../../../../domain/core/errors/failures.dart';
 
 class AttachmentController extends GetxController {

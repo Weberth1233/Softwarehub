@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+
 import '../../../presentation/shared/controller/auth_controller.dart';
 
 class ApiClient {
@@ -9,13 +11,17 @@ class ApiClient {
 
   ApiClient(this.client);
 
-  Map<String, String> _headers() {
-    final authController = Get.find<AuthController>();
-    final token = authController.token;
-
+  Map<String, String> _headers({bool authenticated = true}) {
     final headers = <String, String>{
       'Content-Type': 'application/json',
     };
+
+    if (!authenticated) {
+      return headers;
+    }
+
+    final authController = Get.find<AuthController>();
+    final token = authController.token;
 
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
@@ -24,60 +30,98 @@ class ApiClient {
     return headers;
   }
 
-  Future<http.Response> _handleResponse(http.Response response) async {
-    if (response.statusCode == 401) {
+  Future<http.Response> _handleResponse(
+    http.Response response, {
+    bool authenticated = true,
+  }) async {
+    if (authenticated && response.statusCode == 401) {
       await Get.find<AuthController>().logout();
     }
+
     return response;
   }
 
-  Future<http.Response> get(String url) async {
+  Future<http.Response> get(
+    String url, {
+    bool authenticated = true,
+  }) async {
     final response = await client.get(
       Uri.parse(url),
-      headers: _headers(),
+      headers: _headers(authenticated: authenticated),
     );
 
-    return _handleResponse(response);
+    return _handleResponse(
+      response,
+      authenticated: authenticated,
+    );
   }
 
-  Future<http.Response> post(String url, {Object? body}) async {
+  Future<http.Response> post(
+    String url, {
+    Object? body,
+    bool authenticated = true,
+  }) async {
     final response = await client.post(
       Uri.parse(url),
-      headers: _headers(),
+      headers: _headers(authenticated: authenticated),
       body: body == null ? null : jsonEncode(body),
     );
 
-    return _handleResponse(response);
+    return _handleResponse(
+      response,
+      authenticated: authenticated,
+    );
   }
 
-  Future<http.Response> patch(String url, {Object? body}) async {
+  Future<http.Response> patch(
+    String url, {
+    Object? body,
+    bool authenticated = true,
+  }) async {
     final response = await client.patch(
       Uri.parse(url),
-      headers: _headers(),
+      headers: _headers(authenticated: authenticated),
       body: body == null ? null : jsonEncode(body),
     );
 
-    return _handleResponse(response);
+    return _handleResponse(
+      response,
+      authenticated: authenticated,
+    );
   }
 
-  Future<http.Response> put(String url, {Object? body}) async {
+  Future<http.Response> put(
+    String url, {
+    Object? body,
+    bool authenticated = true,
+  }) async {
     final response = await client.put(
       Uri.parse(url),
-      headers: _headers(),
+      headers: _headers(authenticated: authenticated),
       body: body == null ? null : jsonEncode(body),
     );
 
-    return _handleResponse(response);
+    return _handleResponse(
+      response,
+      authenticated: authenticated,
+    );
   }
 
-  Future<http.Response> delete(String url, {Object? body}) async {
+  Future<http.Response> delete(
+    String url, {
+    Object? body,
+    bool authenticated = true,
+  }) async {
     final response = await client.delete(
       Uri.parse(url),
-      headers: _headers(),
+      headers: _headers(authenticated: authenticated),
       body: body == null ? null : jsonEncode(body),
     );
 
-    return _handleResponse(response);
+    return _handleResponse(
+      response,
+      authenticated: authenticated,
+    );
   }
 
   Future<http.Response> upload(
@@ -86,14 +130,17 @@ class ApiClient {
     List<int>? fileBytes,
     required String fileName,
     String fieldName = 'file',
+    bool authenticated = true,
   }) async {
     final request = http.MultipartRequest('POST', Uri.parse(url));
 
-    final authController = Get.find<AuthController>();
-    final token = authController.token;
+    if (authenticated) {
+      final authController = Get.find<AuthController>();
+      final token = authController.token;
 
-    if (token != null && token.isNotEmpty) {
-      request.headers['Authorization'] = 'Bearer $token';
+      if (token != null && token.isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
     }
 
     http.MultipartFile multipartFile;
@@ -125,6 +172,9 @@ class ApiClient {
     final streamedResponse = await client.send(request);
     final response = await http.Response.fromStream(streamedResponse);
 
-    return _handleResponse(response);
+    return _handleResponse(
+      response,
+      authenticated: authenticated,
+    );
   }
 }

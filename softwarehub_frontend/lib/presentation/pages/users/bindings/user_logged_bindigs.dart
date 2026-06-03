@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:nit_sgpi_frontend/domain/usecases/get_user_logged.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/put_user.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/users/get_user_logged.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/users/put_user.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/users/controllers/user_logged_controller.dart';
 
 import '../../../../domain/repositories/iuser_repository.dart';
