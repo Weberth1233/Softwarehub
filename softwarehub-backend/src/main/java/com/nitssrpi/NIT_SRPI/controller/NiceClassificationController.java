@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("nice_classification")
+@RequestMapping("nice-classification")
 @RequiredArgsConstructor
 @Tag(name = "Classificação de nice")
 public class NiceClassificationController implements GenericController{
