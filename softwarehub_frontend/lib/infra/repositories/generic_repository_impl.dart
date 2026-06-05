@@ -6,16 +6,16 @@ import 'package:nit_sgpi_frontend/domain/repositories/generic_repository.dart';
 import 'package:nit_sgpi_frontend/infra/datasources/igeneric_remote_datasource.dart';
 
 class GenericRepositoryImpl<T> implements IGenericRepository<T> {
-  final IGenericRemoteDatasource<T> remoteDatasource;
+  final IGenericRemoteDatasource<T> remoteDataSource;
 
   GenericRepositoryImpl({
-    required this.remoteDatasource,
+    required this.remoteDataSource,
   });
 
   @override
   Future<Either<Failure, List<T>>> getList() async {
     try {
-      final result = await remoteDatasource.getList();
+      final result = await remoteDataSource.getList();
 
       return Right(result);
     } on ServerException catch (e) {

@@ -10,6 +10,6 @@ class EducationalInstitutionRepositoryImpl
     implements IEducationalInstitutionRepository {
   EducationalInstitutionRepositoryImpl({
 
-    required IEducationalInstitutionRemoteDatasource remoteDatasource,
-  }) : super(remoteDatasource: remoteDatasource);
+    required IEducationalInstitutionRemoteDatasource remoteDataSource,
+  }) : super(remoteDataSource: remoteDataSource);
 }

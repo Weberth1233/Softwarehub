@@ -9,5 +9,5 @@ class TypesLinkRepositoryImpl
   TypesLinkRepositoryImpl({
 
     required ITypesLinkRemoteDatasource remoteDatasource,
-  }) : super(remoteDatasource: remoteDatasource);
+  }) : super(remoteDataSource: remoteDatasource);
 }

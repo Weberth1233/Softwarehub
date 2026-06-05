@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:get/get_connect.dart';
 import 'package:nit_sgpi_frontend/domain/entities/paged_result_entity.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_response_entity.dart';
@@ -7,6 +8,7 @@ import 'package:nit_sgpi_frontend/infra/core/network/api_client.dart';
 import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
 import 'package:nit_sgpi_frontend/infra/models/process/proces_status_count_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/process/process_request_model.dart';
+import 'package:nit_sgpi_frontend/infra/utils/error_formatter%20.dart';
 
 import '../../domain/core/errors/exceptions.dart';
 import '../models/paged_result_model.dart';
@@ -22,7 +24,7 @@ abstract class IProcessRemoteDataSource {
 
   Future<List<ProcessStatusCountModel>> getProcessesStatusCount();
 
-  Future<String> postProcess(ProcessRequestEntity entity);
+  Future<int> postProcess(ProcessRequestEntity entity);
 
   Future<String> putProcess(int processId, ProcessRequestEntity entity);
 
@@ -31,6 +33,8 @@ abstract class IProcessRemoteDataSource {
   Future<ProcessResponseEntity> getProcessById(int processId);
 
   Future<String> updateStatusProcess(int processId, String newStatus);
+
+  Future<String> processClassification(int processId, int niceClassCode);
 }
 
 class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
@@ -70,7 +74,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
           (e) => ProcessResponseModel.fromJson(e),
         );
         final pagedEntity = pagedModel.toEntity((model) => model.toEntity());
-        
+
         return pagedEntity;
       } else {
         throw ServerException(
@@ -114,7 +118,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
   }
 
   @override
-  Future<String> postProcess(ProcessRequestEntity entity) async {
+  Future<int> postProcess(ProcessRequestEntity entity) async {
     try {
       final model = ProcessRequestModel.fromEntity(entity);
 
@@ -127,17 +131,18 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
       print('BODY: ${response.body}');
 
       if (response.statusCode == 201) {
-        return "Cadastrado com sucesso!";
-      } else if (response.statusCode == 422) {
-        // 👇 transforma o JSON de erro em string bonita
-        return response.body;
+        final Map<String, dynamic> data = jsonDecode(response.body);
+
+        final int id = data["id"];
+
+        return id;
       } else {
         throw ServerException(
           'Erro ${response.statusCode} erro no cadastro! - Detalhes: ${response.body}',
         );
       }
     } on ServerException {
-      rethrow; // 👈 mantém a exception original
+      rethrow;
     } catch (e) {
       print(e);
       throw NetworkException('Erro de conexão com o servidor!');
@@ -185,7 +190,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
         );
       }
     } on ServerException {
-      rethrow; // 👈 mantém a exception original
+      rethrow;
     } catch (e) {
       print(e);
       throw NetworkException("Erro de conexão com o servidor!");
@@ -206,7 +211,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
         throw ServerException('Erro ${response.statusCode}: ${response.body}');
       }
     } on ServerException {
-      rethrow; // 👈 mantém a exception original
+      rethrow;
     } catch (e) {
       throw NetworkException('Erro de conexão! $e');
     }
@@ -235,7 +240,26 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
         );
       }
     } on ServerException {
-      rethrow; // 👈 mantém a exception original
+      rethrow;
+    } catch (e) {
+      throw NetworkException('Erro de conexão com o servidor!');
+    }
+  }
+
+  @override
+  Future<String> processClassification(int processId, int niceClassCode) async {
+    try {
+      final response = await apiClient.patch(
+        "${BaseUrl.urlWithHttp}/process/$processId/classification",
+        body: {'niceClassCode': niceClassCode},
+      );
+      if (response.statusCode == 204) {
+        return 'Processo classificado com sucesso!';
+      } else {
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
+      }
+    } on ServerException {
+      rethrow;
     } catch (e) {
       throw NetworkException('Erro de conexão com o servidor!');
     }

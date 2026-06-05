@@ -1,8 +1,9 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:nit_sgpi_frontend/domain/usecases/process/process_classification.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/update_status_process.dart';
 import 'package:nit_sgpi_frontend/presentation/core/bindigs/core_bindings.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/home/controllers/process_detail_controller.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_detail_controller.dart';
 
 import '../../../../domain/repositories/ijustification_repository.dart';
 import '../../../../domain/repositories/iprocess_repository.dart';
@@ -53,12 +54,17 @@ class ProcessDetailBindings extends Bindings {
       () => UpdateStatusProcess(repository: Get.find<IProcessRepository>()),
     );
 
+    Get.lazyPut<ProcessClassification>(
+      () => ProcessClassification(repository: Get.find<IProcessRepository>()),
+    );
+
     Get.lazyPut<ProcessDetailController>(
       () => ProcessDetailController(
         Get.find<GetProcessById>(),
         Get.find<AuthLocalDataSource>(),
         Get.find<DeleteJustification>(),
         Get.find<UpdateStatusProcess>(),
+        Get.find<ProcessClassification>()
       ),
     );
   }

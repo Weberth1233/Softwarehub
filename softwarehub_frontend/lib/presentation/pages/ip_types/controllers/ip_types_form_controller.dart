@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/ip_type_entity.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/ip_types/ip_types_page.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../process/controllers/process_post_controller.dart'
     show ProcessPostController;
 
@@ -207,7 +208,8 @@ class IpTypesFormController extends GetxController {
     }
 
     if (!isValid) {
-      _showErrorSnackbar("Verifique os campos obrigatórios.");
+      AppToast.warning("Verifique os campos obrigatórios.");
+      // _showErrorSnackbar("Verifique os campos obrigatórios.");
     }
 
     return isValid;
@@ -257,46 +259,17 @@ class IpTypesFormController extends GetxController {
         await processController.post(request);
       }
 
-      _showSuccessSnackbar(
+      AppToast.success(
         secondStageProcess.isEdit
             ? "Processo atualizado com sucesso!"
             : "Sucesso ao cadastrar processo!",
       );
-
       clearForm();
+
       Get.offAllNamed('/home');
     } catch (e) {
-      _showErrorSnackbar("Erro ao enviar processo");
+      AppToast.error("Erro ao enviar processo!");
+      //_showErrorSnackbar("Erro ao enviar processo");
     }
-  }
-
-  void _showSuccessSnackbar(String text) {
-    final colors = Get.theme.colorScheme;
-
-    Get.snackbar(
-      'Sucesso',
-      text,
-      backgroundColor: colors.primary,
-      colorText: colors.onPrimary,
-      snackPosition: SnackPosition.TOP,
-      margin: const EdgeInsets.all(12),
-      borderRadius: 12,
-      duration: const Duration(seconds: 2),
-    );
-  }
-
-  void _showErrorSnackbar(String text) {
-    final colors = Get.theme.colorScheme;
-
-    Get.snackbar(
-      'Erro',
-      text,
-      backgroundColor: colors.error,
-      colorText: colors.onError,
-      snackPosition: SnackPosition.TOP,
-      margin: const EdgeInsets.all(12),
-      borderRadius: 12,
-      duration: const Duration(seconds: 3),
-    );
   }
 }

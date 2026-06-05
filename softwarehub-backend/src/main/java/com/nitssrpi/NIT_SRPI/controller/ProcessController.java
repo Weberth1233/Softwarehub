@@ -41,11 +41,17 @@ public class ProcessController implements GenericController{
             @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
     })
-    public ResponseEntity<Object> save(@RequestBody @Valid ProcessRequestDTO dto) {
+    public ResponseEntity<ProcessCreatedResponseDTO> save(@RequestBody @Valid ProcessRequestDTO dto) {
         Process process = mapper.toEntity(dto);
-        service.save(process);
-        URI location = generateHeaderLocation(process.getId());
-        return ResponseEntity.created(location).build();
+        Process savedProcess = service.save(process);
+        URI location = generateHeaderLocation(savedProcess.getId());
+        ProcessCreatedResponseDTO response = new ProcessCreatedResponseDTO(
+                savedProcess.getId(),
+                "Processo cadastrado com sucesso!"
+        );
+        return ResponseEntity
+                .created(location)
+                .body(response);
     }
 
     //Obter autor pelo id
@@ -56,42 +62,15 @@ public class ProcessController implements GenericController{
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
             @ApiResponse(responseCode = "404", description = "Processo não encontrado!"),
     })
-    public ResponseEntity<Object> update
-    (@RequestBody @Valid ProcessRequestDTO dto, @PathVariable("id") String id ) {
-        var idIpTypes = Long.parseLong(id);
-        //Buscando na base se existe alguem com esse id
-        Optional<Process> processOptional = service.getById(idIpTypes);
-        //Se for vazio eu retorno notFound
-        if(processOptional.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        var process = processOptional.get();
-        process.setTitle(dto.title());
-        //Pesquisar no service de usuarios os usuarios e trazer ele pra cá novamente
-        process.setFeatured(dto.isFeatured());
-        process.setFormData(dto.formData());
-        //Adicionando lista de users
-        List<User> users = new ArrayList<User>();
-        for (Long authorId : dto.authorIds()) {
-            System.out.println(authorId);
-            var user = userService.getUserById(authorId);
-            user.ifPresent(users::add);
-        }
-        process.setAuthors(users);
-        List<ExternalAuthor> externalAuthorList = new ArrayList<>();
-        for (Long externalAuthorId : dto.externalAuthorsIds()) {
-            System.out.println(externalAuthorId);
-            var externalAuthor = externalAuthorService.getById(externalAuthorId);
-            externalAuthor.ifPresent(externalAuthorList::add);
-        }
-        process.setExternalAuthors(externalAuthorList);
-        //Pesquisar no service de iptypes
-        Optional<IpTypes> ipTypes = ipTypesService.getById(dto.ipTypeId());
-        System.out.println(ipTypes);
-
-        ipTypes.ifPresent(process::setIpType);
+    public ResponseEntity<Object> update(
+            @RequestBody @Valid ProcessRequestDTO dto,
+            @PathVariable("id") Long id
+    ) {
+        Process process = mapper.toEntity(dto);
+        process.setId(id);
 
         service.update(process);
+
         return ResponseEntity.noContent().build();
     }
 

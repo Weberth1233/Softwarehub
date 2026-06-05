@@ -226,15 +226,12 @@ class IpTypesPage extends StatelessWidget {
                                       '/consent-term-check',
                                       arguments: {
                                         'ipTypeId': secondStageProcess.item.id,
-                                        'nextRoute': '/process/ip_types/form',
+                                        'nextRoute': '/process/ip-types/form',
                                         'nextArguments': secondStageProcess,
                                       },
                                     );
 
-                                    /*Get.toNamed(
-                                      "/process/ip_types/form",
-                                      arguments: secondStageProcess,
-                                    );*/
+                                  
                                   },
                                 );
                               }).toList(),

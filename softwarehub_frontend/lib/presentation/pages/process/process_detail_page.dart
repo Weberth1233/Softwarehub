@@ -1,12 +1,14 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_response_entity.dart';
+import '../../../domain/entities/nice_classification_entity.dart';
 import 'controllers/process_detail_controller.dart';
 
 class ProcessDetailPage extends StatefulWidget {
   const ProcessDetailPage({super.key});
-
 
   @override
   State<ProcessDetailPage> createState() => _ProcessDetailPageState();
@@ -15,9 +17,32 @@ class ProcessDetailPage extends StatefulWidget {
 class _ProcessDetailPageState extends State<ProcessDetailPage> {
   int _selectedIndex = 0;
 
+  bool _isApproving = false;
+  bool _isClassifying = false;
+  bool _isDeletingJustification = false;
+
+  ProcessDetailController get controller => Get.find<ProcessDetailController>();
+
+  Future<void> _runAction({
+    required Future<void> Function() action,
+    required void Function(bool value) setLoading,
+  }) async {
+    if (_isApproving || _isClassifying || _isDeletingJustification) return;
+
+    setState(() => setLoading(true));
+
+    try {
+      await action();
+    } finally {
+      if (mounted) {
+        setState(() => setLoading(false));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ProcessDetailController>();
+    final controller = this.controller;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -43,7 +68,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: Icon(Icons.arrow_back, color: colors.primary),
-                  onPressed: () => Get.back(),
+                  onPressed: () => Get.toNamed("/home"),
                 ),
               ),
             ),
@@ -55,7 +80,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
             color: colors.onSecondary,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.2,
-            fontSize: 20, // Reduzido levemente para caber melhor no mobile
+            fontSize: 20,
           ),
         ),
       ),
@@ -69,32 +94,35 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
         if (controller.errorMessage.value.isNotEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 60, color: colors.error),
-                const SizedBox(height: 16),
-                Text(
-                  controller.errorMessage.value,
-                  style: TextStyle(color: colors.onSecondary),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    if (controller.process.value?.id != null) {
-                      controller.fetchProcess(controller.process.value!.id);
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: colors.onSecondary,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 60, color: colors.error),
+                  const SizedBox(height: 16),
+                  Text(
+                    controller.errorMessage.value,
+                    style: TextStyle(color: colors.onSecondary),
+                    textAlign: TextAlign.center,
                   ),
-                  child: Text(
-                    "Tentar novamente",
-                    style: TextStyle(color: colors.primary),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      if (controller.process.value?.id != null) {
+                        controller.fetchProcess(controller.process.value!.id);
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: colors.onSecondary,
+                    ),
+                    child: Text(
+                      "Tentar novamente",
+                      style: TextStyle(color: colors.primary),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }
@@ -109,10 +137,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         }
 
         final entity = controller.process.value!;
-        final dateFormatted = DateFormat(
-          "d 'de' MMM 'de' y",
-          "pt_BR",
-        ).format(DateTime.parse(entity.createdAt.toString()));
+        final dateFormatted = _formatCreatedAt(entity.createdAt);
 
         return Stack(
           children: [
@@ -123,7 +148,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 ),
               ),
             ),
-
             LayoutBuilder(
               builder: (context, constraints) {
                 final isDesktop = constraints.maxWidth >= 900;
@@ -132,7 +156,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16, 20, 16, 0),
+                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
                         child: _buildProcessStatusBar(
                           context,
                           entity,
@@ -147,7 +171,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                           alignment: Alignment.topLeft,
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1600),
-                            // Renderiza diferente baseado no tamanho da tela
                             child: isDesktop
                                 ? _buildWideMasterDetail(
                                     context,
@@ -220,16 +243,12 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-  // ============================================================
-  // 📱 LAYOUT MOBILE (Telas Estreitas)
-  // ============================================================
   Widget _buildNarrowMasterDetail(
     BuildContext context,
     ProcessResponseEntity entity,
     ProcessDetailController controller,
   ) {
-    // DIALOG DE CONFIRMAÇÃO
-    void _showDialog(BuildContext context, ProcessResponseEntity entity) {
+    void showApproveDialog(BuildContext context, ProcessResponseEntity entity) {
       Get.defaultDialog(
         title: "Confirmar finalização do processo",
         middleText:
@@ -238,10 +257,21 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         textCancel: "Cancelar",
         confirmTextColor: Colors.white,
         buttonColor: Colors.red,
-        onConfirm: () async {
-          Get.back(); // fecha o diálogo
-          await controller.uploadStatusProcess(entity.id, "FINALIZADO");
-        },
+        onConfirm: _isApproving
+            ? null
+            : () async {
+                Get.back();
+
+                await _runAction(
+                  setLoading: (value) => _isApproving = value,
+                  action: () async {
+                    await controller.uploadStatusProcess(
+                      entity.id,
+                      "FINALIZADO",
+                    );
+                  },
+                );
+              },
       );
     }
 
@@ -251,7 +281,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 1. Informação do Tipo de Propriedade
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
@@ -282,7 +311,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         ),
         const SizedBox(height: 16),
 
-        // 2. Menu Horizontal Rolável (Abas)
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
@@ -323,12 +351,23 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 icon: Icons.approval,
                 title: "Correção",
               ),
+              _buildMobileMenuItem(
+                context,
+                index: 6,
+                icon: Icons.category_outlined,
+                title: "Nice",
+              ),
+              _buildMobileMenuItem(
+                context,
+                index: 7,
+                icon: Icons.pie_chart_outline,
+                title: "Cotas",
+              ),
             ],
           ),
         ),
         const SizedBox(height: 16),
 
-        // 3. Área de Conteúdo
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -346,7 +385,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           child: _buildSelectedContent(context, entity),
         ),
 
-        // 4. Botões de Admin no Mobile
         if (controller.isAdmin) ...[
           const SizedBox(height: 24),
           Text(
@@ -361,18 +399,63 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    _showDialog(context, entity);
-                  },
+                  onPressed: entity.status == "FINALIZADO" || _isApproving
+                      ? null
+                      : () {
+                          showApproveDialog(context, entity);
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
-                    "Aprovar",
+                    _isApproving ? "Aprovando..." : "Aprovar",
                     style: TextStyle(
                       color: colors.onSecondary,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _isClassifying
+                      ? null
+                      : () async {
+                          final result = await Get.toNamed(
+                            '/nice-classification',
+                          );
+
+                          if (result is NiceClassificationEntity) {
+                            await _runAction(
+                              setLoading: (value) => _isClassifying = value,
+                              action: () async {
+                                await controller.classifyProcess(
+                                  entity.id,
+                                  result.code,
+                                );
+                              },
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 20,
+                    ),
+                    child: Text(
+                      _isClassifying
+                          ? "Classificando..."
+                          : "Classificação de Nice",
+                      style: TextStyle(
+                        color: colors.onSecondary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -409,8 +492,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     ProcessResponseEntity entity,
     ProcessDetailController controller,
   ) {
-    // DIALOG DE CONFIRMAÇÃO
-    void _showDialog(BuildContext context, ProcessResponseEntity entity) {
+    void showApproveDialog(BuildContext context, ProcessResponseEntity entity) {
       Get.defaultDialog(
         title: "Confirmar finalização do processo",
         middleText:
@@ -419,10 +501,21 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         textCancel: "Cancelar",
         confirmTextColor: Colors.white,
         buttonColor: Colors.red,
-        onConfirm: () async {
-          Get.back(); // fecha o diálogo
-          await controller.uploadStatusProcess(entity.id, "FINALIZADO");
-        },
+        onConfirm: _isApproving
+            ? null
+            : () async {
+                Get.back();
+
+                await _runAction(
+                  setLoading: (value) => _isApproving = value,
+                  action: () async {
+                    await controller.uploadStatusProcess(
+                      entity.id,
+                      "FINALIZADO",
+                    );
+                  },
+                );
+              },
       );
     }
 
@@ -494,7 +587,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
             context,
             index: 2,
             icon: Icons.group_outlined,
-            title: "MEMBROS Externos",
+            title: "MEMBROS EXTERNOS",
             subtitle: "Vinculados externos ao processo",
           ),
           const SizedBox(height: 10),
@@ -521,6 +614,22 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
             title: "CORREÇÃO",
             subtitle: "Correções do processo",
           ),
+          const SizedBox(height: 10),
+          _buildDesktopMenuItem(
+            context,
+            index: 6,
+            icon: Icons.category_outlined,
+            title: "CLASSIFICAÇÃO DE NICE",
+            subtitle: "Classe vinculada ao processo",
+          ),
+          const SizedBox(height: 10),
+          _buildDesktopMenuItem(
+            context,
+            index: 7,
+            icon: Icons.pie_chart_outline,
+            title: "DISTRIBUIÇÃO DE COTAS",
+            subtitle: "Percentuais de royalties",
+          ),
 
           if (controller.isAdmin) ...[
             const SizedBox(height: 24),
@@ -540,14 +649,56 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               runSpacing: 10,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    _showDialog(context, entity);
-                  },
+                  onPressed: _isClassifying
+                      ? null
+                      : () async {
+                          final result = await Get.toNamed(
+                            '/nice-classification',
+                          );
+
+                          if (result is NiceClassificationEntity) {
+                            await _runAction(
+                              setLoading: (value) => _isClassifying = value,
+                              action: () async {
+                                await controller.classifyProcess(
+                                  entity.id,
+                                  result.code,
+                                );
+                              },
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 2,
+                      horizontal: 2,
+                    ),
+                    child: Text(
+                      _isClassifying
+                          ? "Classificando..."
+                          : "Classificação de Nice",
+                      style: TextStyle(
+                        color: colors.onSecondary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: entity.status == "FINALIZADO" || _isApproving
+                      ? null
+                      : () {
+                          showApproveDialog(context, entity);
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                   ),
                   child: Text(
-                    "Aprovar",
+                    _isApproving ? "Aprovando..." : "Aprovar",
                     style: TextStyle(color: colors.onSecondary),
                   ),
                 ),
@@ -632,7 +783,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-  // Menu Item para Mobile (Estilo "Pílula"/Chip)
   Widget _buildMobileMenuItem(
     BuildContext context, {
     required int index,
@@ -692,9 +842,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-  // ============================================================
-  // PAINEL DE CONTEÚDO (Compartilhado entre Desktop e Mobile)
-  // ============================================================
   Widget _buildSelectedContent(
     BuildContext context,
     ProcessResponseEntity entity,
@@ -718,7 +865,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         content = _buildMembersList(context, entity);
         break;
       case 2:
-        title = "MEMBROS Externos";
+        title = "MEMBROS EXTERNOS";
         subtitle = "Pessoas externas vinculadas ao processo.";
         content = _buildExternalMembersList(context, entity);
         break;
@@ -730,13 +877,23 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
       case 4:
         title = "ANEXOS";
         subtitle =
-            "Arquivos relacionados ao processo. Clique no processo para enviá-lo assinado";
+            "Arquivos relacionados ao processo. Clique no processo para enviá-lo assinado.";
         content = _buildAttachmentsList(context, entity);
         break;
       case 5:
         title = "CORREÇÕES / JUSTIFICATIVAS";
         subtitle = "Correções e observações.";
         content = _buildFixesList(context, entity);
+        break;
+      case 6:
+        title = "CLASSIFICAÇÃO DE NICE";
+        subtitle = "Classificação vinculada ao processo.";
+        content = _buildNiceClassificationCard(context, entity);
+        break;
+      case 7:
+        title = "DISTRIBUIÇÃO DE COTAS";
+        subtitle = "Percentuais de royalties vinculados ao processo.";
+        content = _buildRoyaltyDistributionsList(context, entity);
         break;
       default:
         title = "";
@@ -766,10 +923,16 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-  // ============================================================
-  // WIDGETS INTERNOS (Listas e Cards)
-  // ============================================================
   Widget _buildMembersList(BuildContext context, ProcessResponseEntity entity) {
+    if (entity.authors.isEmpty) {
+      return _buildEmptyState(
+        context,
+        icon: Icons.group_outlined,
+        message: "Nenhum membro interno vinculado ao processo.",
+        process: entity,
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -777,6 +940,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final author = entity.authors[index];
+
         return _buildPersonRowCard(
           context,
           name: author.fullName,
@@ -794,6 +958,15 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     BuildContext context,
     ProcessResponseEntity entity,
   ) {
+    if (entity.externalAuthors.isEmpty) {
+      return _buildEmptyState(
+        context,
+        icon: Icons.group_outlined,
+        message: "Nenhum membro externo vinculado ao processo.",
+        process: entity,
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -801,6 +974,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final author = entity.externalAuthors[index];
+
         return _buildPersonRowCard(
           context,
           name: author.fullName,
@@ -814,120 +988,429 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-  Widget _buildFixesList(BuildContext context, ProcessResponseEntity entity) {
-    final controller = Get.find<ProcessDetailController>();
+  Widget _buildRoyaltyDistributionsList(
+    BuildContext context,
+    ProcessResponseEntity entity,
+  ) {
+    final colors = Theme.of(context).colorScheme;
 
-    return entity.justifications.isEmpty
-        ? const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text("Não há correções ou justificativas."),
-          )
-        : ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: entity.justifications.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final justification = entity.justifications[index];
+    if (entity.royaltyDistributions.isEmpty) {
+      return _buildEmptyState(
+        context,
+        icon: Icons.pie_chart_outline,
+        message: "Nenhuma distribuição de cotas vinculada a este processo.",
+        process: entity,
+      );
+    }
 
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  border: Border.all(color: Colors.amber.shade200),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.sticky_note_2_outlined,
-                      color: Colors.amber.shade800,
-                      size: 20,
+    final activeDistributions = entity.royaltyDistributions
+        .where((distribution) => distribution.status == "ACTIVE")
+        .toList();
+
+    final distributionsToShow = activeDistributions.isNotEmpty
+        ? activeDistributions
+        : entity.royaltyDistributions;
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: distributionsToShow.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final distribution = distributionsToShow[index];
+
+        final totalPercentage = distribution.shares.fold<double>(
+          0,
+          (previousValue, share) => previousValue + share.percentage,
+        );
+
+        final isActive = distribution.status == "ACTIVE";
+
+        return _buildSimpleCard(
+          context,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.pie_chart_outline, color: colors.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Distribuição versão ${distribution.version}",
+                      style: TextStyle(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13,
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (isActive ? Colors.green : Colors.grey)
+                          .withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      isActive ? "Ativa" : "Inativa",
+                      style: TextStyle(
+                        color: isActive ? Colors.green : Colors.grey,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Total distribuído: ${totalPercentage.toStringAsFixed(2)}%",
+                style: TextStyle(
+                  color: colors.tertiary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (distribution.shares.isEmpty)
+                _buildEmptyState(
+                  context,
+                  icon: Icons.percent_outlined,
+                  message: "Nenhuma cota encontrada nesta distribuição.",
+                  process: entity,
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: distribution.shares.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (context, shareIndex) {
+                    final share = distribution.shares[shareIndex];
+
+                    final title = _getRoyaltyShareTitle(share);
+                    final subtitle = _getRoyaltyShareSubtitle(share);
+                    final icon = _getRoyaltyShareIcon(share.type);
+
+                    return Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.black.withOpacity(0.06),
+                        ),
+                      ),
                       child: Row(
-                        // Mantém os ícones alinhados no topo junto com o título
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          CircleAvatar(
+                            backgroundColor: colors.primary,
+                            child: Icon(
+                              icon,
+                              color: colors.onSecondary,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Observação #${justification.id}",
+                                  title,
                                   style: TextStyle(
-                                    color: Colors.amber.shade900,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                    color: colors.tertiary,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 2),
                                 Text(
-                                  justification.reason,
+                                  subtitle,
                                   style: TextStyle(
-                                    color: Colors.black87,
-                                    height: 1.4,
+                                    color: colors.secondary,
+                                    fontSize: 12,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-
-                          // ===== 2. Regra de negócio: Apenas Admins veem isso =====
-                          if (controller.isAdmin)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    // Lógica de edição aqui
-                                    Get.toNamed(
-                                      "/process-detail/justification",
-                                      arguments: {
-                                        'processId': entity.id,
-                                        'justificationId': justification.id,
-                                        'reason': justification.reason,
-                                      },
-                                    );
-                                  },
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.green,
-                                    size: 22,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  constraints:
-                                      const BoxConstraints(), // Remove o espaçamento extra nativo
-                                ),
-                                const SizedBox(width: 12),
-                                IconButton(
-                                  onPressed: () {
-                                    controller.deleteJustificationProcess(
-                                      justification.id,
-                                    );
-                                  },
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    color: Colors.red,
-                                    size: 24,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  constraints:
-                                      const BoxConstraints(), // Remove o espaçamento extra nativo
-                                ),
-                              ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
+                            decoration: BoxDecoration(
+                              color: colors.primary.withOpacity(0.10),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              "${share.percentage.toStringAsFixed(2)}%",
+                              style: TextStyle(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String _getRoyaltyShareTitle(dynamic share) {
+    if (share.type == "UNIVERSITY") {
+      final institutionName = share.educationalInstitutionName;
+
+      if (institutionName != null &&
+          institutionName.toString().trim().isNotEmpty) {
+        return institutionName.toString();
+      }
+
+      return "Instituição não informada";
+    }
+
+    final userName = share.userName;
+
+    if (userName != null && userName.toString().trim().isNotEmpty) {
+      return userName.toString();
+    }
+
+    return "Usuário não informado";
+  }
+
+  String _getRoyaltyShareSubtitle(dynamic share) {
+    switch (share.type) {
+      case "UNIVERSITY":
+        return "Instituição de ensino";
+      case "CREATOR":
+        return "Criador";
+      case "MEMBER":
+        return "Membro";
+      default:
+        return share.type.toString();
+    }
+  }
+
+  IconData _getRoyaltyShareIcon(String type) {
+    switch (type) {
+      case "UNIVERSITY":
+        return Icons.account_balance_outlined;
+      case "CREATOR":
+        return Icons.star_border;
+      case "MEMBER":
+        return Icons.person_outline;
+      default:
+        return Icons.percent_outlined;
+    }
+  }
+
+  Widget _buildNiceClassificationCard(
+    BuildContext context,
+    ProcessResponseEntity entity,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    final niceClassification = entity.niceClassificationModel;
+
+    return _buildSimpleCard(
+      context,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.category_outlined, color: colors.primary),
+              const SizedBox(width: 8),
+              Text(
+                "Classificação de Nice",
+                style: TextStyle(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Código",
+            style: TextStyle(
+              color: colors.secondary,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            niceClassification.code.toString(),
+            style: TextStyle(
+              color: colors.tertiary,
+              fontWeight: FontWeight.w900,
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "Descrição",
+            style: TextStyle(
+              color: colors.secondary,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            niceClassification.description,
+            style: TextStyle(color: colors.tertiary, height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFixesList(BuildContext context, ProcessResponseEntity entity) {
+    final controller = this.controller;
+
+    if (entity.justifications.isEmpty) {
+      return _buildEmptyState(
+        context,
+        icon: Icons.sticky_note_2_outlined,
+        message: "Não há correções ou justificativas.",
+        process: entity,
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: entity.justifications.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final justification = entity.justifications[index];
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade50,
+            border: Border.all(color: Colors.amber.shade200),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.sticky_note_2_outlined,
+                color: Colors.amber.shade800,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Observação #${justification.id}",
+                            style: TextStyle(
+                              color: Colors.amber.shade900,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            justification.reason,
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              height: 1.4,
+                            ),
+                          ),
                         ],
                       ),
                     ),
+                    if (controller.isAdmin)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Get.toNamed(
+                                "/process-detail/justification",
+                                arguments: {
+                                  'processId': entity.id,
+                                  'justificationId': justification.id,
+                                  'reason': justification.reason,
+                                },
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Colors.green,
+                              size: 22,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton(
+                            onPressed: _isDeletingJustification
+                                ? null
+                                : () {
+                                    Get.defaultDialog(
+                                      title: "Excluir justificativa",
+                                      middleText:
+                                          "Tem certeza que deseja excluir esta justificativa?",
+                                      textConfirm: "Excluir",
+                                      textCancel: "Cancelar",
+                                      confirmTextColor: Colors.white,
+                                      buttonColor: Colors.red,
+                                      onConfirm: () async {
+                                        Get.back();
+
+                                        await _runAction(
+                                          setLoading: (value) =>
+                                              _isDeletingJustification = value,
+                                          action: () async {
+                                            await controller
+                                                .deleteJustificationProcess(
+                                                  justification.id,
+                                                );
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                              size: 24,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
-              );
-            },
-          );
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildAttachmentsList(
@@ -935,6 +1418,16 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     ProcessResponseEntity entity,
   ) {
     final colors = Theme.of(context).colorScheme;
+
+    if (entity.attachments.isEmpty) {
+      return _buildEmptyState(
+        context,
+        icon: Icons.attach_file_outlined,
+        message: "Nenhum anexo vinculado a este processo.",
+        process: entity,
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -945,8 +1438,9 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         final isSigned = attachment.signedFilePath.isNotEmpty;
 
         return InkWell(
+          borderRadius: BorderRadius.circular(16),
           onTap: () =>
-              Get.toNamed("process-detail/attachments", arguments: entity.id),
+              Get.toNamed("/process-detail/attachments", arguments: entity.id),
           child: _buildSimpleCard(
             context,
             child: Row(
@@ -1001,9 +1495,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-  // ============================================================
-  // HEADER E CARDS AUXILIARES
-  // ============================================================
   Widget _buildProcessStatusBar(
     BuildContext context,
     ProcessResponseEntity entity,
@@ -1017,7 +1508,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
     return Container(
       width: double.infinity,
-      // Ajuste de padding para mobile
       padding: EdgeInsets.symmetric(
         horizontal: isDesktop ? 25 : 16,
         vertical: isDesktop ? 25 : 16,
@@ -1102,9 +1592,11 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
   _StatusUi _statusUi(BuildContext context, String status) {
     final colors = Theme.of(context).colorScheme;
+
     Color color;
     IconData icon;
     String label = status.replaceAll('_', ' ').toUpperCase();
+
     switch (status) {
       case 'EM_ANDAMENTO':
         color = Colors.orange;
@@ -1122,6 +1614,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         color = colors.secondary;
         icon = Icons.info_outline;
     }
+
     return _StatusUi(color: color, icon: icon, label: label);
   }
 
@@ -1134,6 +1627,46 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         border: Border.all(color: Colors.black.withOpacity(0.09)),
       ),
       child: child,
+    );
+  }
+
+  Widget _buildEmptyState(
+    BuildContext context, {
+    required IconData icon,
+    required String message,
+    required ProcessResponseEntity process,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+
+    return _buildSimpleCard(
+      context,
+      child: Row(
+        children: [
+          Icon(icon, color: colors.secondary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: colors.secondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.offAllNamed(
+                '/process-royalty-distribution',
+                arguments: {'processId': process.id},
+              );
+            },
+            child: Text(
+              "Distribuir cotas ao processo",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1169,13 +1702,33 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
   String _formatBirthDate(String date) {
     try {
-      final parsedDate = DateTime.parse(date);
+      if (date.trim().isEmpty) return "Data de nascimento não informada";
+
+      final parsedDate = DateTime.tryParse(date);
+
+      if (parsedDate == null) return date;
 
       return '${parsedDate.day.toString().padLeft(2, '0')}/'
           '${parsedDate.month.toString().padLeft(2, '0')}/'
           '${parsedDate.year}';
     } catch (_) {
       return date;
+    }
+  }
+
+  String _formatCreatedAt(dynamic date) {
+    try {
+      if (date == null) return "Data não informada";
+
+      final parsedDate = date is DateTime
+          ? date
+          : DateTime.tryParse(date.toString());
+
+      if (parsedDate == null) return "Data inválida";
+
+      return DateFormat("d 'de' MMM 'de' y", "pt_BR").format(parsedDate);
+    } catch (_) {
+      return "Data inválida";
     }
   }
 
@@ -1190,30 +1743,33 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
   }) {
     final colors = Theme.of(context).colorScheme;
 
+    final displayName = name.trim().isNotEmpty
+        ? name.trim()
+        : "Nome não informado";
+    final firstLetter = displayName != "Nome não informado"
+        ? displayName.substring(0, 1).toUpperCase()
+        : "?";
+
     return _buildSimpleCard(
       context,
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         childrenPadding: const EdgeInsets.only(left: 56, right: 12, bottom: 12),
-
         leading: CircleAvatar(
           backgroundColor: colors.primary,
           child: Text(
-            name.substring(0, 1).toUpperCase(),
+            firstLetter,
             style: TextStyle(
               color: colors.onSecondary,
               fontWeight: FontWeight.w800,
             ),
           ),
         ),
-
         title: Text(
-          name,
+          displayName,
           style: TextStyle(fontWeight: FontWeight.w800, color: colors.tertiary),
         ),
-
         trailing: Icon(trailingIcon, color: colors.secondary),
-
         children: [
           Align(
             alignment: Alignment.centerLeft,
@@ -1221,33 +1777,33 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  email,
+                  email.trim().isNotEmpty ? email : "E-mail não informado",
                   textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary,),
+                  style: TextStyle(color: colors.secondary),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
-                  _formatPhone(phoneNumber),
+                  phoneNumber.trim().isNotEmpty
+                      ? _formatPhone(phoneNumber)
+                      : "Telefone não informado",
                   textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary, ),
+                  style: TextStyle(color: colors.secondary),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
-                  _formatBirthDate(birthDate),
+                  birthDate.trim().isNotEmpty
+                      ? _formatBirthDate(birthDate)
+                      : "Data de nascimento não informada",
                   textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary,),
+                  style: TextStyle(color: colors.secondary),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
-                  profession,
+                  profession.trim().isNotEmpty
+                      ? profession
+                      : "Profissão não informada",
                   textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary,),
+                  style: TextStyle(color: colors.secondary),
                 ),
               ],
             ),
@@ -1259,6 +1815,16 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
   Widget _buildDynamicForm(BuildContext context, ProcessResponseEntity entity) {
     final fieldsStructure = entity.ipType.formStructure.fields;
+
+    if (fieldsStructure.isEmpty) {
+      return _buildEmptyState(
+        context,
+        icon: Icons.list_alt_outlined,
+        message: "Nenhum campo de formulário encontrado.",
+        process: entity,
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -1266,11 +1832,14 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final fieldDef = fieldsStructure[index];
-        final value = entity.formData[fieldDef.name];
+        final value = entity.formData[fieldDef.key];
+
         return _buildFieldItem(
           context,
           label: fieldDef.name,
-          value: value != null ? value.toString() : 'N/A',
+          value: value != null && value.toString().trim().isNotEmpty
+              ? value.toString()
+              : 'Não informado',
           type: fieldDef.type,
         );
       },
@@ -1285,6 +1854,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
   }) {
     final colors = Theme.of(context).colorScheme;
     final isTextArea = type == 'textArea';
+
     return _buildSimpleCard(
       context,
       child: Column(
@@ -1298,12 +1868,14 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 color: colors.primary,
               ),
               const SizedBox(width: 8),
-              Text(
-                label.toUpperCase(),
-                style: TextStyle(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 12,
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: TextStyle(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -1326,18 +1898,23 @@ class _StatusUi {
   final Color color;
   final IconData icon;
   final String label;
+
   _StatusUi({required this.color, required this.icon, required this.label});
 }
 
 class _DiagonalLinesPainter extends CustomPainter {
   final Color color;
+
   _DiagonalLinesPainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
       ..strokeWidth = 1;
+
     const spacing = 80.0;
+
     for (double i = -size.height; i < size.width; i += spacing) {
       canvas.drawLine(
         Offset(i, 0),

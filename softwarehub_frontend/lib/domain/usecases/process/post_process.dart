@@ -9,7 +9,7 @@ class PostProcess {
 
   PostProcess({required this.repository});
 
-  Future<Either<Failure, String>> call(ProcessRequestEntity entity) async{
+  Future<Either<Failure, int>> call(ProcessRequestEntity entity) async{
     final result = await repository.postProcess(entity);
     return result;
   }

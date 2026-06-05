@@ -55,7 +55,7 @@ class ProcessRepositoryImpl implements IProcessRepository {
   }
 
   @override
-  Future<Either<Failure, String>> postProcess(
+  Future<Either<Failure, int>> postProcess(
     ProcessRequestEntity entity,
   ) async {
     try {
@@ -120,6 +120,20 @@ class ProcessRepositoryImpl implements IProcessRepository {
   Future<Either<Failure, String>> putProcess(int idProcess, ProcessRequestEntity entity) async{
    try {
       final result = await remoteDataSource.putProcess(idProcess, entity);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure("Erro inesperado!"));
+    }
+  }
+  
+  @override
+  Future<Either<Failure, String>> processClassification(int processId, int niceClassCode) async{
+    try {
+      final result = await remoteDataSource.processClassification(processId, niceClassCode);
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));

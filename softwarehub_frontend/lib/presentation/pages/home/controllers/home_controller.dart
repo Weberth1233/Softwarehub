@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_status_count_entity.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/delete_process.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/get_process_status_count.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../../domain/core/errors/failures.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../domain/usecases/process/get_process.dart';
@@ -16,7 +17,6 @@ class ProcessController extends GetxController {
     this._deleteProcess,
   );
 
-  // ===================== STATES =====================
 
   final RxBool isLoadingList = false.obs;
   final RxBool isDeleting = false.obs;
@@ -36,16 +36,12 @@ class ProcessController extends GetxController {
 
   final int size = 10;
 
-  // ===================== INIT =====================
-
   @override
   void onInit() {
     super.onInit();
     fetchProcesses();
     processStatusCount();
   }
-
-  // ===================== FETCH =====================
 
   Future<void> fetchProcesses({int page = 0}) async {
     if (isLoadingList.value) return;
@@ -136,12 +132,13 @@ class ProcessController extends GetxController {
 
     await result.fold(
       (Failure failure) async {
-        Get.snackbar("Erro", failure.message);
+        AppToast.error(failure.message);
+      
       },
       (message) async {
         await fetchProcesses(page: 0);
         await processStatusCount();
-        Get.snackbar("Sucesso", message);
+        AppToast.success(message);
       },
     );
 

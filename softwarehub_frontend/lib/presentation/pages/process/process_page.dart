@@ -693,7 +693,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                     originalFormData: process?.formData,
                                   );
                                   await Get.toNamed(
-                                    "/process/ip_types",
+                                    "/process/ip-types",
                                     arguments: auxProcess,
                                   );
                                 },

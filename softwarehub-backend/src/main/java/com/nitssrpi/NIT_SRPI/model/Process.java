@@ -30,8 +30,8 @@ public class Process {
     @Column(columnDefinition = "varchar(255)") // Força a coluna a ser apenas um texto sem Check
     private StatusProcess status;
 
-    @Column(name = "is_featured")
-    private boolean isFeatured;
+//    @Column(name = "is_featured")
+//    private boolean isFeatured;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

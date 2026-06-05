@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../../../domain/core/errors/failures.dart';
 import '../../../../../domain/entities/address_api_entity.dart';
 import '../../../../../domain/entities/educational_institution_entity.dart';
@@ -144,11 +145,10 @@ class RegisterController extends GetxController {
 
       result.fold(
         (Failure failure) {
-
-          message.value = failure.message;
+          AppToast.error(failure.message);
         },
         (success) {
-          message.value = success;
+          AppToast.success(success);
           clearForm();
         },
       );
@@ -168,11 +168,10 @@ class RegisterController extends GetxController {
 
       result.fold(
         (Failure failure) {
-          message.value = failure.message;
+          AppToast.error(failure.message);
         },
         (success) {
-          message.value = success;
-          clearForm();
+          AppToast.success(success);
         },
       );
     } finally {
@@ -190,8 +189,7 @@ class RegisterController extends GetxController {
 
       return result.fold(
         (Failure failure) {
-          message.value = failure.message;
-          Get.snackbar('Erro', 'Não foi possível buscar o CEP');
+          AppToast.error(failure.message);
           return null;
         },
         (AddressApiEntity address) {
@@ -215,7 +213,8 @@ class RegisterController extends GetxController {
 
       result.fold(
         (Failure failure) {
-          message.value = failure.message;
+          AppToast.error(failure.message);
+
         },
         (List<EducationalInstitutionEntity> result) {
           educationalInstitutions.assignAll(result);
@@ -237,7 +236,7 @@ class RegisterController extends GetxController {
 
       result.fold(
         (Failure failure) {
-          message.value = failure.message;
+          AppToast.error(failure.message);
         },
         (List<TypesLinkEntity> result) {
           typesLinks.assignAll(result);
@@ -259,7 +258,8 @@ class RegisterController extends GetxController {
     );
 
     if (alreadyExists) {
-      Get.snackbar('Atenção', 'Esse vínculo já foi adicionado.');
+      AppToast.warning("Atenção - Esse vínculo já foi adicionado!");
+
       return;
     }
 

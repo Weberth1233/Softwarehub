@@ -17,7 +17,7 @@ class EducationalInstitutionBinding {
 
     Get.lazyPut<IEducationalInstitutionRepository>(
       () => EducationalInstitutionRepositoryImpl(
-        remoteDatasource: Get.find<IEducationalInstitutionRemoteDatasource>(),
+        remoteDataSource: Get.find<IEducationalInstitutionRemoteDatasource>(),
       ),
       fenix: true,
     );

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/post_process.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/put_process.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 
 import '../../../../domain/core/errors/failures.dart';
 
@@ -22,12 +23,11 @@ class ProcessPostController extends GetxController{
     );
     result.fold(
       (Failure failure) {
-        
         message.value = failure.message;
       },
-      (sucess) {
-        Get.snackbar('Sucesso', 'Formulário enviado com sucesso!');
-        message.value = sucess;
+      (int id) {
+        AppToast.success("Sucesso - Formulário enviado com sucesso!");
+        
       },
     );
     isLoading.value = false;

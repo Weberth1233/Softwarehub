@@ -1,18 +1,18 @@
-import '../../../domain/entities/process_royalty_distribution/process_royalty_distribution_entity.dart';
+import '../../../domain/entities/process/process_royalty_distribution_request_entity.dart';
 
-class ProcessRoyaltyDistributionModel {
+class ProcessRoyaltyDistributionRequestModel {
   final int processId;
   final int? changeRequestId;
   final List<RoyaltyShareModel> shares;
 
-  const ProcessRoyaltyDistributionModel({
+  const ProcessRoyaltyDistributionRequestModel({
     required this.processId,
     this.changeRequestId,
     required this.shares,
   });
 
-  factory ProcessRoyaltyDistributionModel.fromJson(Map<String, dynamic> json) {
-    return ProcessRoyaltyDistributionModel(
+  factory ProcessRoyaltyDistributionRequestModel.fromJson(Map<String, dynamic> json) {
+    return ProcessRoyaltyDistributionRequestModel(
       processId: json['processId'],
       changeRequestId: json['changeRequestId'],
       shares: (json['shares'] as List<dynamic>)
@@ -21,10 +21,10 @@ class ProcessRoyaltyDistributionModel {
     );
   }
 
-  factory ProcessRoyaltyDistributionModel.fromEntity(
-    ProcessRoyaltyDistributionEntity entity,
+  factory ProcessRoyaltyDistributionRequestModel.fromEntity(
+    ProcessRoyaltyDistributionRequestEntity entity,
   ) {
-    return ProcessRoyaltyDistributionModel(
+    return ProcessRoyaltyDistributionRequestModel(
       processId: entity.processId,
       changeRequestId: entity.changeRequestId,
       shares: entity.shares
@@ -33,8 +33,8 @@ class ProcessRoyaltyDistributionModel {
     );
   }
 
-  ProcessRoyaltyDistributionEntity toEntity() {
-    return ProcessRoyaltyDistributionEntity(
+  ProcessRoyaltyDistributionRequestEntity toEntity() {
+    return ProcessRoyaltyDistributionRequestEntity(
       processId: processId,
       changeRequestId: changeRequestId,
       shares: shares.map((shareModel) => shareModel.toEntity()).toList(),

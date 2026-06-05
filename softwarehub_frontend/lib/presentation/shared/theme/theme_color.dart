@@ -7,4 +7,6 @@ class ThemeColor {
   static const Color colorVariantWhite = Color(0XFFF3F3F3);
   static const Color iconColor = Colors.white;
   static const Color greyColor = Color.fromARGB(255, 228, 226, 226);
+  static const Color greenColor = Color.fromARGB(255, 28, 223, 11);
+
 }

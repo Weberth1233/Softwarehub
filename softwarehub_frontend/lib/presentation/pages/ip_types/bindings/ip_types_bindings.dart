@@ -24,7 +24,7 @@ class IpTypesBindings extends Bindings{
     );
     // Repository
     Get.lazyPut<IIpTypesRepository>(
-      () => IpTypesRepositoryImpl(remoteDatasource: Get.find<IIpTypesRemoteDataSource>())
+      () => IpTypesRepositoryImpl(remoteDataSource: Get.find<IIpTypesRemoteDataSource>())
     );
     // UseCase
     Get.lazyPut<GetIpTypes>(

@@ -20,7 +20,8 @@ class MyTheme {
         secondary: ThemeColor.secondaryColor,
         onSecondary: ThemeColor.colorVariantWhite,
         tertiary: ThemeColor.colorVarianteBlack,
-        onSurface: ThemeColor.greyColor
+        onSurface: ThemeColor.greyColor,
+        
     ),
     iconTheme: IconThemeData(color: ThemeColor.iconColor, size: 40),
     textTheme: _textTheme,

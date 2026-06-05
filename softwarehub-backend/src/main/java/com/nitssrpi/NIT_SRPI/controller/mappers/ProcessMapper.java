@@ -1,28 +1,72 @@
 package com.nitssrpi.NIT_SRPI.controller.mappers;
+
 import com.nitssrpi.NIT_SRPI.controller.dto.ProcessRequestDTO;
 import com.nitssrpi.NIT_SRPI.controller.dto.ProcessResponseDTO;
+import com.nitssrpi.NIT_SRPI.model.ExternalAuthor;
+import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.model.Process;
-import com.nitssrpi.NIT_SRPI.repository.*;
+import com.nitssrpi.NIT_SRPI.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring", uses = {IpTypesMapper.class, UserMapper.class, NiceClassificationMapper.class,
-        ProcessRoyaltyDistributionMapper.class
-})
+@Mapper(
+        componentModel = "spring",
+        uses = {
+                IpTypesMapper.class,
+                UserMapper.class,
+                NiceClassificationMapper.class,
+                ProcessRoyaltyDistributionMapper.class
+        }
+)
+public interface ProcessMapper {
 
-public abstract class ProcessMapper {
-    @Autowired
-    IpTypesRepository ipTypesRepository;
-    @Autowired
-    ExternalAuthorRepository externalAuthorRepository;
-    @Autowired
-    UserRepository userRepository;
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
+//    @Mapping(target = "isFeatured", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
 
-    @Mapping(target = "ipType", expression = "java( ipTypesRepository.findById(dto.ipTypeId()).orElse(null))")
-    @Mapping(target = "authors", expression = "java(userRepository.findAllById(dto.authorIds()))")
-    @Mapping(target = "externalAuthors", expression = "java(externalAuthorRepository.findAllById(dto.externalAuthorsIds()))")
+    @Mapping(target = "creator", ignore = true)
+    @Mapping(target = "niceClassification", ignore = true)
 
-    public abstract Process toEntity(ProcessRequestDTO dto);
-    public abstract ProcessResponseDTO toDTO(Process process);
+    @Mapping(target = "attachments", ignore = true)
+    @Mapping(target = "justifications", ignore = true)
+    @Mapping(target = "royaltyDistributions", ignore = true)
+
+    @Mapping(target = "ipType", source = "ipTypeId")
+    @Mapping(target = "authors", source = "authorIds")
+    @Mapping(target = "externalAuthors", source = "externalAuthorsIds")
+    Process toEntity(ProcessRequestDTO dto);
+
+    ProcessResponseDTO toDTO(Process process);
+
+    default IpTypes mapIpTypes(Long id) {
+        if (id == null) {
+            return null;
+        }
+
+        IpTypes ipTypes = new IpTypes();
+        ipTypes.setId(id);
+        return ipTypes;
+    }
+
+    default ExternalAuthor mapExternalAuthor(Long id) {
+        if (id == null) {
+            return null;
+        }
+
+        ExternalAuthor externalAuthor = new ExternalAuthor();
+        externalAuthor.setId(id);
+        return externalAuthor;
+    }
+
+    default User mapUser(Long id) {
+        if (id == null) {
+            return null;
+        }
+
+        User user = new User();
+        user.setId(id);
+        return user;
+    }
 }

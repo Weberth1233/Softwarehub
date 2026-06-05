@@ -1,16 +1,18 @@
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/justification/delete_justification.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/get_process_by_id.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process/process_classification.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/update_status_process.dart';
 import '../../../../domain/core/errors/failures.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../infra/datasources/auth_local_datasource.dart';
+import '../../../shared/utils/app_toast.dart';
 
 class ProcessDetailController extends GetxController {
   final GetProcessById _getProcessById;
   final DeleteJustification _deleteJustification;
   final UpdateStatusProcess _updateStatusProcess;
-
+  final ProcessClassification _processClassification;
   final AuthLocalDataSource _authLocal;
 
   ProcessDetailController(
@@ -18,9 +20,11 @@ class ProcessDetailController extends GetxController {
     this._authLocal,
     this._deleteJustification,
     this._updateStatusProcess,
+    this._processClassification,
   );
 
   final RxBool isLoading = false.obs;
+
   final RxString errorMessage = ''.obs;
 
   final RxString message = ''.obs;
@@ -40,8 +44,7 @@ class ProcessDetailController extends GetxController {
 
   @override
   void onClose() {
-     print("DEBUG: Controller do processo ${process.value?.id} FOI DESTRUÍDO!");
-    process.value = null; // Limpa o processo antigo ao sair
+    process.value = null;
     super.onClose();
   }
 
@@ -104,6 +107,33 @@ class ProcessDetailController extends GetxController {
         process.value = success;
       },
     );
+  }
+
+  Future<void> classifyProcess(int processId, int niceClassCode) async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+      message.value = '';
+
+      final result = await _processClassification(processId, niceClassCode);
+
+      await result.fold(
+        (Failure failure) async {
+          errorMessage.value = failure.message;
+          AppToast.error(failure.message);
+        },
+        (String success) async {
+          message.value = success;
+          AppToast.success(success);
+
+          await fetchProcess(processId);
+        },
+      );
+    } catch (e) {
+      AppToast.error("Ocorreu um erro ao tentar classificar o processo.");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> deleteJustificationProcess(int id) async {

@@ -6,6 +6,7 @@ import '../../domain/core/errors/exceptions.dart';
 import '../core/network/api_client.dart';
 import '../core/network/base_url.dart';
 import '../models/paged_result_model.dart';
+import '../utils/error_formatter .dart';
 
 abstract class IUserRemoteDataSource {
   Future<PagedResultEntity<UserEntity>> getUsers({
@@ -104,7 +105,7 @@ class UserRemoteDatasourcesImpl implements IUserRemoteDataSource {
         return "Atualizado com sucesso!";
       } else {
         throw ServerException(
-          'Erro ${response.statusCode} ao buscar processos! - Detalhes: ${response.body}',
+          ApiErrorFormatter.formatFromBody(response.body),
         );
       }
     }on ServerException {

@@ -9,6 +9,6 @@ class IpTypesRepositoryImpl
     implements IIpTypesRepository {
   IpTypesRepositoryImpl({
 
-    required IIpTypesRemoteDataSource remoteDatasource,
-  }) : super(remoteDatasource: remoteDatasource);
+    required IIpTypesRemoteDataSource remoteDataSource,
+  }) : super(remoteDataSource: remoteDataSource);
 }

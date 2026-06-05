@@ -1,9 +1,9 @@
-class ProcessRoyaltyDistributionEntity {
+class ProcessRoyaltyDistributionRequestEntity {
   final int processId;
   final int? changeRequestId;
   final List<RoyaltyShareEntity> shares;
 
-  ProcessRoyaltyDistributionEntity({
+  ProcessRoyaltyDistributionRequestEntity({
     required this.processId,
     this.changeRequestId,
     required this.shares,

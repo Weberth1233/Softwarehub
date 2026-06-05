@@ -6,9 +6,7 @@ import com.nitssrpi.NIT_SRPI.controller.dto.ProcessClassificationRequestDTO;
 import com.nitssrpi.NIT_SRPI.controller.dto.ProcessStatusCountDTO;
 import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.model.Process;
-import com.nitssrpi.NIT_SRPI.repository.IpTypesRepository;
-import com.nitssrpi.NIT_SRPI.repository.NiceClassificationRepository;
-import com.nitssrpi.NIT_SRPI.repository.ProcessRepository;
+import com.nitssrpi.NIT_SRPI.repository.*;
 import com.nitssrpi.NIT_SRPI.repository.specs.ProcessSpecs;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,47 +18,92 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ProcessService {
-
     private final ProcessRepository repository;
+    private final UserRepository userRepository;
     private final IpTypesRepository ipTypesRepository;
     private final NiceClassificationRepository niceClassificationRepository;
+    private  final ExternalAuthorRepository externalAuthorRepository;
     private final SecurityService securityService;
 
     @Transactional
     public Process save(Process process) {
         User user = securityService.getAuthenticatedUser();
-        System.out.println(user.getEmail()+ " " + user.getFullName());
-        process.setCreator(user);
 
-        // 1. IMPORTANTE: Buscar o tipo de PI completo no banco para ter acesso à lista de documentos (RequiredDocuments)
-        IpTypes type = ipTypesRepository.findById(process.getIpType().getId())
-                .orElseThrow(() -> new RuntimeException("Tipo de PI não encontrado!"));
-        // Vinculamos o objeto "vivo" do banco ao processo
-        process.setIpType(type);
-        // 2. Agora o loop vai funcionar porque o 'type' carregou os documentos
-        if (type.getRequiredDocuments() != null && !type.getRequiredDocuments().isEmpty()) {
-            for (IpTypeDocument docModelo : type.getRequiredDocuments()) {
-                Attachment novoAnexo = new Attachment();
-                novoAnexo.setDisplayName(docModelo.getDisplayName());
-                // Aqui acontece a cópia que você perguntou: igualamos os caminhos!
-                novoAnexo.setTemplateFilePath(docModelo.getTemplateFilePath());
-                novoAnexo.setStatus("PENDING");
-                novoAnexo.setProcess(process);
-                // Adicionamos na lista do processo
-                process.getAttachments().add(novoAnexo);
-            }
-        }
+        process.setCreator(user);
         process.setStatus(StatusProcess.EM_ANDAMENTO);
-        // 3. Ao salvar o processo, o JPA salvará os Attachments automaticamente
-        // (se você tiver o CascadeType.ALL ou PERSIST no mapeamento da lista de attachments)
+        process.setNiceClassification(null);
+        IpTypes type = prepareProcessBasicRelations(process);
+        addRequiredAttachments(process, type);
+
         return repository.save(process);
     }
+
+    @Transactional
+    public void update(Process process) {
+        if (process.getId() == null) {
+            throw new IllegalArgumentException("Para atualizar é necessário informar o ID do processo!");
+        }
+        Process processDb = repository.findById(process.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
+
+        processDb.setTitle(process.getTitle());
+        processDb.setFormData(process.getFormData());
+
+        prepareProcessBasicRelations(process);
+
+        processDb.setIpType(process.getIpType());
+        processDb.setAuthors(process.getAuthors());
+        processDb.setExternalAuthors(process.getExternalAuthors());
+
+        repository.save(processDb);
+    }
+
+    private void addRequiredAttachments(Process process, IpTypes type) {
+        if (type.getRequiredDocuments() == null || type.getRequiredDocuments().isEmpty()) {
+            return;
+        }
+
+        for (IpTypeDocument docModelo : type.getRequiredDocuments()) {
+            Attachment novoAnexo = new Attachment();
+            novoAnexo.setDisplayName(docModelo.getDisplayName());
+            novoAnexo.setTemplateFilePath(docModelo.getTemplateFilePath());
+            novoAnexo.setStatus("PENDING");
+            novoAnexo.setProcess(process);
+
+            process.getAttachments().add(novoAnexo);
+        }
+    }
+
+    private IpTypes prepareProcessBasicRelations(Process process) {
+        if (process.getIpType() == null || process.getIpType().getId() == null) {
+            throw new IllegalArgumentException("Tipo de PI é obrigatório!");
+        }
+
+        IpTypes type = ipTypesRepository.findById(process.getIpType().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Tipo de PI não encontrado!"));
+
+        process.setIpType(type);
+
+        List<User> validAuthors = validateAuthors(process.getAuthors());
+        List<ExternalAuthor> validExternalAuthors = validateExternalAuthors(process.getExternalAuthors());
+
+        if (validAuthors.isEmpty() && validExternalAuthors.isEmpty()) {
+            throw new IllegalArgumentException("Necessário adicionar pelo menos um autor interno ou externo ao processo!");
+        }
+
+        process.setAuthors(validAuthors);
+        process.setExternalAuthors(validExternalAuthors);
+
+        return type;
+    }
+
 
     @Transactional
     public void classifyProcess(Long processId, ProcessClassificationRequestDTO requestDTO){
@@ -76,31 +119,46 @@ public class ProcessService {
         repository.save(process);
     }
 
-    public void update(Process process){
-        if (process.getId() == null) {
-            throw new IllegalArgumentException("Para atualizar é necessário que o processo esteja cadastrado!");
+    private List<User> validateAuthors(List<User> authors) {
+        if (authors == null || authors.isEmpty()) {
+            return new ArrayList<>();
         }
-        if(process.getExternalAuthors().isEmpty() && process.getAuthors().isEmpty()){
-           throw new NullPointerException("Necessário adicionar pelo menos um membro interno ou externo ao processo!");
-        }
-        // 1. Buscar o processo real no banco
-        Process processDb = repository.findById(process.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
-        // 2. Atualizar apenas os campos necessários
-        processDb.setTitle(process.getTitle());
 
-        processDb.setExternalAuthors(process.getExternalAuthors());
+        List<User> validAuthors = new ArrayList<>();
 
-        //Atualizando a lista de autores também
-        processDb.setAuthors(process.getAuthors());
-        // Se quiser permitir alterar o tipo de PI:
-        if (process.getIpType() != null) {
-            IpTypes type = ipTypesRepository.findById(process.getIpType().getId())
-                    .orElseThrow(() -> new RuntimeException("Tipo de PI não encontrado!"));
-            processDb.setIpType(type);
+        for (User author : authors) {
+            if (author.getId() == null) {
+                throw new IllegalArgumentException("ID do autor interno é obrigatório!");
+            }
+
+            User currentAuthor = userRepository.findById(author.getId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Autor interno não encontrado com ID: " + author.getId()
+                    ));
+
+            validAuthors.add(currentAuthor);
         }
-//        processDb.setStatus(StatusProcess.);
-        repository.save(processDb);
+        return validAuthors;
+    }
+
+    private List<ExternalAuthor> validateExternalAuthors(List<ExternalAuthor> externalAuthors) {
+        if (externalAuthors == null || externalAuthors.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<ExternalAuthor> validExternalAuthors = new ArrayList<>();
+
+        for (ExternalAuthor externalAuthor : externalAuthors) {
+            if (externalAuthor.getId() == null) {
+                throw new IllegalArgumentException("ID do autor externo é obrigatório!");
+            }
+            ExternalAuthor currentExternalAuthor = externalAuthorRepository.findById(externalAuthor.getId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Autor externo não encontrado com ID: " + externalAuthor.getId()
+                    ));
+            validExternalAuthors.add(currentExternalAuthor);
+        }
+        return validExternalAuthors;
     }
 
     public Page<Process> searchProcess(String title, StatusProcess statusProcess, Integer page, Integer pageSize){
@@ -116,23 +174,16 @@ public class ProcessService {
     }
 
     public Page<Process> userProcesses(String title, StatusProcess statusProcess, Integer page, Integer pageSize) {
-        // 1. Pega o usuário logado
         User user = securityService.getAuthenticatedUser();
-        //Se for admin eu retorno os processos do usuario logado caso seja admin eu retorno tudo
         if(user.getRole() == UserRole.USER){
-            // 2. Começa a Specification definindo que o processo DEVE pertencer ao usuário
-            // Se você não criou o método na classe ProcessSpecs, pode fazer o lambda direto aqui
             Specification<Process> specs = Specification.where(ProcessSpecs.equalCreatorId(user.getId()));
-            // 3. Adiciona os filtros dinâmicos (igual ao searchProcess)
             if (title != null && !title.isEmpty()) {
                 specs = specs.and(ProcessSpecs.likeTitle(title));
             }
             if (statusProcess != null) {
                 specs = specs.and(ProcessSpecs.equalStatusProcess(statusProcess));
             }
-            // 4. Configura a paginação
             Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-            // 5. Chama o findAll (que vem do JpaSpecificationExecutor)
             return repository.findAll(specs, pageable);
         }else {
             return searchProcess(title, statusProcess, page, pageSize);

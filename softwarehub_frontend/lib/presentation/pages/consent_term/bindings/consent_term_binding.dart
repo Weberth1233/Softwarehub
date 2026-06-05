@@ -12,7 +12,7 @@ import '../../../../infra/repositories/consent_term_acceptance_repository_impl.d
 import '../../../../infra/repositories/consent_term_repository_impl.dart';
 import '../controllers/consent_term_controller.dart';
 
-class ConsentTermBindings extends Bindings {
+class ConsentTermBinding extends Bindings {
   @override
   void dependencies() {
     CoreBinding.dependencies();
@@ -20,6 +20,8 @@ class ConsentTermBindings extends Bindings {
     Get.lazyPut<IConsentTermRemoteDataSource>(
       () => ConsentTermRemoteDatasourceImpl(Get.find<ApiClient>()),
     );
+
+    //Separar isso em bindings diferente
     Get.lazyPut<IConsentTermAcceptanceRemoteDataSource>(
       () => ConsentTermAcceptanceRemoteDataSourceImpl(Get.find<ApiClient>()),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../../domain/entities/educational_institution_entity.dart';
 import '../../../../domain/entities/types_link_entity.dart';
 import '../../../../domain/entities/user/address_entity.dart';
@@ -101,10 +102,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _addEducationalInstitutionLink() {
     if (selectedEducationalInstitution == null || selectedTypesLink == null) {
-      Get.snackbar(
-        "Atenção",
-        "Selecione uma instituição e um tipo de vínculo.",
-        snackPosition: SnackPosition.TOP,
+      AppToast.warning(
+        "Atenção - Selecione uma instituição e um tipo de vínculo!",
       );
       return;
     }
@@ -432,23 +431,6 @@ class _RegisterPageState extends State<RegisterPage> {
     final textTheme = theme.textTheme;
 
     return Obx(() {
-      if (registerController.message.value.isNotEmpty) {
-        Future.microtask(() {
-          Get.snackbar(
-            widget.isEditMode ? "Atualização" : "Cadastro",
-            registerController.message.value,
-            snackPosition: SnackPosition.TOP,
-            duration: const Duration(seconds: 3),
-            backgroundColor: const Color(0xFFCBD5E1),
-            colorText: theme.colorScheme.primary,
-            margin: const EdgeInsets.all(12),
-            borderRadius: 12,
-          );
-
-          registerController.message.value = "";
-        });
-      }
-
       return Scaffold(
         backgroundColor: const Color(0xFFCBD5E1),
 
@@ -747,7 +729,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 const SizedBox(height: 14),
 
                                 CustomTextField(
-                                  controller: registerController.passwordController,
+                                  controller:
+                                      registerController.passwordController,
                                   label: widget.isEditMode
                                       ? "Nova Senha (deixe em branco para manter)"
                                       : "Senha",
@@ -821,15 +804,29 @@ class _RegisterPageState extends State<RegisterPage> {
                                     child: ElevatedButton(
                                       onPressed: () async {
                                         final address = await registerController
-                                            .getByZipCode(registerController.cepController.text);
+                                            .getByZipCode(
+                                              registerController
+                                                  .cepController
+                                                  .text,
+                                            );
 
                                         if (address != null) {
-                                          registerController.streetController.text =
+                                          registerController
+                                                  .streetController
+                                                  .text =
                                               address.street;
-                                          registerController.neighborhoodController.text =
+                                          registerController
+                                                  .neighborhoodController
+                                                  .text =
                                               address.neighborhood;
-                                          registerController.cityController.text = address.city;
-                                          registerController.stateController.text = address.state;
+                                          registerController
+                                                  .cityController
+                                                  .text =
+                                              address.city;
+                                          registerController
+                                                  .stateController
+                                                  .text =
+                                              address.state;
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -867,7 +864,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 CustomTextField(
-                                  controller: registerController.streetController,
+                                  controller:
+                                      registerController.streetController,
                                   label: "Rua",
                                   size: 500,
                                   validator: Validators.required,
@@ -879,7 +877,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 CustomTextField(
-                                  controller: registerController.neighborhoodController,
+                                  controller:
+                                      registerController.neighborhoodController,
                                   label: "Bairro / Setor",
                                   size: 500,
                                   validator: Validators.required,
@@ -889,7 +888,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 CustomTextField(
-                                  controller: registerController.complementController,
+                                  controller:
+                                      registerController.complementController,
                                   label: "Complemento",
                                   hintText: "Opcional",
                                   size: 500,
@@ -905,7 +905,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Expanded(
                                       child: CustomTextField(
-                                        controller:registerController. cityController,
+                                        controller:
+                                            registerController.cityController,
                                         label: "Município",
                                         size: 500,
                                         validator: Validators.required,
@@ -919,7 +920,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                     Expanded(
                                       child: CustomTextField(
-                                        controller:registerController. stateController,
+                                        controller:
+                                            registerController.stateController,
                                         label: "Estado (UF)",
                                         size: 500,
                                         validator: Validators.required,
@@ -971,27 +973,39 @@ class _RegisterPageState extends State<RegisterPage> {
                                         if (_formKey.currentState!.validate()) {
                                           if (!registerController
                                               .hasEducationalInstitutionLinks) {
-                                            Get.snackbar(
-                                              "Atenção",
-                                              "Adicione pelo menos um vínculo institucional.",
-                                              snackPosition: SnackPosition.TOP,
+                                            AppToast.warning(
+                                              "Atenção - Adicione pelo menos um vínculo institucional.",
                                             );
+
                                             return;
                                           }
 
                                           final userEntityToSave = UserEntity(
-                                            userName: registerController.userController.text,
-                                            email: registerController.emailController.text,
-                                            cpf: registerController.cpfController.text,
-                                            password:registerController. passwordController.text,
-                                            phoneNumber:registerController. phoneController.text,
+                                            userName: registerController
+                                                .userController
+                                                .text,
+                                            email: registerController
+                                                .emailController
+                                                .text,
+                                            cpf: registerController
+                                                .cpfController
+                                                .text,
+                                            password: registerController
+                                                .passwordController
+                                                .text,
+                                            phoneNumber: registerController
+                                                .phoneController
+                                                .text,
                                             birthDate:
                                                 "${registerController.birthYearController.text}-"
                                                 "${registerController.birthMonthController.text.padLeft(2, '0')}-"
                                                 "${registerController.birthDayController.text.padLeft(2, '0')}",
-                                            profession:
-                                                registerController.professionController.text,
-                                            fullName: registerController.nameController.text,
+                                            profession: registerController
+                                                .professionController
+                                                .text,
+                                            fullName: registerController
+                                                .nameController
+                                                .text,
                                             role:
                                                 userControllerGet.user.value !=
                                                     null
@@ -1005,14 +1019,24 @@ class _RegisterPageState extends State<RegisterPage> {
                                                 registerController
                                                     .getSelectedEducationalInstitutionLinks(),
                                             address: AddressEntity(
-                                              zipCode: registerController.cepController.text,
-                                              street: registerController.streetController.text,
-                                              complement:
-                                                  registerController.complementController.text,
-                                              neighborhood:
-                                                  registerController.neighborhoodController.text,
-                                              city: registerController.cityController.text,
-                                              state: registerController.stateController.text,
+                                              zipCode: registerController
+                                                  .cepController
+                                                  .text,
+                                              street: registerController
+                                                  .streetController
+                                                  .text,
+                                              complement: registerController
+                                                  .complementController
+                                                  .text,
+                                              neighborhood: registerController
+                                                  .neighborhoodController
+                                                  .text,
+                                              city: registerController
+                                                  .cityController
+                                                  .text,
+                                              state: registerController
+                                                  .stateController
+                                                  .text,
                                             ),
                                           );
 
