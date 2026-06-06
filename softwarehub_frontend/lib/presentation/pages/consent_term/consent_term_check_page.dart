@@ -21,6 +21,7 @@ class ConsentTermCheckPage extends GetView<ConsentTermController> {
 
       if (controller.errorMessage.value.isNotEmpty) {
         AppToast.error("Erro - ${controller.errorMessage.value}");
+
         Get.back();
         return;
       }

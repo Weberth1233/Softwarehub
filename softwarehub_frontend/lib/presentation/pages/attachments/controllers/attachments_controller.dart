@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/attachment_entity.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/attachments/get_attachments.dart';
@@ -26,6 +27,34 @@ class AttachmentController extends GetxController {
   int? currentProcessId;
 
 
+  @override
+  void onReady() {
+    super.onReady();
+    _loadAttachments();
+  }
+
+  void _loadAttachments() {
+    // 1. Tenta pegar o ID direto da URL (:id)
+    String? idStr = Get.parameters['id'];
+    int processId = 0;
+
+    if (idStr != null && idStr.isNotEmpty) {
+      processId = int.tryParse(idStr) ?? 0;
+    } 
+    // 2. Fallback para os argumentos
+    else if (Get.arguments is int) {
+      processId = Get.arguments as int;
+    }
+
+    // 3. Chama a API
+    if (processId != 0) {
+      attachments(processId);
+    } else {
+      debugPrint("Erro: processId não foi encontrado na rota e nem nos argumentos.");
+      // AppToast.error("ID do processo não identificado.");
+    }
+  }
+  
   Future<void> pickAndUpload({required int attachmentId}) async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(

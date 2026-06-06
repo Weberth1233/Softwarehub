@@ -5,7 +5,7 @@ import '../../../core/bindigs/core_bindings.dart';
 import '../../process/bindings/process_dependencies_binding.dart';
 import '../controllers/process_royalty_distribution_controller.dart';
 
-class ProcessRoyaltyDistributionBinding extends Bindings {
+class ProcessRoyaltyDistributionBindings extends Bindings {
   @override
   void dependencies() {
     CoreBinding.dependencies();

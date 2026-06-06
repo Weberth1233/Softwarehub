@@ -15,11 +15,25 @@ class JustificationController extends GetxController {
     this._putJustification,
   );
 
-
   final TextEditingController reasonController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final RxBool isLoading = false.obs;
   final RxString message = ''.obs;
+  
+
+   @override
+  void onReady() {
+    super.onReady();
+    _loadJustification();
+  }
+
+  void _loadJustification() {
+    String? idStr = Get.parameters['id'];
+
+    if (idStr != null && idStr.isNotEmpty) {
+    } else if (Get.arguments is int) {
+    }
+  }
 
   @override
   void onClose() {
@@ -38,7 +52,8 @@ class JustificationController extends GetxController {
       successMessage: 'Justificativa enviada com sucesso!',
       onSuccess: () async {
         reasonController.clear();
-  
+        Get.back(result: idProcess);
+
       },
     );
   }

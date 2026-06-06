@@ -66,7 +66,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: Icon(Icons.arrow_back, color: colors.primary),
-                  onPressed: () => Get.toNamed("/home"),
+                  onPressed: () => Get.back(),
                 ),
               ),
             ),
@@ -422,7 +422,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ? null
                       : () async {
                           final result = await Get.toNamed(
-                            '/nice-classification',
+                            '/home/process-detail/${entity.id}/nice-classification',
                           );
 
                           if (result is NiceClassificationEntity) {
@@ -461,10 +461,18 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => Get.toNamed(
-                    '/process-detail/justification',
-                    arguments: {'processId': entity.id},
-                  ),
+                  onPressed: () async {
+                    final result = await Get.toNamed(
+                      '/home/process-detail/${entity.id}/justification',
+                      arguments: {'processId': entity.id},
+                    );
+
+                    if (result != null && result is int) {
+                      print("Atualizando o processo");
+                      await controller.fetchProcess(result);
+                    }
+                  },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -651,7 +659,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ? null
                       : () async {
                           final result = await Get.toNamed(
-                            '/nice-classification',
+                            '/home/process-detail/${entity.id}/nice-classification',
                           );
 
                           if (result is NiceClassificationEntity) {
@@ -701,10 +709,17 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () => Get.toNamed(
-                    '/process-detail/justification',
-                    arguments: {'processId': entity.id},
-                  ),
+                  onPressed: () async {
+                    final result = await Get.toNamed(
+                      '/home/process-detail/${entity.id}/justification',
+                      arguments: {'processId': entity.id},
+                    );
+
+                    if (result != null && result is int) {
+                      print("Atualizando o processo");
+                      await controller.fetchProcess(result);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                   ),
@@ -961,7 +976,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.group_outlined,
         message: "Nenhum membro externo vinculado ao processo.",
-       // process: entity,
+        // process: entity,
       );
     }
 
@@ -1283,7 +1298,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.sticky_note_2_outlined,
         message: "Não há correções ou justificativas.",
-       // process: entity,
+        // process: entity,
       );
     }
 
@@ -1344,15 +1359,20 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            onPressed: () {
-                              Get.toNamed(
-                                "/process-detail/justification",
+                            onPressed: () async {
+                              final result = await Get.toNamed(
+                                '/home/process-detail/${entity.id}/justification',
                                 arguments: {
                                   'processId': entity.id,
                                   'justificationId': justification.id,
                                   'reason': justification.reason,
                                 },
                               );
+
+                              if (result != null && result is int) {
+                                print("Atualizando o processo");
+                                await controller.fetchProcess(result);
+                              }
                             },
                             icon: const Icon(
                               Icons.edit,
@@ -1422,7 +1442,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.attach_file_outlined,
         message: "Nenhum anexo vinculado a este processo.",
-       // process: entity,
+        // process: entity,
       );
     }
 
@@ -1438,7 +1458,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         return InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () =>
-              Get.toNamed("/process-detail/attachments", arguments: entity.id),
+              Get.toNamed("/home/process-detail/${entity.id}/attachments"),
           child: _buildSimpleCard(
             context,
             child: Row(
@@ -1628,7 +1648,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-   Widget _buildEmptyRoyaltDistributionState(
+  Widget _buildEmptyRoyaltDistributionState(
     BuildContext context, {
     required IconData icon,
     required String message,
@@ -1653,9 +1673,12 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              Get.offAllNamed(
+              /*Get.offAllNamed(
                 '/process-royalty-distribution',
                 arguments: {'processId': process.id},
+              );*/
+              Get.toNamed(
+                '/home/process-detail/${controller.process.value!.id}/royalty-distribution',
               );
             },
             child: Text(
@@ -1690,7 +1713,6 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               ),
             ),
           ),
-          
         ],
       ),
     );

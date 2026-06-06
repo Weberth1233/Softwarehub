@@ -12,10 +12,9 @@ class ProcessRoyaltyDistributionPage
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
 
     return Scaffold(
-      backgroundColor: colorScheme.onSecondary, 
+      backgroundColor: colorScheme.onSecondary,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: colorScheme.primary,
@@ -37,8 +36,11 @@ class ProcessRoyaltyDistributionPage
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   icon: Icon(Icons.arrow_back, color: colorScheme.primary),
-                  onPressed: () => Get.toNamed('/home/process-detail/${controller.process.value!.id}',
-                preventDuplicates: false)
+                  onPressed: () =>
+                      Get.back(result: controller.process.value!.id),
+
+                  // Ou, se quiser mandar mais de uma coisa, pode mandar um Map:
+                  // Get.back(result: {'processId': controller.process.value!.id});
                 ),
               ),
             ),
@@ -68,41 +70,46 @@ class ProcessRoyaltyDistributionPage
                   isValid: controller.isTotalValid,
                 ),
               ),
-
               Expanded(
-                child: Obx(
-                  () {
-                    if (controller.shares.isEmpty) {
-                      return Center(
-                        child: Text(
-                          "Nenhuma cota encontrada.",
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.secondary,
-                          ),
+                child: Obx(() {
+                  if (controller.shares.isEmpty) {
+                    return Center(
+                      child: Text(
+                        "Nenhuma cota encontrada.",
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.secondary,
                         ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                      itemCount: controller.shares.length,
-                      itemBuilder: (context, index) {
-                        final share = controller.shares[index];
-
-                        return _ShareReadonlyCard(
-                          key: ValueKey(share.id),
-                          index: index,
-                          share: share,
-                          onPercentageChanged: (value) {
-                            controller.updatePercentage(index, value);
-                          },
-                          onRequestUniversityChange:
-                              controller.requestUniversityChange,
-                        );
-                      },
+                      ),
                     );
-                  },
-                ),
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                    itemCount: controller.shares.length,
+                    itemBuilder: (context, index) {
+                      final share = controller.shares[index];
+
+                      return _ShareReadonlyCard(
+                        key: ValueKey(share.id),
+                        index: index,
+                        share: share,
+                        // Aqui avisamos o controller se a mudança veio do Slider ou do Texto
+                        onSliderChanged: (value) => controller.updatePercentage(
+                          index,
+                          value,
+                          fromText: false,
+                        ),
+                        onTextChanged: (value) => controller.updatePercentage(
+                          index,
+                          value,
+                          fromText: true,
+                        ),
+                        onRequestUniversityChange:
+                            controller.requestUniversityChange,
+                      );
+                    },
+                  );
+                }),
               ),
               Container(
                 padding: const EdgeInsets.all(16),
@@ -127,7 +134,11 @@ class ProcessRoyaltyDistributionPage
                   height: 48,
                   child: ElevatedButton.icon(
                     onPressed: controller.submit,
-                    icon: const Icon(Icons.check, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     label: Text(
                       "Salvar distribuição",
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -166,12 +177,11 @@ class _RoyaltySummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Resgatando a cor verde de sucesso do seu ThemeColor original
     final Color statusColor = isValid
-        ? const Color(0XFF1CDF0B) 
+        ? const Color(0XFF1CDF0B)
         : totalPercentage > 100
-            ? Colors.red
-            : Colors.orange;
+        ? Colors.red
+        : Colors.orange;
 
     return Container(
       width: double.infinity,
@@ -179,10 +189,8 @@ class _RoyaltySummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(6), // Sincronizado com os 6px do seu InputDecorationTheme
-        border: Border.all(
-          color: colorScheme.onSurface.withOpacity(0.5),
-        ),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: colorScheme.onSurface.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -248,7 +256,7 @@ class _RoyaltySummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                "${totalPercentage.toStringAsFixed(1)}%",
+                "${totalPercentage.toStringAsFixed(2)}%", // AQUI garante as 2 casas decimais visualmente
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: statusColor,
@@ -264,7 +272,7 @@ class _RoyaltySummaryCard extends StatelessWidget {
   String _statusText() {
     if (isValid) return "Distribuição completa";
     if (totalPercentage > 100) return "Total excedido";
-    return "Restante: ${remainingPercentage.toStringAsFixed(1)}%";
+    return "Restante: ${remainingPercentage.toStringAsFixed(2)}%"; // AQUI também padroniza 2 casas
   }
 }
 
@@ -273,13 +281,15 @@ class _ShareReadonlyCard extends StatelessWidget {
     super.key,
     required this.index,
     required this.share,
-    required this.onPercentageChanged,
+    required this.onSliderChanged,
+    required this.onTextChanged,
     required this.onRequestUniversityChange,
   });
 
   final int index;
   final ShareFormModel share;
-  final ValueChanged<double> onPercentageChanged;
+  final ValueChanged<double> onSliderChanged;
+  final ValueChanged<double> onTextChanged;
   final VoidCallback onRequestUniversityChange;
 
   @override
@@ -297,10 +307,8 @@ class _ShareReadonlyCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(6), // Identidade visual de 6px mantida
-          border: Border.all(
-            color: colorScheme.onSurface.withOpacity(0.4),
-          ),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: colorScheme.onSurface.withOpacity(0.4)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,7 +349,10 @@ class _ShareReadonlyCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: typeColor.withOpacity(0.10),
                     borderRadius: BorderRadius.circular(4),
@@ -363,7 +374,8 @@ class _ShareReadonlyCard extends StatelessWidget {
               enabled: !share.isLocked,
               minPercentage: share.minPercentage,
               helperText: isCreator ? "Mínimo obrigatório: 5%" : null,
-              onChanged: onPercentageChanged,
+              onSliderChanged: onSliderChanged,
+              onTextChanged: onTextChanged,
             ),
             if (isUniversity) ...[
               const SizedBox(height: 14),
@@ -399,7 +411,11 @@ class _ShareReadonlyCard extends StatelessWidget {
                           ),
                         ),
                         onPressed: onRequestUniversityChange,
-                        icon: Icon(Icons.edit_note_outlined, size: 18, color: colorScheme.primary),
+                        icon: Icon(
+                          Icons.edit_note_outlined,
+                          size: 18,
+                          color: colorScheme.primary,
+                        ),
                         label: Text(
                           "Solicitar alteração",
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -421,26 +437,34 @@ class _ShareReadonlyCard extends StatelessWidget {
 
   String _subtitle() {
     switch (share.type) {
-      case ShareType.university: return "Instituição de ensino";
-      case ShareType.creator: return "Criador do processo";
-      case ShareType.member: return "Autor/Membro participante";
+      case ShareType.university:
+        return "Instituição de ensino";
+      case ShareType.creator:
+        return "Criador do processo";
+      case ShareType.member:
+        return "Autor/Membro participante";
     }
   }
 
   IconData _getTypeIcon(ShareType type) {
     switch (type) {
-      case ShareType.university: return Icons.school_outlined;
-      case ShareType.creator: return Icons.person_pin_outlined;
-      case ShareType.member: return Icons.person_outline;
+      case ShareType.university:
+        return Icons.school_outlined;
+      case ShareType.creator:
+        return Icons.person_pin_outlined;
+      case ShareType.member:
+        return Icons.person_outline;
     }
   }
 
-  // Cores extraídas de forma coesa a partir do seu próprio ColorScheme
   Color _getTypeColor(ShareType type, ColorScheme scheme) {
     switch (type) {
-      case ShareType.university: return scheme.primary;
-      case ShareType.creator: return scheme.secondary;
-      case ShareType.member: return scheme.tertiary;
+      case ShareType.university:
+        return scheme.primary;
+      case ShareType.creator:
+        return scheme.secondary;
+      case ShareType.member:
+        return scheme.tertiary;
     }
   }
 }
@@ -449,7 +473,8 @@ class _PercentageField extends StatelessWidget {
   const _PercentageField({
     required this.value,
     required this.controller,
-    required this.onChanged,
+    required this.onSliderChanged,
+    required this.onTextChanged,
     this.enabled = true,
     this.minPercentage = 0,
     this.helperText,
@@ -457,7 +482,8 @@ class _PercentageField extends StatelessWidget {
 
   final double value;
   final TextEditingController controller;
-  final ValueChanged<double> onChanged;
+  final ValueChanged<double> onSliderChanged;
+  final ValueChanged<double> onTextChanged;
   final bool enabled;
   final double minPercentage;
   final String? helperText;
@@ -493,6 +519,25 @@ class _PercentageField extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
+            // --- BOTÃO DE DIMINUIR (-) ---
+            if (enabled)
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: Icon(
+                  Icons.remove_circle_outline,
+                  color: colorScheme.primary,
+                  size: 24,
+                ),
+                onPressed: () {
+                  final newValue = value - 1.0;
+                  if (newValue >= minPercentage) {
+                    onSliderChanged(newValue);
+                  }
+                },
+              ),
+
+            // --- SLIDER ---
             Expanded(
               child: SliderTheme(
                 data: SliderTheme.of(context).copyWith(
@@ -500,49 +545,105 @@ class _PercentageField extends StatelessWidget {
                   inactiveTrackColor: colorScheme.onSurface.withOpacity(0.3),
                   thumbColor: colorScheme.primary,
                   trackHeight: 4,
-                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 7,
+                  ),
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 14,
+                  ),
                 ),
                 child: Slider(
                   value: value.clamp(minPercentage, 100),
                   min: minPercentage,
                   max: 100,
                   divisions: 100,
-                  onChanged: enabled ? onChanged : null,
+                  onChanged: enabled ? onSliderChanged : null,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 90,
-              child: TextFormField(
-                enabled: enabled,
-                controller: controller,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: enabled ? colorScheme.tertiary : colorScheme.secondary,
+
+            // --- BOTÃO DE AUMENTAR (+) ---
+            if (enabled)
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  color: colorScheme.primary,
+                  size: 24,
                 ),
-                // Aqui o inputDecorationTheme central do MyTheme assume o controle das bordas e preenchimentos!
-                decoration: InputDecoration(
-                  suffixText: "%",
-                  isDense: true,
-                  filled: true,
-                  fillColor: enabled ? Colors.white : colorScheme.onSurface.withOpacity(0.2),
+                onPressed: () {
+                  final newValue = value + 1.0;
+                  if (newValue <= 100.0) {
+                    onSliderChanged(newValue);
+                  }
+                },
+              ),
+
+            const SizedBox(width: 8),
+
+            // --- CAMPO DE TEXTO TOTALMENTE REFEITO ---
+            Container(
+              width: 85,
+              height: 36,
+              decoration: BoxDecoration(
+                color: enabled
+                    ? Colors.white
+                    : colorScheme.onSurface.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: enabled
+                      ? colorScheme.onSurface.withOpacity(0.4)
+                      : Colors.transparent,
                 ),
-                onChanged: (text) {
-                  final percentage = double.tryParse(text.replaceAll(",", "."));
-                  if (percentage == null) return;
-                  onChanged(percentage);
-                },
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) return "Obrig.";
-                  final percentage = double.tryParse(value.replaceAll(",", "."));
-                  if (percentage == null) return "Inválido";
-                  if (percentage < minPercentage) return "Mín. ${minPercentage.toStringAsFixed(0)}";
-                  if (percentage > 100) return "Máx. 100";
-                  return null;
-                },
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      enabled: enabled,
+                      controller: controller,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: enabled
+                            ? colorScheme.tertiary
+                            : colorScheme.secondary,
+                      ),
+                      // Removemos o InputTheme padrão para não dar conflito de bordas aqui dentro
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onChanged: (text) {
+                        final percentage = double.tryParse(
+                          text.replaceAll(",", "."),
+                        );
+                        if (percentage == null) return;
+                        onTextChanged(percentage);
+                      },
+                    ),
+                  ),
+                  // Colocamos o % fisicamente separado do campo de digitação
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Text(
+                      "%",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: enabled
+                            ? colorScheme.tertiary
+                            : colorScheme.secondary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

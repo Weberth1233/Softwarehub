@@ -24,7 +24,8 @@ import '../../pages/justifications/bindings/justification_bindings.dart';
 import '../../pages/justifications/justification_page.dart';
 import '../../pages/nice_classification/bindings/nice_classification_binding.dart';
 import '../../pages/nice_classification/nice_classification_page.dart';
-import '../../pages/process/bindings/external_author_bindigs.dart' show ExternalAuthorBindigs;
+import '../../pages/process/bindings/external_author_bindigs.dart'
+    show ExternalAuthorBindigs;
 import '../../pages/process/bindings/process_detail_bindings.dart';
 import '../../pages/process/bindings/user_bindings.dart';
 import '../../pages/process/process_detail_page.dart';
@@ -98,6 +99,7 @@ class MyRoutes {
       middlewares: [AuthMiddleware()],
     ),
 
+    // Rota da Tela A (Detalhes)
     GetPage(
       name: "/home/process-detail/:id",
       page: () => ProcessDetailPage(),
@@ -106,15 +108,23 @@ class MyRoutes {
       middlewares: [AuthMiddleware()],
     ),
 
+    // Rota da Tela B (Cotas)
     GetPage(
-      name: "/process-detail/attachments",
+      name: "/home/process-detail/:id/royalty-distribution",
+      page: () => ProcessRoyaltyDistributionPage(),
+      binding: ProcessRoyaltyDistributionBindings(), // O seu binding das cotas
+      middlewares: [AuthMiddleware()],
+    ),
+
+    GetPage(
+      name: "/home/process-detail/:id/attachments",
       page: () => AttachmentsPage(),
       binding: AttachmentsBindigs(),
       middlewares: [AuthMiddleware()],
     ),
 
     GetPage(
-      name: "/process-detail/justification",
+      name: "/home/process-detail/:id/justification",
       page: () => JustificationPage(),
       binding: JustificationBindings(),
       middlewares: [AuthMiddleware()],
@@ -140,7 +150,7 @@ class MyRoutes {
       binding: ConsentTermBinding(),
       middlewares: [AuthMiddleware()],
     ),
-    
+
     GetPage(
       name: '/consent-term-check',
       page: () => const ConsentTermCheckPage(),
@@ -148,25 +158,18 @@ class MyRoutes {
       middlewares: [AuthMiddleware()],
     ),
 
-    GetPage(
+   /* GetPage(
       name: '/consent-term',
       page: () => const ConsentTermPage(),
       binding: ConsentTermBinding(),
       middlewares: [AuthMiddleware()],
-    ),
+    ),*/
 
     GetPage(
-      name: '/nice-classification',
+      name: '/home/process-detail/:id/nice-classification',
       page: () => const NiceClassificationPage(),
       binding: NiceClassificationBinding(),
       middlewares: [AuthMiddleware()],
-    ),
-
-    GetPage(
-      name: '/process-royalty-distribution',
-      page: () => const ProcessRoyaltyDistributionPage(),
-      binding: ProcessRoyaltyDistributionBinding(),
-     // middlewares: [AuthMiddleware()],*/
     ),
 
     GetPage(name: '/unauthenticated', page: () => const UnauthenticatedPage()),
