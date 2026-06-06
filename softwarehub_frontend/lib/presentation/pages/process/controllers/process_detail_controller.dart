@@ -71,12 +71,8 @@ class ProcessDetailController extends GetxController {
       fetchProcess(finalId);
     } else {
       errorMessage.value = "ID do processo não encontrado.";
-      Get.snackbar(
-        "Erro",
-        "Não foi possível identificar o ID do processo.",
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-      );
+
+      AppToast.error("Erro - Não foi possível identificar o ID do processo.");
     }
   }
 
@@ -93,13 +89,7 @@ class ProcessDetailController extends GetxController {
         errorMessage.value = failure.message;
         process.value = null;
 
-        Get.snackbar(
-          "Erro",
-          "Falha ao carregar processo: ${failure.message}",
-          backgroundColor: Get.theme.colorScheme.error,
-          colorText: Get.theme.colorScheme.onError,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppToast.error("Falha ao carregar processo: ${failure.message}");
       },
       (ProcessResponseEntity success) {
         // Sucesso
@@ -147,24 +137,12 @@ class ProcessDetailController extends GetxController {
         (failure) {
           message.value = failure.message;
 
-          Get.snackbar(
-            "Erro",
-            message.value,
-            backgroundColor: Get.theme.colorScheme.error,
-            colorText: Get.theme.colorScheme.onError,
-            snackPosition: SnackPosition.TOP,
-          );
+          AppToast.error("Erro - ${message.value}");
         },
         (successMessage) async {
           message.value = successMessage;
 
-          Get.snackbar(
-            "Sucesso",
-            message.value,
-            backgroundColor: Get.theme.colorScheme.primary,
-            colorText: Get.theme.colorScheme.onPrimary,
-            snackPosition: SnackPosition.TOP,
-          );
+          AppToast.success("Sucesso - ${message.value}");
 
           // 🔥 Recarrega o processo atualizado
           if (process.value != null) {
@@ -173,13 +151,9 @@ class ProcessDetailController extends GetxController {
         },
       );
     } catch (e) {
-      Get.snackbar(
-        "Erro inesperado",
-        "Ocorreu um erro ao tentar remover a justificativa.",
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-        snackPosition: SnackPosition.TOP,
-      );
+      
+      AppToast.error("Erro inesperado - Ocorreu um erro ao tentar remover a justificativa");
+      
     } finally {
       isLoading.value = false;
     }
@@ -196,24 +170,12 @@ class ProcessDetailController extends GetxController {
         (failure) {
           message.value = failure.message;
 
-          Get.snackbar(
-            "Erro",
-            message.value,
-            backgroundColor: Get.theme.colorScheme.error,
-            colorText: Get.theme.colorScheme.onError,
-            snackPosition: SnackPosition.TOP,
-          );
+          AppToast.error("Erro - ${message.value}");
         },
         (successMessage) async {
           message.value = successMessage;
 
-          Get.snackbar(
-            "Sucesso",
-            message.value,
-            backgroundColor: Get.theme.colorScheme.primary,
-            colorText: Get.theme.colorScheme.onPrimary,
-            snackPosition: SnackPosition.TOP,
-          );
+          AppToast.success("Sucesso - ${message.value}");
 
           // 🔥 Recarrega o processo atualizado
           if (process.value != null) {
@@ -222,13 +184,7 @@ class ProcessDetailController extends GetxController {
         },
       );
     } catch (e) {
-      Get.snackbar(
-        "Erro inesperado",
-        "Ocorreu um erro ao tentar atualizar o status do processo.",
-        backgroundColor: Get.theme.colorScheme.error,
-        colorText: Get.theme.colorScheme.onError,
-        snackPosition: SnackPosition.TOP,
-      );
+      AppToast.error("Erro inesperado -Ocorreu um erro ao tentar atualizar o status do processo.");
     } finally {
       isLoading.value = false;
     }

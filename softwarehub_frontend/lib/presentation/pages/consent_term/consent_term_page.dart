@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import 'controllers/consent_term_controller.dart';
 import '../../../../domain/entities/consent_term_entity.dart';
 
@@ -183,12 +184,7 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                                       );
 
                                       if (success) {
-                                        Get.snackbar(
-                                          'Termo aceito',
-                                          'Você aceitou o termo de consentimento.',
-                                          snackPosition: SnackPosition.BOTTOM,
-                                        );
-
+                                       AppToast.success("Termo aceito - Você aceitou o termo de consentimento.");
                                         Get.offNamed(
                                           nextRoute,
                                           arguments: nextArguments,

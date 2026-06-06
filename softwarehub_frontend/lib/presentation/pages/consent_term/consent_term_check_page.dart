@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import 'controllers/consent_term_controller.dart';
 
 class ConsentTermCheckPage extends GetView<ConsentTermController> {
@@ -19,12 +20,7 @@ class ConsentTermCheckPage extends GetView<ConsentTermController> {
       final consentTerm = controller.consentTerm.value;
 
       if (controller.errorMessage.value.isNotEmpty) {
-        Get.snackbar(
-          'Erro',
-          controller.errorMessage.value,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-
+        AppToast.error("Erro - ${controller.errorMessage.value}");
         Get.back();
         return;
       }

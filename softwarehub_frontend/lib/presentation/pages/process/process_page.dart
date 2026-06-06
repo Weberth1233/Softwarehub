@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_user_controller.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/theme/theme_color.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../domain/entities/external_author/external_author_entity.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../shared/utils/responsive.dart';
@@ -102,7 +103,7 @@ class _ProcessPageState extends State<ProcessPage> {
   Widget build(BuildContext context) {
     final userController = Get.find<ProcessUserController>();
     final theme = Theme.of(context);
-    
+
     void handleManageExternals() async {
       var result = await Get.toNamed(
         "/process/process-external-author",
@@ -411,10 +412,13 @@ class _ProcessPageState extends State<ProcessPage> {
                                         child: CustomTextField(
                                           controller: searchController,
                                           label: "",
-                                          hintText: "Procure por Nome, CPF ou email",
+                                          hintText:
+                                              "Procure por Nome, CPF ou email",
                                           onChanged: onSearchChanged,
-                                          onFieldSubmitted: (_) => userController
-                                              .searchByFilter(searchController.text),
+                                          onFieldSubmitted: (_) =>
+                                              userController.searchByFilter(
+                                                searchController.text,
+                                              ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -423,14 +427,21 @@ class _ProcessPageState extends State<ProcessPage> {
                                         height: 42,
                                         decoration: BoxDecoration(
                                           color: ThemeColor.primaryColor,
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         child: IconButton(
-                                          icon: const Icon(Icons.search, color: Colors.white),
+                                          icon: const Icon(
+                                            Icons.search,
+                                            color: Colors.white,
+                                          ),
                                           iconSize: 25,
                                           tooltip: "Buscar",
                                           onPressed: () {
-                                            userController.searchByFilter(searchController.text);
+                                            userController.searchByFilter(
+                                              searchController.text,
+                                            );
                                           },
                                         ),
                                       ),
@@ -590,7 +601,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       fontSize: 16,
-                                                  color: Colors.redAccent,
+                                                      color: Colors.redAccent,
                                                     ),
                                               ),
                                             ),
@@ -672,12 +683,10 @@ class _ProcessPageState extends State<ProcessPage> {
                                   if (titleController.text.trim().isEmpty ||
                                       (userController.selectedUsers.isEmpty &&
                                           listExternalAuthor.isEmpty)) {
-                                    Get.snackbar(
-                                      "Campos inválidos!",
-                                      "Necessário inserir os campos abaixo para prosseguir...",
-                                      backgroundColor: Colors.grey.shade800,
-                                      colorText: Colors.white,
+                                    AppToast.warning(
+                                      "Campos inválidos! - Necessário inserir os campos abaixo para prosseguir...",
                                     );
+
                                     return;
                                   }
 

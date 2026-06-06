@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/consent_term/get_consent_term_was_accepted.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/consent_term/post_consent_term_acceptance.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../../domain/entities/consent_term_entity.dart';
 import '../../../../domain/usecases/consent_term/get_consent_term_by_iptypes.dart';
 
@@ -159,11 +160,7 @@ class ConsentTermController extends GetxController {
       (failure) async {
         isLoading.value = false;
 
-        Get.snackbar(
-          'Erro',
-          failure.message,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppToast.error("Erro -  ${failure.message}");
       },
       (term) async {
         final wasAcceptedResult = await _getConsentTermWasAccepted(term.id);
@@ -172,11 +169,7 @@ class ConsentTermController extends GetxController {
           (failure) {
             isLoading.value = false;
 
-            Get.snackbar(
-              'Erro',
-              failure.message,
-              snackPosition: SnackPosition.BOTTOM,
-            );
+            AppToast.error("Erro -  ${failure.message}");
           },
           (wasAccepted) {
             isLoading.value = false;

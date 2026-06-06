@@ -4,6 +4,7 @@ import 'package:nit_sgpi_frontend/domain/entities/external_author/external_autho
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/delete_external_author.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/get_external_authors.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/put_external_author.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../../domain/usecases/external_author/post_external_author.dart';
 
 class ProcessExternalAuthorController extends GetxController {
@@ -162,19 +163,13 @@ class ProcessExternalAuthorController extends GetxController {
 
       result.fold(
         (failure) {
-          Get.snackbar("Erro", failure.message, backgroundColor: Colors.red);
+          AppToast.error("Erro - ${failure.message}");
+          
         },
         (successMessage) {
-          // ATUALIZAÇÃO LOCAL: É o segredo para UI fluida
           externalAuthors.removeWhere((element) => element.id == id);
           selectedExternalAuthor.remove(id);
-
-          Get.snackbar(
-            "Sucesso",
-            "Registro removido com sucesso",
-            backgroundColor: Get.theme.colorScheme.primary,
-            colorText: Get.theme.colorScheme.onPrimary,
-          );
+          AppToast.success("Sucesso - Registro removido com sucesso");
         },
       );
     } catch (e) {

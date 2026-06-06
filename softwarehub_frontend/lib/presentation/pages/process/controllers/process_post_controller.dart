@@ -23,11 +23,10 @@ class ProcessPostController extends GetxController{
     );
     result.fold(
       (Failure failure) {
-        message.value = failure.message;
+        AppToast.error(failure.message);
       },
       (int id) {
         AppToast.success("Sucesso - Formulário enviado com sucesso!");
-        
       },
     );
     isLoading.value = false;
@@ -43,10 +42,10 @@ class ProcessPostController extends GetxController{
     );
     result.fold(
       (Failure failure) {
-        message.value = failure.message;
+        AppToast.error(failure.message);
       },
       (sucess) {
-        Get.snackbar('Sucesso', 'Formulário enviado com sucesso!');
+        AppToast.success("Sucesso - Formulário enviado com sucesso!");
         message.value = sucess;
       },
     );

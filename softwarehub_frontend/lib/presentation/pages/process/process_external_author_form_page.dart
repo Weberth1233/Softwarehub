@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/external_author/external_author_entity.dart';
-
+import '../../../domain/entities/external_author/external_author_entity.dart';
+import '../../shared/utils/app_toast.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/utils/validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
@@ -20,8 +20,8 @@ class _ProcessExternalAuthorFormPageState
   final controller = Get.find<ProcessExternalAuthorController>();
   final _formKey = GlobalKey<FormState>();
 
-  
-  final ExternalAuthorEntity? editingEntity = Get.arguments as ExternalAuthorEntity?;
+  final ExternalAuthorEntity? editingEntity =
+      Get.arguments as ExternalAuthorEntity?;
 
   late final TextEditingController fullNameController;
   late final TextEditingController emailController;
@@ -55,38 +55,19 @@ class _ProcessExternalAuthorFormPageState
         email: emailController.text.trim(),
         cpf: cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
       );
-
-      // Decide qual método do controller chamar
       final bool isSuccess = isEditing
           ? await controller.updateExternalAuthor(entity.id!, entity)
           : await controller.postExternalAuthor(entity);
 
       if (isSuccess) {
-        Get.snackbar(
-          "Sucesso",
+        AppToast.success(
           isEditing ? "Cadastro atualizado!" : "Cadastro realizado!",
-          backgroundColor: Colors.green.withOpacity(0.8), // Cor original mantida
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12,
-          icon: const Icon(Icons.check_circle, color: Colors.white),
         );
-
         if (!isEditing) {
           clear();
         }
       } else {
-        Get.snackbar(
-          "Erro",
-          controller.errorMessage.value,
-          backgroundColor: Colors.red.withOpacity(0.8), // Cor original mantida
-          colorText: Colors.white,
-          snackPosition: SnackPosition.TOP,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12,
-          icon: const Icon(Icons.error_outline, color: Colors.white),
-        );
+        AppToast.error("Erro - ${controller.errorMessage.value}");
       }
     }
   }
@@ -115,7 +96,6 @@ class _ProcessExternalAuthorFormPageState
             padding: EdgeInsets.symmetric(
               horizontal: Responsive.getPadding(context).left,
               vertical: 32,
-              
             ),
             child: Center(
               child: ConstrainedBox(
@@ -139,7 +119,7 @@ class _ProcessExternalAuthorFormPageState
         children: [
           IconButton(
             onPressed: () => Get.back(),
-            icon: const Icon(Icons.arrow_back,),
+            icon: const Icon(Icons.arrow_back),
             style: IconButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: colors.primary,
@@ -151,7 +131,9 @@ class _ProcessExternalAuthorFormPageState
           const SizedBox(width: 16),
           Expanded(
             child: Text(
-              isEditing ? "Editar colaborador externo" : "Formulário para cadastro de colaborador externo",
+              isEditing
+                  ? "Editar colaborador externo"
+                  : "Formulário para cadastro de colaborador externo",
               style: theme.textTheme.titleLarge?.copyWith(
                 color: colors.onPrimary, // Cor original mantida
                 fontWeight: FontWeight.bold,
@@ -169,7 +151,9 @@ class _ProcessExternalAuthorFormPageState
     return Positioned.fill(
       child: CustomPaint(
         painter: _DiagonalLinesPainter(
-          color: colors.primary.withOpacity(0.05), // Uma opacidade bem suave para não atrapalhar a leitura
+          color: colors.primary.withOpacity(
+            0.05,
+          ), // Uma opacidade bem suave para não atrapalhar a leitura
         ),
       ),
     );
@@ -183,7 +167,9 @@ class _ProcessExternalAuthorFormPageState
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05), // Cor da sombra original mantida
+            color: Colors.black.withOpacity(
+              0.05,
+            ), // Cor da sombra original mantida
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -274,7 +260,7 @@ class _ProcessExternalAuthorFormPageState
             ),
             const SizedBox(height: 40),
             Obx(
-                  () => SizedBox(
+              () => SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
@@ -284,17 +270,20 @@ class _ProcessExternalAuthorFormPageState
                       : const Icon(Icons.check_circle_outline),
                   label: controller.isLoading.value
                       ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                  )
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : Text(
-                    isEditing ? 'Salvar Alterações' : 'Salvar Cadastro',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                          isEditing ? 'Salvar Alterações' : 'Salvar Cadastro',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primary,
                     foregroundColor: colors.onPrimary,

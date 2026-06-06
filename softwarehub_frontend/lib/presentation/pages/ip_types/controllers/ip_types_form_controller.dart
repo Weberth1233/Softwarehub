@@ -209,7 +209,6 @@ class IpTypesFormController extends GetxController {
 
     if (!isValid) {
       AppToast.warning("Verifique os campos obrigatórios.");
-      // _showErrorSnackbar("Verifique os campos obrigatórios.");
     }
 
     return isValid;
@@ -269,7 +268,6 @@ class IpTypesFormController extends GetxController {
       Get.offAllNamed('/home');
     } catch (e) {
       AppToast.error("Erro ao enviar processo!");
-      //_showErrorSnackbar("Erro ao enviar processo");
     }
   }
 }

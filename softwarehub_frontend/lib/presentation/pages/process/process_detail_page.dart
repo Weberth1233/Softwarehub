@@ -927,7 +927,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.group_outlined,
         message: "Nenhum membro interno vinculado ao processo.",
-        process: entity,
+        //process: entity,
       );
     }
 
@@ -961,7 +961,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.group_outlined,
         message: "Nenhum membro externo vinculado ao processo.",
-        process: entity,
+       // process: entity,
       );
     }
 
@@ -993,7 +993,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     final colors = Theme.of(context).colorScheme;
 
     if (entity.royaltyDistributions.isEmpty) {
-      return _buildEmptyState(
+      return _buildEmptyRoyaltDistributionState(
         context,
         icon: Icons.pie_chart_outline,
         message: "Nenhuma distribuição de cotas vinculada a este processo.",
@@ -1078,7 +1078,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                   context,
                   icon: Icons.percent_outlined,
                   message: "Nenhuma cota encontrada nesta distribuição.",
-                  process: entity,
+                  //process: entity,
                 )
               else
                 ListView.separated(
@@ -1283,7 +1283,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.sticky_note_2_outlined,
         message: "Não há correções ou justificativas.",
-        process: entity,
+       // process: entity,
       );
     }
 
@@ -1422,7 +1422,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.attach_file_outlined,
         message: "Nenhum anexo vinculado a este processo.",
-        process: entity,
+       // process: entity,
       );
     }
 
@@ -1628,7 +1628,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
-  Widget _buildEmptyState(
+   Widget _buildEmptyRoyaltDistributionState(
     BuildContext context, {
     required IconData icon,
     required String message,
@@ -1663,6 +1663,34 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               style: TextStyle(color: Colors.white),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(
+    BuildContext context, {
+    required IconData icon,
+    required String message,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+
+    return _buildSimpleCard(
+      context,
+      child: Row(
+        children: [
+          Icon(icon, color: colors.secondary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: colors.secondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          
         ],
       ),
     );
@@ -1819,7 +1847,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         context,
         icon: Icons.list_alt_outlined,
         message: "Nenhum campo de formulário encontrado.",
-        process: entity,
+        //process: entity,
       );
     }
 
