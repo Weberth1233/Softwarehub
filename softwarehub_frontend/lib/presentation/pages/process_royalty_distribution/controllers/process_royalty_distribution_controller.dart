@@ -12,34 +12,25 @@ class ProcessRoyaltyDistributionController extends GetxController {
   ProcessRoyaltyDistributionController(this._getProcessById);
 
   final formKey = GlobalKey<FormState>();
-
   final RxBool isLoading = false.obs;
-
   final Rxn<ProcessResponseEntity> process = Rxn<ProcessResponseEntity>();
-
   final RxList<ShareFormModel> shares = <ShareFormModel>[].obs;
 
   static const int unitinsId = 2;
   static const String unitinsName = "Universidade Estadual do Tocantins";
-
   static const double universityFixedPercentage = 70.0;
   static const double creatorMinimumPercentage = 5.0;
 
   int get processId => process.value?.id ?? 0;
-
   String get processTitle => process.value?.title ?? "Carregando processo...";
-
   int? get changeRequestId => null;
 
   double get totalPercentage {
-    return shares.fold(
-      0.0,
-      (sum, item) => sum + item.percentage.value,
-    );
+    return shares.fold(0.0, (sum, item) => sum + item.percentage.value);
   }
 
   double get remainingPercentage {
-    return 100 - totalPercentage;
+    return 100.0 - totalPercentage;
   }
 
   bool get isTotalValid {
@@ -47,32 +38,45 @@ class ProcessRoyaltyDistributionController extends GetxController {
   }
 
   ShareFormModel? get creatorShare {
-    return shares.firstWhereOrNull(
-      (item) => item.type == ShareType.creator,
-    );
+    return shares.firstWhereOrNull((item) => item.type == ShareType.creator);
   }
 
   @override
   void onInit() {
     super.onInit();
+    // onInit agora fica vazio ou só com inicializações simples
+  }
 
-    final args = Get.arguments as Map<String, dynamic>?;
+  @override
+  void onReady() {
+    super.onReady();
 
-    final id = args?['processId'] as int?;
+    // 1. Tenta pegar o ID direto da URL bonita que você montou
+    String? idStr = Get.parameters['id'];
+    int? id;
+
+    if (idStr != null) {
+      id = int.tryParse(idStr);
+    } else {
+      // 2. Se por acaso não vier na URL, tenta pegar nos argumentos como fallback
+      final args = Get.arguments as Map<String, dynamic>?;
+      id = args?['processId'] as int?;
+    }
 
     if (id == null) {
+      // Como estamos no onReady, o Toast e o Get.back não vão quebrar a tela!
       AppToast.error("ID do processo não informado.");
       Get.back();
       return;
     }
 
+    // Se achou o ID, manda buscar!
     getProcessById(id);
   }
 
   Future<void> getProcessById(int id) async {
     try {
       isLoading.value = true;
-
       final result = await _getProcessById(id);
 
       result.fold(
@@ -95,16 +99,13 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
   void _buildSharesFromProcess(ProcessResponseEntity process) {
     shares.clear();
-
     final creator = process.creator;
-
-    final members = process.authors.where((author) {
-      return author.id != creator.id;
-    }).toList();
+    final members = process.authors
+        .where((author) => author.id != creator.id)
+        .toList();
 
     final availableForMembers =
-        100 - universityFixedPercentage - creatorMinimumPercentage;
-
+        100.0 - universityFixedPercentage - creatorMinimumPercentage;
     final memberPercentages = _distributePercentage(
       total: availableForMembers,
       quantity: members.length,
@@ -132,7 +133,6 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
     for (int i = 0; i < members.length; i++) {
       final member = members[i];
-
       shares.add(
         ShareFormModel(
           type: ShareType.member,
@@ -151,81 +151,114 @@ class ProcessRoyaltyDistributionController extends GetxController {
     required double total,
     required int quantity,
   }) {
-    if (quantity <= 0) {
-      return [];
-    }
-
+    if (quantity <= 0) return [];
     final base = double.parse((total / quantity).toStringAsFixed(2));
-
     final values = List<double>.filled(quantity, base);
-
-    final currentTotal = values.fold(
-      0.0,
-      (sum, value) => sum + value,
-    );
-
-    final difference = double.parse(
-      (total - currentTotal).toStringAsFixed(2),
-    );
-
+    final currentTotal = values.fold(0.0, (sum, value) => sum + value);
+    final difference = double.parse((total - currentTotal).toStringAsFixed(2));
     values[quantity - 1] = double.parse(
       (values.last + difference).toStringAsFixed(2),
     );
-
     return values;
   }
 
   String _getUserName(ProcessUserEntity user) {
-    if (user.fullName.trim().isNotEmpty) {
-      return user.fullName;
-    }
-
-    if ((user.email ?? '').trim().isNotEmpty) {
-      return user.email!;
-    }
-
+    if (user.fullName.trim().isNotEmpty) return user.fullName;
+    if ((user.email ?? '').trim().isNotEmpty) return user.email!;
     return "Usuário #${user.id}";
   }
 
-  void updatePercentage(int index, double value) {
-    final share = shares[index];
+  void updatePercentage(int index, double newValue, {bool fromText = false}) {
+    final targetShare = shares[index];
 
-    if (share.isLocked) {
+    if (targetShare.isLocked) {
       AppToast.warning("A cota da universidade é fixa em 70%.");
       return;
     }
 
-    if (share.type == ShareType.creator &&
-        value < creatorMinimumPercentage) {
-      value = creatorMinimumPercentage;
+    double originalNewValue = newValue;
 
-      AppToast.warning(
-        "O criador não pode ter menos de ${creatorMinimumPercentage.toStringAsFixed(0)}%.",
-      );
+    if (newValue < targetShare.minPercentage) {
+      newValue = targetShare.minPercentage;
     }
 
-    final normalized = double.parse(value.toStringAsFixed(2));
+    double lockedSum = shares
+        .where((s) => s.isLocked)
+        .fold(0.0, (sum, s) => sum + s.percentage.value);
+    double maxAllowed = 100.0 - lockedSum;
 
-    share.percentage.value = normalized;
-    share.percentageController.text = normalized.toStringAsFixed(2);
+    double reservedMin = shares
+        .where((s) => !s.isLocked && s != targetShare)
+        .fold(0.0, (sum, s) => sum + s.minPercentage);
+
+    if (newValue > (maxAllowed - reservedMin)) {
+      newValue = maxAllowed - reservedMin;
+    }
+
+    final oldValue = targetShare.percentage.value;
+    double delta = newValue - oldValue;
+
+    if (delta == 0) return;
+
+    targetShare.percentage.value = double.parse(newValue.toStringAsFixed(2));
+
+    if (!fromText || newValue != originalNewValue) {
+      targetShare.percentageController.text = targetShare.percentage.value
+          .toStringAsFixed(2);
+    }
+
+    var otherShares = shares
+        .where((s) => !s.isLocked && s != targetShare)
+        .toList();
+    if (otherShares.isNotEmpty) {
+      double deltaPerShare = delta / otherShares.length;
+
+      for (var other in otherShares) {
+        double newOtherValue = other.percentage.value - deltaPerShare;
+
+        if (newOtherValue < other.minPercentage) {
+          newOtherValue = other.minPercentage;
+        }
+
+        other.percentage.value = double.parse(newOtherValue.toStringAsFixed(2));
+        other.percentageController.text = other.percentage.value
+            .toStringAsFixed(2);
+      }
+
+      _fixRounding(targetShare);
+    }
 
     shares.refresh();
+  }
+
+  void _fixRounding(ShareFormModel targetShare) {
+    double currentTotal = shares.fold(
+      0.0,
+      (sum, s) => sum + s.percentage.value,
+    );
+    double diff = 100.0 - currentTotal;
+
+    if (diff != 0) {
+      var flexibleShares = shares.where((s) => !s.isLocked && s != targetShare);
+
+      var flexibleShare = flexibleShares.isNotEmpty
+          ? flexibleShares.last
+          : null;
+
+      if (flexibleShare != null) {
+        flexibleShare.percentage.value = double.parse(
+          (flexibleShare.percentage.value + diff).toStringAsFixed(2),
+        );
+        flexibleShare.percentageController.text = flexibleShare.percentage.value
+            .toStringAsFixed(2);
+      }
+    }
   }
 
   void requestUniversityChange() {
     AppToast.warning(
       "Para alterar a cota da universidade é necessário solicitar uma alteração.",
     );
-
-    // Quando tiver a tela de solicitação:
-    //
-    // Get.toNamed(
-    //   '/royalty-change-request',
-    //   arguments: {
-    //     'processId': processId,
-    //     'currentPercentage': universityFixedPercentage,
-    //   },
-    // );
   }
 
   bool validate() {
@@ -235,7 +268,6 @@ class ProcessRoyaltyDistributionController extends GetxController {
     }
 
     final creator = creatorShare;
-
     if (creator == null) {
       AppToast.warning("Criador não encontrado na distribuição.");
       return false;
@@ -270,24 +302,16 @@ class ProcessRoyaltyDistributionController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
 
     if (!validate()) return;
-
     final json = buildJson();
-
     debugPrint(json.toString());
-
     AppToast.success("Distribuição de cotas criada com sucesso!");
-
-    // Aqui depois você chama seu usecase de salvar distribuição.
-    //
-    // await _createRoyaltyDistribution(
-    //   ProcessRoyaltyDistributionRequestEntity.fromJson(json),
-    // );
   }
 
   void _syncControllers() {
     for (final share in shares) {
-      share.percentageController.text =
-          share.percentage.value.toStringAsFixed(2);
+      share.percentageController.text = share.percentage.value.toStringAsFixed(
+        2,
+      );
     }
   }
 
@@ -296,7 +320,6 @@ class ProcessRoyaltyDistributionController extends GetxController {
     for (final share in shares) {
       share.dispose();
     }
-
     super.onClose();
   }
 }

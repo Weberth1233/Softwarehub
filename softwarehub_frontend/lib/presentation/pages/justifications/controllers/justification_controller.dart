@@ -53,7 +53,6 @@ class JustificationController extends GetxController {
       onSuccess: () async {
         reasonController.clear();
         Get.back(result: idProcess);
-
       },
     );
   }
