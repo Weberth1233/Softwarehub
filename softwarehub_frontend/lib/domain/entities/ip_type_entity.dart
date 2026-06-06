@@ -25,6 +25,7 @@ class IpTypeFieldEntity {
   final String name;
   final String type;
   final bool requiredField;
+  final String helpText;
   final String? placeholder;
   final int? order;
   final IpTypeFieldValidationEntity? validation;
@@ -36,6 +37,7 @@ class IpTypeFieldEntity {
     required this.name,
     required this.type,
     required this.requiredField,
+    required this.helpText,
     this.placeholder,
     this.order,
     this.validation,

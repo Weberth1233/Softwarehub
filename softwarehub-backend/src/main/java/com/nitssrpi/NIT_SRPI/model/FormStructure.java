@@ -22,6 +22,10 @@ public class FormStructure {
         private String type;
         private Boolean required;
         private String placeholder;
+
+        // Novo campo para texto explicativo do campo
+        private String helpText;
+
         private Integer order;
         private Validation validation;
         private List<Option> options;

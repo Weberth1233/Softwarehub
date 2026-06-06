@@ -1,10 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:nit_sgpi_frontend/domain/entities/process/process_response_entity.dart';
 import '../../../domain/entities/nice_classification_entity.dart';
+import '../../../domain/entities/process/process_response_entity.dart';
 import 'controllers/process_detail_controller.dart';
 
 class ProcessDetailPage extends StatefulWidget {
@@ -1838,7 +1836,11 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           context,
           label: fieldDef.name,
           value: value != null && value.toString().trim().isNotEmpty
-              ? value.toString()
+              ? value.toString() == 'YES'
+                    ? "SIM"
+                    : value.toString() == "NO"
+                    ? "NÃO"
+                    : value.toString()
               : 'Não informado',
           type: fieldDef.type,
         );

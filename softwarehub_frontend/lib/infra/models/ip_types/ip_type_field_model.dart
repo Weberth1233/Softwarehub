@@ -8,6 +8,7 @@ class IpTypeFieldModel {
   final String name;
   final String type;
   final bool requiredField;
+  final String helpText;
   final String? placeholder;
   final int? order;
   final IpTypeFieldValidationModel? validation;
@@ -19,6 +20,7 @@ class IpTypeFieldModel {
     required this.name,
     required this.type,
     required this.requiredField,
+    required this.helpText,
     this.placeholder,
     this.order,
     this.validation,
@@ -32,6 +34,7 @@ class IpTypeFieldModel {
       name: json['name'] ?? '',
       type: json['type'] ?? 'text',
       requiredField: json['required'] ?? false,
+      helpText: json["helpText"] ?? '',
       placeholder: json['placeholder'],
       order: json['order'],
       validation: json['validation'] != null
@@ -56,6 +59,7 @@ class IpTypeFieldModel {
       name: entity.name,
       type: entity.type,
       requiredField: entity.requiredField,
+      helpText: entity.helpText,
       placeholder: entity.placeholder,
       order: entity.order,
       validation: entity.validation != null
@@ -90,6 +94,7 @@ class IpTypeFieldModel {
       name: name,
       type: type,
       requiredField: requiredField,
+      helpText: helpText,
       placeholder: placeholder,
       order: order,
       validation: validation?.toEntity(),

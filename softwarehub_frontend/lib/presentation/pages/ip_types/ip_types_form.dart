@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/presentation/shared/widgets/custom_text_field.dart';
-
+import '../../shared/widgets/custom_text_field.dart';
 import 'controllers/ip_types_form_controller.dart';
 
 class IpTypesForm extends GetView<IpTypesFormController> {
@@ -134,25 +133,9 @@ class IpTypesForm extends GetView<IpTypesFormController> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        text: field.name,
-                                        style:
-                                            theme.textTheme.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black87,
-                                        ),
-                                        children: [
-                                          if (field.requiredField)
-                                            const TextSpan(
-                                              text: ' *',
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                        ],
-                                      ),
+                                    _buildFieldLabel(
+                                      context: context,
+                                      field: field,
                                     ),
                                     const SizedBox(height: 8),
                                     _buildDynamicField(
@@ -208,6 +191,66 @@ class IpTypesForm extends GetView<IpTypesFormController> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFieldLabel({
+    required BuildContext context,
+    required dynamic field,
+  }) {
+    final theme = Theme.of(context);
+    final helpText = field.helpText?.toString().trim() ?? "";
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Flexible(
+          child: RichText(
+            text: TextSpan(
+              text: field.name,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              children: [
+                if (field.requiredField)
+                  const TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        if (helpText.isNotEmpty) ...[
+          const SizedBox(width: 6),
+          Tooltip(
+            message: helpText,
+            triggerMode: TooltipTriggerMode.tap,
+            showDuration: const Duration(seconds: 6),
+            waitDuration: const Duration(milliseconds: 300),
+            preferBelow: false,
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            textStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              height: 1.35,
+            ),
+            child: const Icon(
+              Icons.help_outline,
+              size: 18,
+              color: Color(0xFF094E9A),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
