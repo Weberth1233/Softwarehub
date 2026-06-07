@@ -173,21 +173,31 @@ public class ProcessService {
         return repository.findAll(specs, pageRequest);
     }
 
-    public Page<Process> userProcesses(String title, StatusProcess statusProcess, Integer page, Integer pageSize) {
+    public Page<Process> userProcesses(
+            String title,
+            StatusProcess statusProcess,
+            Integer page,
+            Integer pageSize
+    ) {
         User user = securityService.getAuthenticatedUser();
-        if(user.getRole() == UserRole.USER){
-            Specification<Process> specs = Specification.where(ProcessSpecs.equalCreatorId(user.getId()));
+        if (user.getRole() == UserRole.USER) {
+            Specification<Process> specs = Specification.where(
+                    ProcessSpecs.creatorOrAuthor(user.getId())
+            );
             if (title != null && !title.isEmpty()) {
                 specs = specs.and(ProcessSpecs.likeTitle(title));
             }
             if (statusProcess != null) {
                 specs = specs.and(ProcessSpecs.equalStatusProcess(statusProcess));
             }
-            Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Pageable pageable = PageRequest.of(
+                    page,
+                    pageSize,
+                    Sort.by(Sort.Direction.DESC, "createdAt")
+            );
             return repository.findAll(specs, pageable);
-        }else {
-            return searchProcess(title, statusProcess, page, pageSize);
         }
+        return searchProcess(title, statusProcess, page, pageSize);
     }
 
     public void updateStatus(Long id, StatusProcess newStatus) {

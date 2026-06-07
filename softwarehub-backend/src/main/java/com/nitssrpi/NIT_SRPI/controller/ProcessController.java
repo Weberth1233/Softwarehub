@@ -103,6 +103,7 @@ public class ProcessController implements GenericController{
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(name = "page-size", defaultValue = "10") Integer pageSize
     ) {
+
         Page<ProcessResponseDTO> result =
                 service.userProcesses(title,statusProcess, page, pageSize)
                         .map(mapper::toDTO);
