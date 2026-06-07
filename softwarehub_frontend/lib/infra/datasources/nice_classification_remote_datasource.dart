@@ -3,9 +3,9 @@ import '../core/network/api_client.dart';
 import '../core/network/base_url.dart';
 import '../core/network/remote_datasource_helper.dart';
 import '../models/nice_classification_model.dart';
-import 'igeneric_remote_datasource.dart';
+import '../core/datasources/igeneric_remote_datasource.dart';
 
-abstract class INiceClassificationRemoteDatasource extends IGenericRemoteDatasource<NiceClassificationEntity>{}
+abstract class INiceClassificationRemoteDatasource extends IGenericListRemoteDatasource<NiceClassificationEntity>{}
 
 class NiceClassificationRemoteDatasourceImpl implements INiceClassificationRemoteDatasource {
   final RemoteDatasourceHelper helper;

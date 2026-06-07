@@ -3,9 +3,9 @@ import '../core/network/api_client.dart';
 import '../core/network/base_url.dart';
 import '../core/network/remote_datasource_helper.dart';
 import '../models/ip_types/ip_types_model.dart';
-import 'igeneric_remote_datasource.dart';
+import '../core/datasources/igeneric_remote_datasource.dart';
 
-abstract class IIpTypesRemoteDataSource extends IGenericRemoteDatasource<IpTypeEntity>{
+abstract class IIpTypesRemoteDataSource extends IGenericListRemoteDatasource<IpTypeEntity>{
 }
 
 class IpTypesRemoteDataSourceImpl implements IIpTypesRemoteDataSource {

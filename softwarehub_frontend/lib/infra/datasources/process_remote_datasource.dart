@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:get/get_connect.dart';
 import 'package:nit_sgpi_frontend/domain/entities/paged_result_entity.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_response_entity.dart';

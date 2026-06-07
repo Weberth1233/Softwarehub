@@ -4,9 +4,9 @@ import '../core/network/api_client.dart';
 import '../core/network/base_url.dart';
 import '../core/network/remote_datasource_helper.dart';
 import '../models/educational_institution_model.dart';
-import 'igeneric_remote_datasource.dart';
+import '../core/datasources/igeneric_remote_datasource.dart';
 
-abstract class IEducationalInstitutionRemoteDatasource extends IGenericRemoteDatasource<EducationalInstitutionEntity>{
+abstract class IEducationalInstitutionRemoteDatasource extends IGenericListRemoteDatasource<EducationalInstitutionEntity>{
 }
 
 class EducationalInstitutionRemoteDatasource

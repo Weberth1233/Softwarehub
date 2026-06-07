@@ -1,5 +1,10 @@
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/domain/entities/process/process_royalty_distribution_request_entity.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process_royalty_distribution/post_process_royalty_distribution.dart';
+import 'package:nit_sgpi_frontend/infra/models/process/process_royalty_distribution_request_model.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../domain/entities/process/process_user_entity.dart';
 import '../../../../domain/usecases/process/get_process_by_id.dart';
@@ -8,8 +13,12 @@ import '../widgets/share_form_model.dart';
 
 class ProcessRoyaltyDistributionController extends GetxController {
   final GetProcessById _getProcessById;
+  final PostProcessRoyaltyDistribution _postRoyaltyDistribution;
 
-  ProcessRoyaltyDistributionController(this._getProcessById);
+  ProcessRoyaltyDistributionController(
+    this._getProcessById,
+    this._postRoyaltyDistribution,
+  );
 
   final formKey = GlobalKey<FormState>();
   final RxBool isLoading = false.obs;
@@ -44,39 +53,70 @@ class ProcessRoyaltyDistributionController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // onInit agora fica vazio ou só com inicializações simples
+    _loadProcessFromRoute();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  void _loadProcessFromRoute() {
+    final idStr = Get.parameters['id'];
+    final idFromUrl = int.tryParse(idStr ?? '');
 
-    // 1. Tenta pegar o ID direto da URL bonita que você montou
-    String? idStr = Get.parameters['id'];
-    int? id;
+    final args = Get.arguments;
+    final idFromArgs = args is Map<String, dynamic>
+        ? args['processId'] as int?
+        : null;
 
-    if (idStr != null) {
-      id = int.tryParse(idStr);
-    } else {
-      // 2. Se por acaso não vier na URL, tenta pegar nos argumentos como fallback
-      final args = Get.arguments as Map<String, dynamic>?;
-      id = args?['processId'] as int?;
-    }
+    final id = idFromUrl ?? idFromArgs;
+
+    debugPrint('ID DA URL: $idStr');
+    debugPrint('ID USADO NA TELA: $id');
 
     if (id == null) {
-      // Como estamos no onReady, o Toast e o Get.back não vão quebrar a tela!
       AppToast.error("ID do processo não informado.");
       Get.back();
       return;
     }
 
-    // Se achou o ID, manda buscar!
     getProcessById(id);
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+  }
+
+  Future<void> _postProcessRoyaltyDistribution(
+    ProcessRoyaltyDistributionRequestEntity entity,
+  ) async {
+    try {
+      isLoading.value = true;
+      final result = await _postRoyaltyDistribution(entity);
+
+      result.fold(
+        (failure) {
+          AppToast.error(failure.message);
+        },
+        (success) {
+          AppToast.success(success);
+          Get.back(result: process.value!.id);
+        },
+      );
+    } catch (e) {
+      AppToast.error(
+        "Erro inesperado ao cadastrar distribuição de cotas ao processo ${process.value!.id}.",
+      );
+      Get.back();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> getProcessById(int id) async {
     try {
       isLoading.value = true;
+
+      process.value = null;
+      shares.clear();
+
       final result = await _getProcessById(id);
 
       result.fold(
@@ -86,6 +126,8 @@ class ProcessRoyaltyDistributionController extends GetxController {
         },
         (success) {
           process.value = success;
+          debugPrint('ID DA URL USADO: $id');
+          debugPrint('ID RETORNADO DA API: ${success.id}');
           _buildSharesFromProcess(success);
         },
       );
@@ -303,8 +345,11 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
     if (!validate()) return;
     final json = buildJson();
+    final entity = ProcessRoyaltyDistributionRequestModel.fromJson(
+      json,
+    ).toEntity();
+    _postProcessRoyaltyDistribution(entity);
     debugPrint(json.toString());
-    AppToast.success("Distribuição de cotas criada com sucesso!");
   }
 
   void _syncControllers() {

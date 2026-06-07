@@ -1,5 +1,5 @@
 import '../entities/educational_institution_entity.dart';
-import 'generic_repository.dart';
+import '../core/repository/generic_repository.dart';
 
 abstract class IEducationalInstitutionRepository
-    extends IGenericRepository<EducationalInstitutionEntity> {}
+    extends IGenericListRepository<EducationalInstitutionEntity> {}

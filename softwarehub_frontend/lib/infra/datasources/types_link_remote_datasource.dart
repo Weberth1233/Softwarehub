@@ -4,9 +4,9 @@ import '../core/network/api_client.dart';
 import '../core/network/base_url.dart';
 import '../core/network/remote_datasource_helper.dart';
 import '../models/types_link_model.dart';
-import 'igeneric_remote_datasource.dart';
+import '../core/datasources/igeneric_remote_datasource.dart';
 
-abstract class ITypesLinkRemoteDatasource extends IGenericRemoteDatasource<TypesLinkEntity>{}
+abstract class ITypesLinkRemoteDatasource extends IGenericListRemoteDatasource<TypesLinkEntity>{}
 
 class TypesLinkRemoteDatasource implements ITypesLinkRemoteDatasource {
   final RemoteDatasourceHelper helper;

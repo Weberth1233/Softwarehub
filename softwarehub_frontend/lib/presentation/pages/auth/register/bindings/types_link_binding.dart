@@ -14,7 +14,7 @@ class TypesLinkBinding {
 
     Get.lazyPut<ITypesLinkRepository>(
       () => TypesLinkRepositoryImpl(
-        remoteDatasource: Get.find<ITypesLinkRemoteDatasource>(),
+        remoteDataSource: Get.find<ITypesLinkRemoteDatasource>(),
       ),
       fenix: true,
     );

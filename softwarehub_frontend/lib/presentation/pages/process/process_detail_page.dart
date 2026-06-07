@@ -1671,18 +1671,21 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               ),
             ),
           ),
+
           ElevatedButton(
-            onPressed: () {
-              /*Get.offAllNamed(
-                '/process-royalty-distribution',
-                arguments: {'processId': process.id},
-              );*/
-              Get.toNamed(
-                '/home/process-detail/${controller.process.value!.id}/royalty-distribution',
+            onPressed: () async {
+              print(process.title);
+              print(process.id);
+              final result = await Get.toNamed(
+                '/home/process-detail/${process.id}/royalty-distribution',
               );
+              if (result != null && result is int) {
+                print("Atualizando o processo");
+                await controller.fetchProcess(result);
+              }
             },
             child: Text(
-              "Distribuir cotas ao processo",
+              "Distribuir cotas ao processo ffff",
               style: TextStyle(color: Colors.white),
             ),
           ),

@@ -1,4 +1,4 @@
 import '../entities/types_link_entity.dart';
-import 'generic_repository.dart';
+import '../core/repository/generic_repository.dart';
 
-abstract class ITypesLinkRepository extends IGenericRepository<TypesLinkEntity>{}
+abstract class ITypesLinkRepository extends IGenericListRepository<TypesLinkEntity>{}
