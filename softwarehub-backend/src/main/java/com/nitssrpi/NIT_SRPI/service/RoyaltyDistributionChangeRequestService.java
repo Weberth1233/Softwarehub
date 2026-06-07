@@ -8,6 +8,7 @@ import com.nitssrpi.NIT_SRPI.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -54,6 +55,8 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
         Process process = processRepository.findById(processId)
                 .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado."));
 
+        validateCanCreateChangeRequest(process);
+
         User requestedBy = userRepository.findById(requestedById)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário solicitante não encontrado."));
 
@@ -78,14 +81,14 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
         changeRequest.setReviewedAt(null);
         changeRequest.setRejectionReason(null);
 
-        return repository.save(changeRequest);
-    }
+        /*
+         * Como foi criada uma solicitação relacionada às cotas,
+         * o processo fica marcado como cotas distribuídas.
+         */
+        process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
+        processRepository.save(process);
 
-    private void validateAttachment(RoyaltyDistributionChangeRequest changeRequest) {
-        if (changeRequest.getAttachment() == null ||
-                changeRequest.getAttachment().getId() == null) {
-            throw new IllegalArgumentException("O anexo da solicitação é obrigatório.");
-        }
+        return repository.save(changeRequest);
     }
 
     @Transactional
@@ -105,6 +108,14 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
         changeRequest.setReviewedBy(reviewedBy);
         changeRequest.setReviewedAt(LocalDateTime.now());
         changeRequest.setRejectionReason(null);
+
+        /*
+         * Aqui você pode aplicar a alteração da distribuição,
+         * caso seu fluxo faça isso na aprovação.
+         *
+         * Exemplo:
+         * distributionService.applyChangeRequest(changeRequest);
+         */
 
         return repository.save(changeRequest);
     }
@@ -185,12 +196,6 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
         }
     }
 
-    private void validateReviewedBy(User reviewedBy) {
-        if (reviewedBy == null || reviewedBy.getId() == null) {
-            throw new IllegalArgumentException("O usuário responsável pela análise é obrigatório.");
-        }
-    }
-
     private void validateRequestedPercentage(RoyaltyDistributionChangeRequest changeRequest) {
         if (changeRequest.getRequestedUniversityPercentage() == null) {
             throw new IllegalArgumentException("O novo percentual da universidade é obrigatório.");
@@ -212,6 +217,13 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
         }
     }
 
+    private void validateAttachment(RoyaltyDistributionChangeRequest changeRequest) {
+        if (changeRequest.getAttachment() == null ||
+                changeRequest.getAttachment().getId() == null) {
+            throw new IllegalArgumentException("O anexo da solicitação é obrigatório.");
+        }
+    }
+
     private void validateNoPendingRequest(RoyaltyDistributionChangeRequest changeRequest) {
         Long processId = changeRequest.getProcess().getId();
 
@@ -224,6 +236,32 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
         if (hasPendingRequest) {
             throw new DuplicateRecordException(
                     "Já existe uma solicitação de alteração pendente para esse processo."
+            );
+        }
+    }
+
+    private void validateCanCreateChangeRequest(Process process) {
+        if (process.getStatus() == StatusProcess.FINALIZADO) {
+            throw new IllegalArgumentException(
+                    "Não é possível criar solicitação de alteração para um processo finalizado."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.INATIVO) {
+            throw new IllegalArgumentException(
+                    "Não é possível criar solicitação de alteração para um processo inativo."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.CORRECAO) {
+            throw new IllegalArgumentException(
+                    "O processo está em correção. Finalize a correção antes de solicitar alteração de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.PENDENTE_DISTRIBUICAO_COTAS) {
+            throw new IllegalArgumentException(
+                    "O processo ainda não possui distribuição de cotas para ser alterada."
             );
         }
     }

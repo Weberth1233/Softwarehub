@@ -7,7 +7,7 @@ import 'package:nit_sgpi_frontend/infra/core/network/api_client.dart';
 import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
 import 'package:nit_sgpi_frontend/infra/models/process/proces_status_count_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/process/process_request_model.dart';
-import 'package:nit_sgpi_frontend/infra/utils/error_formatter%20.dart';
+import 'package:nit_sgpi_frontend/infra/utils/error_formatter.dart';
 
 import '../../domain/core/errors/exceptions.dart';
 import '../models/paged_result_model.dart';

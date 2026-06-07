@@ -3,6 +3,7 @@ import 'package:nit_sgpi_frontend/domain/entities/justification_request_entity.d
 import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
 import 'package:nit_sgpi_frontend/infra/models/justification_request_model.dart';
 import '../core/network/api_client.dart';
+import '../utils/error_formatter.dart';
 
 abstract class IJustificationRemoteDataSource{
   Future<String> postJustification(JustificationRequestEntity justification);
@@ -31,9 +32,7 @@ class JustificationRemoteDatasourceImpl implements IJustificationRemoteDataSourc
       } else if (response.statusCode == 422) {
         return response.body;
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} erro no cadastro! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     }on ServerException {
       rethrow; // 👈 mantém a exception original
@@ -53,9 +52,7 @@ class JustificationRemoteDatasourceImpl implements IJustificationRemoteDataSourc
       }else if(response.statusCode == 404){
         return "Não encontrou justificativa na base de dados!";
       }else {
-        throw ServerException(
-          'Erro ${response.statusCode} erro na deleção! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     }on ServerException {
       rethrow; // 👈 mantém a exception original
@@ -80,9 +77,9 @@ class JustificationRemoteDatasourceImpl implements IJustificationRemoteDataSourc
       } else if (response.statusCode == 422) {
         return response.body;
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} erro no cadastro! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
+
+        
       }
     }on ServerException {
       rethrow; // 👈 mantém a exception original
@@ -92,6 +89,4 @@ class JustificationRemoteDatasourceImpl implements IJustificationRemoteDataSourc
       throw NetworkException("Erro de conexão com o servidor!");
     }
   }
-
-  
 }

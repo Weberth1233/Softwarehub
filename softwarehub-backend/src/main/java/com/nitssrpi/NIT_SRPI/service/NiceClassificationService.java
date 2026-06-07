@@ -1,6 +1,7 @@
 package com.nitssrpi.NIT_SRPI.service;
 import com.nitssrpi.NIT_SRPI.model.NiceClassification;
 import com.nitssrpi.NIT_SRPI.repository.NiceClassificationRepository;
+import com.nitssrpi.NIT_SRPI.repository.ProcessRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class NiceClassificationService {
     private final NiceClassificationRepository repository;
+    private final ProcessRepository processRepository;
 
     public NiceClassification save(NiceClassification niceClassification){
         return repository.save(niceClassification);

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:nit_sgpi_frontend/infra/utils/error_formatter.dart';
+
 import '../../../domain/core/errors/exceptions.dart';
 import 'api_client.dart';
 
@@ -13,10 +15,7 @@ class RemoteDatasourceHelper {
     return json.decode(body);
   }
 
-  bool _isSuccessStatus(
-    int statusCode,
-    List<int> successStatusCodes,
-  ) {
+  bool _isSuccessStatus(int statusCode, List<int> successStatusCodes) {
     return successStatusCodes.contains(statusCode);
   }
 
@@ -25,9 +24,7 @@ class RemoteDatasourceHelper {
     required String body,
     String? errorMessage,
   }) {
-    return ServerException(
-      errorMessage ?? 'Erro $statusCode! - Detalhes: $body',
-    );
+    return ServerException(ApiErrorFormatter.formatFromBody(body));
   }
 
   Future<List<T>> getList<T>({
@@ -38,18 +35,13 @@ class RemoteDatasourceHelper {
     List<int> successStatusCodes = const [200],
   }) async {
     try {
-      final response = await apiClient.get(
-        url,
-        authenticated: authenticated,
-      );
+      final response = await apiClient.get(url, authenticated: authenticated);
 
       if (_isSuccessStatus(response.statusCode, successStatusCodes)) {
         final decoded = _decodeBody(response.body) as List<dynamic>;
 
         return decoded
-            .map(
-              (item) => fromJson(item as Map<String, dynamic>),
-            )
+            .map((item) => fromJson(item as Map<String, dynamic>))
             .toList();
       }
 
@@ -60,7 +52,7 @@ class RemoteDatasourceHelper {
       );
     } on ServerException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw NetworkException('Erro de conexão com o servidor!');
     }
   }
@@ -73,10 +65,7 @@ class RemoteDatasourceHelper {
     List<int> successStatusCodes = const [200],
   }) async {
     try {
-      final response = await apiClient.get(
-        url,
-        authenticated: authenticated,
-      );
+      final response = await apiClient.get(url, authenticated: authenticated);
 
       if (_isSuccessStatus(response.statusCode, successStatusCodes)) {
         final decoded = _decodeBody(response.body) as Map<String, dynamic>;
@@ -91,7 +80,7 @@ class RemoteDatasourceHelper {
       );
     } on ServerException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw NetworkException('Erro de conexão com o servidor!');
     }
   }
@@ -123,7 +112,7 @@ class RemoteDatasourceHelper {
       );
     } on ServerException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw NetworkException('Erro de conexão com o servidor!');
     }
   }
@@ -155,7 +144,7 @@ class RemoteDatasourceHelper {
       );
     } on ServerException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw NetworkException('Erro de conexão com o servidor!');
     }
   }
@@ -167,7 +156,6 @@ class RemoteDatasourceHelper {
     String? errorMessage,
     bool authenticated = true,
     List<int> successStatusCodes = const [200, 204],
-    String Function(String body)? errorFormatter,
   }) async {
     try {
       final response = await apiClient.patch(
@@ -181,10 +169,6 @@ class RemoteDatasourceHelper {
         return onSuccess(decoded, response.statusCode);
       }
 
-      if (errorFormatter != null) {
-        throw ServerException(errorFormatter(response.body));
-      }
-
       throw _buildServerException(
         statusCode: response.statusCode,
         body: response.body,
@@ -192,7 +176,7 @@ class RemoteDatasourceHelper {
       );
     } on ServerException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw NetworkException('Erro de conexão com o servidor!');
     }
   }
@@ -229,7 +213,7 @@ class RemoteDatasourceHelper {
       );
     } on ServerException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw NetworkException('Erro de conexão com o servidor!');
     }
   }

@@ -14,6 +14,8 @@ class ProcessResponseModel implements BaseModel {
   final int id;
   final String title;
   final String status;
+  final String statusLabel;
+
   final DateTime createdAt;
   final Map<String, dynamic> formData;
   final IpTypeModel ipType;
@@ -29,6 +31,7 @@ class ProcessResponseModel implements BaseModel {
     required this.id,
     required this.title,
     required this.status,
+    required this.statusLabel,
     required this.createdAt,
     required this.formData,
     required this.ipType,
@@ -46,6 +49,7 @@ class ProcessResponseModel implements BaseModel {
       id: json['id'],
       title: json['title'],
       status: json['status'],
+      statusLabel: json['statusLabel'],
       createdAt: DateTime.parse(json['createdAt']),
       formData: Map<String, dynamic>.from(json['formData'] ?? {}),
       ipType: IpTypeModel.fromJson(json['ipType']),
@@ -55,18 +59,10 @@ class ProcessResponseModel implements BaseModel {
               Map<String, dynamic>.from(json['niceClassification']),
             ),
       authors: (json['authors'] as List? ?? [])
-          .map(
-            (e) => ProcessUserModel.fromJson(
-              Map<String, dynamic>.from(e),
-            ),
-          )
+          .map((e) => ProcessUserModel.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
       attachments: (json['attachments'] as List? ?? [])
-          .map(
-            (e) => AttachmentModel.fromJson(
-              Map<String, dynamic>.from(e),
-            ),
-          )
+          .map((e) => AttachmentModel.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
       justifications: (json['justifications'] as List? ?? [])
           .map(
@@ -78,9 +74,7 @@ class ProcessResponseModel implements BaseModel {
       creator: ProcessUserModel.fromJson(json['creator']),
       externalAuthors: (json['externalAuthors'] as List? ?? [])
           .map(
-            (e) => ExternalAuthorModel.fromJson(
-              Map<String, dynamic>.from(e),
-            ),
+            (e) => ExternalAuthorModel.fromJson(Map<String, dynamic>.from(e)),
           )
           .toList(),
       royaltyDistributions: (json['royaltyDistributions'] as List? ?? [])
@@ -99,6 +93,7 @@ class ProcessResponseModel implements BaseModel {
       id: id,
       title: title,
       status: status,
+      statusLabel: statusLabel,
       createdAt: createdAt,
       formData: formData,
       ipType: ipType.toEntity(),

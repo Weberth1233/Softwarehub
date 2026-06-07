@@ -24,12 +24,8 @@ class ProcessCard extends StatelessWidget {
 
     
     String textCorrect(){
-      if(item.status == "CORRECAO"){
-        return "CORREÇÃO";
-      }else if(item.status == "EM_ANDAMENTO"){
-        return "EM ANDAMENTO";
-      }
-      return item.status;
+      
+      return item.statusLabel;
 
     }
 

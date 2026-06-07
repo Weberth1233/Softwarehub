@@ -1,5 +1,7 @@
 package com.nitssrpi.NIT_SRPI.service;
+
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
+import com.nitssrpi.NIT_SRPI.controller.exceptions.OperationNotAllowedException;
 import com.nitssrpi.NIT_SRPI.generic.service.GenericServiceImpl;
 import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.model.Process;
@@ -10,14 +12,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
-import java.util.Objects;
-import com.nitssrpi.NIT_SRPI.model.ChangeRequestStatus;
-import com.nitssrpi.NIT_SRPI.model.ProcessRoyaltyDistribution;
-import com.nitssrpi.NIT_SRPI.model.RoyaltyDistributionChangeRequest;
-import com.nitssrpi.NIT_SRPI.model.RoyaltyDistributionStatus;
-import com.nitssrpi.NIT_SRPI.model.RoyaltyShare;
-import com.nitssrpi.NIT_SRPI.model.RoyaltyShareType;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -54,22 +50,29 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
 
         distribution.setProcess(process);
 
+        boolean isInitialDistribution = distribution.getChangeRequest() == null ||
+                distribution.getChangeRequest().getId() == null;
+
+        if (isInitialDistribution) {
+            validateCanCreateInitialDistribution(process);
+        } else {
+            validateCanCreateDistributionFromChangeRequest(process);
+        }
+
         Integer nextVersion = getNextVersion(processId);
         distribution.setVersion(nextVersion);
 
-        if (distribution.getChangeRequest() == null ||
-                distribution.getChangeRequest().getId() == null) {
-
+        if (isInitialDistribution) {
             prepareInitialDistribution(distribution, processId);
-
         } else {
-
             prepareDistributionFromApprovedChangeRequest(distribution);
         }
 
         validateDistribution(distribution);
         validateSharesParticipants(distribution, process);
         bindSharesToDistribution(distribution);
+
+        process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
 
         return repository.save(distribution);
     }
@@ -100,12 +103,16 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
             throw new DuplicateRecordException("Essa distribuição já está ativa.");
         }
 
+        Process process = newDistribution.getProcess();
+
+        validateCanActivateDistribution(process);
+
         validateDistribution(newDistribution);
-        validateSharesParticipants(newDistribution, newDistribution.getProcess());
+        validateSharesParticipants(newDistribution, process);
 
         ProcessRoyaltyDistribution activeDistribution =
                 repository.findByProcessIdAndStatus(
-                        newDistribution.getProcess().getId(),
+                        process.getId(),
                         RoyaltyDistributionStatus.ACTIVE
                 ).orElse(null);
 
@@ -115,6 +122,12 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         }
 
         newDistribution.setStatus(RoyaltyDistributionStatus.ACTIVE);
+
+        /*
+         * Ao ativar uma nova distribuição, o processo continua/volta
+         * para cotas distribuídas, aguardando análise/classificação.
+         */
+        process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
 
         return repository.save(newDistribution);
     }
@@ -163,6 +176,92 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         return repository.findTopByProcessIdOrderByVersionDesc(processId)
                 .map(lastDistribution -> lastDistribution.getVersion() + 1)
                 .orElse(1);
+    }
+
+    private void validateCanCreateInitialDistribution(Process process) {
+        if (process.getStatus() == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException(
+                    "Processo finalizado não permite distribuição de cotas."
+            );
+        }
+        if (process.getStatus() == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException(
+                    "Processo inativo não permite distribuição de cotas."
+            );
+        }
+        if (process.getStatus() == StatusProcess.CORRECAO) {
+            throw new OperationNotAllowedException(
+                    "Processo em correção não permite distribuição de cotas antes de ser corrigido."
+            );
+        }
+        if (process.getStatus() == StatusProcess.CLASSIFICADO) {
+            throw new OperationNotAllowedException(
+                    "Processo classificado não permite nova distribuição inicial de cotas."
+            );
+        }
+        if (process.getStatus() == StatusProcess.COTAS_DISTRIBUIDAS) {
+            throw new OperationNotAllowedException(
+                    "Esse processo já possui cotas distribuídas."
+            );
+        }
+        boolean statusPermitido =
+                process.getStatus() == StatusProcess.PENDENTE_DISTRIBUICAO_COTAS ||
+                        process.getStatus() == StatusProcess.CORRIGIDO;
+        if (!statusPermitido) {
+            throw new OperationNotAllowedException(
+                    "A distribuição inicial de cotas só pode ser realizada quando o processo estiver aguardando distribuição de cotas ou corrigido."
+            );
+        }
+    }
+
+    private void validateCanCreateDistributionFromChangeRequest(Process process) {
+        if (process.getStatus() == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException(
+                    "Processo finalizado não permite alteração de distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException(
+                    "Processo inativo não permite alteração de distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.CORRECAO) {
+            throw new OperationNotAllowedException(
+                    "Processo em correção não permite alteração de cotas antes de ser corrigido."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.PENDENTE_DISTRIBUICAO_COTAS) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda não possui distribuição de cotas ativa para ser alterada."
+            );
+        }
+    }
+
+    private void validateCanActivateDistribution(Process process) {
+        if (process == null || process.getId() == null) {
+            throw new IllegalArgumentException("A distribuição não possui processo vinculado.");
+        }
+
+        if (process.getStatus() == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException(
+                    "Processo finalizado não permite ativar nova distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException(
+                    "Processo inativo não permite ativar nova distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.CORRECAO) {
+            throw new OperationNotAllowedException(
+                    "Processo em correção não permite ativar nova distribuição de cotas."
+            );
+        }
     }
 
     private void validateProcess(ProcessRoyaltyDistribution distribution) {

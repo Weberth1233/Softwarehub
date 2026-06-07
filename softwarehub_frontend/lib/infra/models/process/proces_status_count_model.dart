@@ -6,12 +6,14 @@ class ProcessStatusCountModel extends ProcessStatusCountEntity {
   ProcessStatusCountModel({
     required super.status,
     required super.amount,
+    required super.statusLabel 
   });
 
   factory ProcessStatusCountModel.fromJson(Map<String, dynamic> json) {
     return ProcessStatusCountModel(
       status: json['status'] as String,
       amount: json['amount'] as int,
+      statusLabel: json['statusLabel'] as String,
     );
   }
 
@@ -19,6 +21,7 @@ class ProcessStatusCountModel extends ProcessStatusCountEntity {
     return {
       'status': status,
       'amount': amount,
+      'statusLabel': statusLabel
     };
   }
 }

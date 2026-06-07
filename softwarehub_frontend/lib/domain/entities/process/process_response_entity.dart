@@ -10,6 +10,7 @@ class ProcessResponseEntity {
   final int id;
   final String title;
   final String status;
+  final String statusLabel;
   final DateTime createdAt;
   final Map<String, dynamic> formData;
   final IpTypeEntity ipType;
@@ -25,6 +26,7 @@ class ProcessResponseEntity {
     required this.id,
     required this.title,
     required this.status,
+    required this.statusLabel,
     required this.createdAt,
     required this.formData,
     required this.ipType,
@@ -36,4 +38,5 @@ class ProcessResponseEntity {
     required this.niceClassificationModel,
     required this.royaltyDistributions,
   });
+
 }

@@ -18,9 +18,36 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String status = "";
-    Color color = Colors.green;
+   
     final theme = Theme.of(context);
+
+    Color getStatusColor(String status) {
+      switch (status) {
+        case "PENDENTE_DISTRIBUICAO_COTAS":
+          return const Color.fromARGB(255, 228, 206, 11);
+
+        case "COTAS_DISTRIBUIDAS":
+          return Colors.blue;
+
+        case "CORRECAO":
+          return Colors.red;
+
+        case "CORRIGIDO":
+          return Colors.orange;
+
+        case "CLASSIFICADO":
+          return Colors.purple;
+
+        case "FINALIZADO":
+          return Colors.green;
+
+        case "INATIVO":
+          return Colors.grey;
+
+        default:
+          return Colors.grey;
+      }
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFCBD5E1),
@@ -323,21 +350,9 @@ class HomePage extends StatelessWidget {
                                 runSpacing: 16,
                                 children: processController.processesStatus.map(
                                   (item) {
-                                    if (item.status == "CORRECAO") {
-                                      status = "CORREÇÃO";
-                                      color = Colors.red;
-                                    } else if (item.status == "EM_ANDAMENTO") {
-                                      status = " EM ANDAMENTO";
-                                      color = const Color.fromARGB(
-                                        255,
-                                        228,
-                                        206,
-                                        11,
-                                      );
-                                    } else {
-                                      status = item.status;
-                                      color = Colors.green;
-                                    }
+                                
+                                    final color = getStatusColor(item.status);
+
                                     return Container(
                                       height: 55,
                                       width: 260,
@@ -349,7 +364,7 @@ class HomePage extends StatelessWidget {
                                         color: Colors.white,
                                         borderRadius: BorderRadius.circular(30),
                                         border: Border.all(
-                                          color: Colors.grey.shade400,
+                                          color: color,
                                           width: 1.5,
                                         ),
                                         boxShadow: [
@@ -368,7 +383,7 @@ class HomePage extends StatelessWidget {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              status,
+                                              item.statusLabel,
                                               style: const TextStyle(
                                                 decorationColor:
                                                     ThemeColor.greyColor,
@@ -517,8 +532,11 @@ class FilterHeader extends StatefulWidget {
 class _FilterHeaderState extends State<FilterHeader> {
   final List<String> filters = [
     "Todos",
-    "Em andamento",
-    "Correção",
+    "Aguardando distribuição de cotas",
+    "Cotas distribuídas",
+    "Em correção",
+    "Corrigido",
+    "Classificado",
     "Finalizado",
   ];
   int selectedIndex = 0;
@@ -623,9 +641,12 @@ class _FilterHeaderState extends State<FilterHeader> {
               setState(() => selectedIndex = index);
               final statusMap = {
                 0: "",
-                1: "EM_ANDAMENTO",
-                2: "CORRECAO",
-                3: "FINALIZADO",
+                1: "PENDENTE_DISTRIBUICAO_COTAS",
+                2: "COTAS_DISTRIBUIDAS",
+                3: "CORRECAO",
+                4: "CORRIGIDO",
+                5: "CLASSIFICADO",
+                6: "FINALIZADO"
               };
               processController.filterByStatus(statusMap[index]!);
             },

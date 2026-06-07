@@ -5,6 +5,7 @@ import com.nitssrpi.NIT_SRPI.controller.dto.ProcessResponseDTO;
 import com.nitssrpi.NIT_SRPI.model.ExternalAuthor;
 import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.model.Process;
+import com.nitssrpi.NIT_SRPI.model.StatusProcess;
 import com.nitssrpi.NIT_SRPI.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,7 +23,6 @@ public interface ProcessMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", ignore = true)
-//    @Mapping(target = "isFeatured", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
 
@@ -38,7 +38,16 @@ public interface ProcessMapper {
     @Mapping(target = "externalAuthors", source = "externalAuthorsIds")
     Process toEntity(ProcessRequestDTO dto);
 
+    @Mapping(target = "statusLabel", expression = "java(getStatusLabel(process.getStatus()))")
     ProcessResponseDTO toDTO(Process process);
+
+    default String getStatusLabel(StatusProcess status) {
+        if (status == null) {
+            return null;
+        }
+
+        return status.getLabel();
+    }
 
     default IpTypes mapIpTypes(Long id) {
         if (id == null) {

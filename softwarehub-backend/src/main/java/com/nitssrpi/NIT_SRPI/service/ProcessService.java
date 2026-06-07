@@ -1,5 +1,4 @@
 package com.nitssrpi.NIT_SRPI.service;
-
 import com.nitssrpi.NIT_SRPI.Infra.security.SecurityService;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.OperationNotAllowedException;
 import com.nitssrpi.NIT_SRPI.controller.dto.ProcessClassificationRequestDTO;
@@ -25,11 +24,12 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ProcessService {
+
     private final ProcessRepository repository;
     private final UserRepository userRepository;
     private final IpTypesRepository ipTypesRepository;
     private final NiceClassificationRepository niceClassificationRepository;
-    private  final ExternalAuthorRepository externalAuthorRepository;
+    private final ExternalAuthorRepository externalAuthorRepository;
     private final SecurityService securityService;
 
     @Transactional
@@ -37,9 +37,11 @@ public class ProcessService {
         User user = securityService.getAuthenticatedUser();
 
         process.setCreator(user);
-        process.setStatus(StatusProcess.EM_ANDAMENTO);
+        process.setStatus(StatusProcess.PENDENTE_DISTRIBUICAO_COTAS);
         process.setNiceClassification(null);
+
         IpTypes type = prepareProcessBasicRelations(process);
+
         addRequiredAttachments(process, type);
 
         return repository.save(process);
@@ -50,8 +52,17 @@ public class ProcessService {
         if (process.getId() == null) {
             throw new IllegalArgumentException("Para atualizar é necessário informar o ID do processo!");
         }
+
         Process processDb = repository.findById(process.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
+
+        if (processDb.getStatus() == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException("Processo finalizado não pode ser alterado.");
+        }
+
+        if (processDb.getStatus() == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException("Processo inativo não pode ser alterado.");
+        }
 
         processDb.setTitle(process.getTitle());
         processDb.setFormData(process.getFormData());
@@ -62,7 +73,185 @@ public class ProcessService {
         processDb.setAuthors(process.getAuthors());
         processDb.setExternalAuthors(process.getExternalAuthors());
 
+        /*
+         * Se o admin colocou o processo em correção,
+         * quando o usuário atualizar o processo, ele vira CORRIGIDO.
+         */
+        if (processDb.getStatus() == StatusProcess.CORRECAO) {
+            processDb.setStatus(StatusProcess.CORRIGIDO);
+        }
+
         repository.save(processDb);
+    }
+
+    @Transactional
+    public void classifyProcess(Long processId, ProcessClassificationRequestDTO requestDTO) {
+        Process process = repository.findById(processId)
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
+
+        validateCanClassify(process);
+
+        NiceClassification niceClassification =
+                niceClassificationRepository.findById(requestDTO.niceClassCode())
+                        .orElseThrow(() ->
+                                new EntityNotFoundException("Classe NICE não encontrada")
+                        );
+
+        process.setNiceClassification(niceClassification);
+        process.setStatus(StatusProcess.CLASSIFICADO);
+
+        repository.save(process);
+    }
+
+    @Transactional
+    public void updateStatus(Long id, StatusProcess newStatus) {
+        Process process = repository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Processo não encontrado com ID: " + id)
+                );
+
+        validateStatusTransition(process, newStatus);
+
+        process.setStatus(newStatus);
+
+        repository.save(process);
+    }
+
+    private void validateStatusTransition(Process process, StatusProcess newStatus) {
+        StatusProcess currentStatus = process.getStatus();
+
+        if (currentStatus == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException(
+                    "Processo finalizado não pode ter seu status alterado."
+            );
+        }
+
+        if (currentStatus == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException(
+                    "Processo inativo não pode ter seu status alterado."
+            );
+        }
+
+        if (newStatus == StatusProcess.CLASSIFICADO) {
+            validateCanClassify(process);
+        }
+
+        if (newStatus == StatusProcess.FINALIZADO) {
+            validateCanFinish(process);
+        }
+
+        if (newStatus == StatusProcess.CORRIGIDO && currentStatus != StatusProcess.CORRECAO) {
+            throw new OperationNotAllowedException(
+                    "Somente processos em correção podem ser marcados como corrigidos."
+            );
+        }
+    }
+
+    private void validateCanClassify(Process process) {
+        if (process.getStatus() == StatusProcess.PENDENTE_DISTRIBUICAO_COTAS) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda está aguardando a distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.CORRECAO) {
+            throw new OperationNotAllowedException(
+                    "O processo está em correção e não pode ser classificado."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException(
+                    "Processo finalizado não pode ser classificado novamente."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException(
+                    "Processo inativo não pode ser classificado."
+            );
+        }
+
+        validateHasQuotaDistribution(process);
+    }
+
+    private void validateCanFinish(Process process) {
+        if (process.getStatus() == StatusProcess.CORRECAO) {
+            throw new OperationNotAllowedException(
+                    "O processo está em correção e não pode ser finalizado."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.CORRIGIDO) {
+            throw new OperationNotAllowedException(
+                    "O processo foi corrigido e precisa ser classificado antes de ser finalizado."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.PENDENTE_DISTRIBUICAO_COTAS) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda está aguardando a distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.COTAS_DISTRIBUIDAS) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda precisa ser classificado antes de ser finalizado."
+            );
+        }
+
+        if (process.getStatus() != StatusProcess.CLASSIFICADO) {
+            throw new OperationNotAllowedException(
+                    "O processo só pode ser finalizado após ser classificado."
+            );
+        }
+
+        validateHasQuotaDistribution(process);
+
+        validateAllAttachmentsSigned(process);
+
+        if (process.getNiceClassification() == null) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda não foi classificado."
+            );
+        }
+    }
+
+    private void validateHasQuotaDistribution(Process process) {
+        if (process.getRoyaltyDistributions() == null ||
+                process.getRoyaltyDistributions().isEmpty()) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda não possui distribuição de cotas."
+            );
+        }
+
+        boolean hasActiveDistribution = process.getRoyaltyDistributions()
+                .stream()
+                .anyMatch(distribution ->
+                        distribution.getStatus() == RoyaltyDistributionStatus.ACTIVE
+                );
+
+        if (!hasActiveDistribution) {
+            throw new OperationNotAllowedException(
+                    "O processo não possui uma distribuição de cotas ativa."
+            );
+        }
+    }
+
+    private void validateAllAttachmentsSigned(Process process) {
+        if (process.getAttachments() == null || process.getAttachments().isEmpty()) {
+            return;
+        }
+
+        process.getAttachments()
+                .stream()
+                .filter(att -> "PENDING".equalsIgnoreCase(att.getStatus()))
+                .findFirst()
+                .ifPresent(att -> {
+                    throw new OperationNotAllowedException(
+                            "Há documento pendente para assinatura: " + att.getDisplayName()
+                    );
+                });
     }
 
     private void addRequiredAttachments(Process process, IpTypes type) {
@@ -70,8 +259,13 @@ public class ProcessService {
             return;
         }
 
+        if (process.getAttachments() == null) {
+            process.setAttachments(new ArrayList<>());
+        }
+
         for (IpTypeDocument docModelo : type.getRequiredDocuments()) {
             Attachment novoAnexo = new Attachment();
+
             novoAnexo.setDisplayName(docModelo.getDisplayName());
             novoAnexo.setTemplateFilePath(docModelo.getTemplateFilePath());
             novoAnexo.setStatus("PENDING");
@@ -95,28 +289,15 @@ public class ProcessService {
         List<ExternalAuthor> validExternalAuthors = validateExternalAuthors(process.getExternalAuthors());
 
         if (validAuthors.isEmpty() && validExternalAuthors.isEmpty()) {
-            throw new IllegalArgumentException("Necessário adicionar pelo menos um autor interno ou externo ao processo!");
+            throw new IllegalArgumentException(
+                    "Necessário adicionar pelo menos um autor interno ou externo ao processo!"
+            );
         }
 
         process.setAuthors(validAuthors);
         process.setExternalAuthors(validExternalAuthors);
 
         return type;
-    }
-
-
-    @Transactional
-    public void classifyProcess(Long processId, ProcessClassificationRequestDTO requestDTO){
-        Process process = repository.findById(processId).orElseThrow(() ->
-                new EntityNotFoundException("Processo não encontrado")
-        );
-        NiceClassification niceClassification =
-                niceClassificationRepository.findById(requestDTO.niceClassCode())
-                        .orElseThrow(() ->
-                                new EntityNotFoundException("Classe NICE não encontrada")
-                        );
-        process.setNiceClassification(niceClassification);
-        repository.save(process);
     }
 
     private List<User> validateAuthors(List<User> authors) {
@@ -138,6 +319,7 @@ public class ProcessService {
 
             validAuthors.add(currentAuthor);
         }
+
         return validAuthors;
     }
 
@@ -152,24 +334,40 @@ public class ProcessService {
             if (externalAuthor.getId() == null) {
                 throw new IllegalArgumentException("ID do autor externo é obrigatório!");
             }
+
             ExternalAuthor currentExternalAuthor = externalAuthorRepository.findById(externalAuthor.getId())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Autor externo não encontrado com ID: " + externalAuthor.getId()
                     ));
+
             validExternalAuthors.add(currentExternalAuthor);
         }
+
         return validExternalAuthors;
     }
 
-    public Page<Process> searchProcess(String title, StatusProcess statusProcess, Integer page, Integer pageSize){
+    public Page<Process> searchProcess(
+            String title,
+            StatusProcess statusProcess,
+            Integer page,
+            Integer pageSize
+    ) {
         Specification<Process> specs = Specification.where((root, query, cb) -> cb.conjunction());
-        if(title != null){
+
+        if (title != null && !title.isEmpty()) {
             specs = specs.and(ProcessSpecs.likeTitle(title));
         }
-        if(statusProcess != null){
+
+        if (statusProcess != null) {
             specs = specs.and(ProcessSpecs.equalStatusProcess(statusProcess));
         }
-        Pageable pageRequest = PageRequest.of(page, pageSize);
+
+        Pageable pageRequest = PageRequest.of(
+                page,
+                pageSize,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
         return repository.findAll(specs, pageRequest);
     }
 
@@ -180,52 +378,37 @@ public class ProcessService {
             Integer pageSize
     ) {
         User user = securityService.getAuthenticatedUser();
+
         if (user.getRole() == UserRole.USER) {
             Specification<Process> specs = Specification.where(
                     ProcessSpecs.creatorOrAuthor(user.getId())
             );
+
             if (title != null && !title.isEmpty()) {
                 specs = specs.and(ProcessSpecs.likeTitle(title));
             }
+
             if (statusProcess != null) {
                 specs = specs.and(ProcessSpecs.equalStatusProcess(statusProcess));
             }
+
             Pageable pageable = PageRequest.of(
                     page,
                     pageSize,
                     Sort.by(Sort.Direction.DESC, "createdAt")
             );
+
             return repository.findAll(specs, pageable);
         }
+
         return searchProcess(title, statusProcess, page, pageSize);
     }
 
-    public void updateStatus(Long id, StatusProcess newStatus) {
-        Process process = repository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException("Processo não encontrado com ID: " + id)
-                );
-
-        if (newStatus == StatusProcess.FINALIZADO) {
-            process.getAttachments().stream()
-                    .filter(att -> "PENDING".equalsIgnoreCase(att.getStatus()))
-                    .findFirst()
-                    .ifPresent(att -> {
-                        throw new OperationNotAllowedException(
-                                "Há documento pendente para assinatura: "
-                                        + att.getDisplayName()
-                        );
-                    });
-        }
-        process.setStatus(newStatus);
-        repository.save(process);
-    }
-
-    public Optional<Process> getById(Long id){
+    public Optional<Process> getById(Long id) {
         return repository.findById(id);
     }
 
-    public void delete(Process process){
+    public void delete(Process process) {
         repository.delete(process);
     }
 
@@ -233,13 +416,14 @@ public class ProcessService {
         return repository.findAll();
     }
 
-    public List<ProcessStatusCountDTO> countProcessStatus(){
+    public List<ProcessStatusCountDTO> countProcessStatus() {
         User user = securityService.getAuthenticatedUser();
-        if(user.getRole() == UserRole.USER){
-            System.out.println(user.getEmail()+ " " + user.getFullName());
+
+        if (user.getRole() == UserRole.USER) {
+            System.out.println(user.getEmail() + " " + user.getFullName());
             return repository.countProcessStatus(user.getId());
-        }else{
-            return repository.countProcessStatusAdmin();
         }
+
+        return repository.countProcessStatusAdmin();
     }
 }

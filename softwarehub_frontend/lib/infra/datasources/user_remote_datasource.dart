@@ -6,7 +6,7 @@ import '../../domain/core/errors/exceptions.dart';
 import '../core/network/api_client.dart';
 import '../core/network/base_url.dart';
 import '../models/paged_result_model.dart';
-import '../utils/error_formatter .dart';
+import '../utils/error_formatter.dart';
 
 abstract class IUserRemoteDataSource {
   Future<PagedResultEntity<UserEntity>> getUsers({

@@ -1,7 +1,7 @@
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
 import 'package:nit_sgpi_frontend/infra/core/network/api_client.dart';
 import 'package:nit_sgpi_frontend/infra/models/user/user_model.dart';
-import 'package:nit_sgpi_frontend/infra/utils/error_formatter%20.dart';
+import 'package:nit_sgpi_frontend/infra/utils/error_formatter.dart';
 import '../../domain/core/errors/exceptions.dart';
 import '../core/network/base_url.dart';
 
