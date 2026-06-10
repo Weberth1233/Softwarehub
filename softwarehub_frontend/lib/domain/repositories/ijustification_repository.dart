@@ -11,5 +11,5 @@ abstract class IJustificationRepository {
   Future<Either<Failure, JustificationAttachmentFileEntity>> getAttachmentFile(
     int attachmentId,
   );
-  //  Future<Either<Failure, String>> putJustification(int idJustification, JustificationRequestEntity justification);
+   Future<Either<Failure, String>> putJustification(int justificationId, JustificationRequestEntity justification);
 }

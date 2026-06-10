@@ -48,7 +48,7 @@ class ApiClient {
     return _handleResponse(response, authenticated: authenticated);
   }
 
-    Future<http.Response> getFile(String url, {bool authenticated = true}) async {
+  Future<http.Response> getFile(String url, {bool authenticated = true}) async {
     final response = await client.get(
       Uri.parse(url),
       headers: _headers(authenticated: authenticated),
@@ -56,8 +56,6 @@ class ApiClient {
 
     return _handleResponse(response, authenticated: authenticated);
   }
-
-
 
   Future<http.Response> post(
     String url, {
@@ -166,8 +164,9 @@ class ApiClient {
     return _handleResponse(response, authenticated: authenticated);
   }
 
-  Future<http.Response> multipartPost(
+  Future<http.Response> multipartRequest(
     String url, {
+    required String method, // "POST" ou "PUT"
     Map<String, String>? fields,
     String? filePath,
     List<int>? fileBytes,
@@ -175,7 +174,7 @@ class ApiClient {
     String fieldName = 'file',
     bool authenticated = true,
   }) async {
-    final request = http.MultipartRequest('POST', Uri.parse(url));
+    final request = http.MultipartRequest(method.toUpperCase(), Uri.parse(url));
 
     if (authenticated) {
       final authController = Get.find<AuthController>();

@@ -4,15 +4,18 @@ import 'package:get/get.dart';
 
 import 'package:nit_sgpi_frontend/domain/entities/justification/justification_request_entity.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/justification/post_justification.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/justification/put_justification.dart';
 
 import '../../../../domain/core/errors/failures.dart';
 import '../../../shared/utils/app_toast.dart';
 
 class JustificationController extends GetxController {
   final PostJustification _postJustification;
+  final PutJustification _putJustification;
 
   JustificationController(
     this._postJustification,
+    this._putJustification,
   );
 
   final TextEditingController reasonController = TextEditingController();
@@ -90,6 +93,29 @@ class JustificationController extends GetxController {
         ),
       ),
       successMessage: 'Justificativa enviada com sucesso!',
+      onSuccess: () async {
+        clearForm();
+        Get.back(result: idProcess);
+      },
+    );
+  }
+
+  Future<void> put({
+    required int justificationId,
+    required int idProcess,
+  }) async {
+    await _executeAction(
+      action: () => _putJustification(
+        justificationId,
+        JustificationRequestEntity(
+          processId: idProcess,
+          reason: reasonController.text.trim(),
+          fileName: selectedFileName.value,
+          filePath: selectedFilePath.value,
+          fileBytes: selectedFileBytes.value,
+        ),
+      ),
+      successMessage: 'Justificativa atualizada com sucesso!',
       onSuccess: () async {
         clearForm();
         Get.back(result: idProcess);

@@ -11,10 +11,10 @@ abstract class IJustificationRemoteDataSource {
   Future<JustificationAttachmentFileEntity> getAttachmentFile(int attachmentId);
 
   Future<String> deleteJustification(int idJustification);
-  // Future<String> putJustificattion(
-  //   int idJustification,
-  //   JustificationRequestEntity justification,
-  // );
+  Future<String> putJustificattion(
+    int idJustification,
+    JustificationRequestEntity justification,
+  );
 }
 
 class JustificationRemoteDatasourceImpl
@@ -31,8 +31,9 @@ class JustificationRemoteDatasourceImpl
     try {
       final model = JustificationRequestModel.fromEntity(justification);
 
-      final response = await apiClient.multipartPost(
+      final response = await apiClient.multipartRequest(
         "${BaseUrl.urlWithHttp}/justification",
+        method: "POST",
         fields: {
           "processId": model.processId.toString(),
           "reason": model.reason,
@@ -55,6 +56,42 @@ class JustificationRemoteDatasourceImpl
       }
     } on ServerException {
       rethrow;
+    } catch (e) {
+      print(e);
+      throw NetworkException("Erro de conexão com o servidor!");
+    }
+  }
+
+  @override
+  Future<String> putJustificattion(
+    int justificationId,
+    JustificationRequestEntity justification,
+  ) async {
+    try {
+      final model = JustificationRequestModel.fromEntity(justification);
+ 
+      final response = await apiClient.multipartRequest(
+        "${BaseUrl.urlWithHttp}/justification/$justificationId",
+        method: "PUT",
+        fields: {
+          "processId": model.processId.toString(),
+          "reason": model.reason,
+        },
+        filePath: model.filePath,
+        fileBytes: model.fileBytes,
+        fileName: model.fileName,
+        fieldName: "file",
+      );
+
+      if (response.statusCode == 204) {
+        return "Atualizado com sucesso!";
+      } else if (response.statusCode == 422) {
+        return response.body;
+      } else {
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
+      }
+    } on ServerException {
+      rethrow; // 👈 mantém a exception original
     } catch (e) {
       print(e);
       throw NetworkException("Erro de conexão com o servidor!");
@@ -125,32 +162,4 @@ class JustificationRemoteDatasourceImpl
 
     return match?.group(1);
   }
-  
-  // @override
-  // Future<String> putJustificattion(
-  //   int idJustification,
-  //   JustificationRequestEntity justification,
-  // ) async {
-  //   try {
-  //     final model = JustificationRequestModel.fromEntity(justification);
-
-  //     final response = await apiClient.put(
-  //       "${BaseUrl.urlWithHttp}/justification/$idJustification",
-  //       body: model.toJson(),
-  //     );
-
-  //     if (response.statusCode == 204) {
-  //       return "Atualizo com sucesso!";
-  //     } else if (response.statusCode == 422) {
-  //       return response.body;
-  //     } else {
-  //       throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
-  //     }
-  //   } on ServerException {
-  //     rethrow; // 👈 mantém a exception original
-  //   } catch (e) {
-  //     print(e);
-  //     throw NetworkException("Erro de conexão com o servidor!");
-  //   }
-  // }
 }

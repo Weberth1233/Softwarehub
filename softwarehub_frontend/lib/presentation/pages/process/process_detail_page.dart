@@ -1428,6 +1428,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                                   'processId': entity.id,
                                   'justificationId': justification.id,
                                   'reason': justification.reason,
+                                  'attachmentFileName': justification.attachment?.fileName
                                 },
                               );
 

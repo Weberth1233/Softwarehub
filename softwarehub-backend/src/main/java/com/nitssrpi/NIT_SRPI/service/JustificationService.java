@@ -8,14 +8,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +33,47 @@ public class JustificationService {
         justification.setReason(reason);
         justification.setProcess(process);
 
+        saveFileAtJustification(file, justification);
+
+        return repository.save(justification);
+    }
+
+    public void update(Long justificationId, Long processId, String reason, MultipartFile file){
+        Justification justification = repository.findById(justificationId).orElseThrow(() -> new EntityNotFoundException("Justificativa não encontrada!"));
+        Process process = processRepository.findById(processId)
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
+        justification.setProcess(process);
+        justification.setReason(reason);
+        updateFileAtJustification(file, justification);
+
+        repository.save(justification);
+    }
+
+    private void updateFileAtJustification(MultipartFile file, Justification justification) {
+        if (file != null && !file.isEmpty()) {
+            //Tenta pegar o anexo que já está vinculado nessa justificativa
+            //Evitar criar outro pode dar erro
+            JustificationAttachment attachment = justification.getAttachment();
+            //Se a justificativa não tiver nenhum anexo
+            //AQui criamos um novo
+            if (attachment == null) {
+                attachment = new JustificationAttachment();
+                //Quando não existe anexo
+                //Aí sim precisa criar o relacionamento:
+                attachment.setJustification(justification);
+                justification.setAttachment(attachment);
+            }
+
+            String fileName = file.getOriginalFilename();
+            String filePath = saveFile(file);
+
+            attachment.setFileName(fileName);
+            attachment.setFilePath(filePath);
+            attachment.setFileType(file.getContentType());
+            attachment.setFileSize(file.getSize());
+        }
+    }
+    private void saveFileAtJustification(MultipartFile file, Justification justification){
         if(file != null && !file.isEmpty()){
             JustificationAttachment attachment = new JustificationAttachment();
             String fileName = file.getOriginalFilename();
@@ -48,7 +87,6 @@ public class JustificationService {
             attachment.setJustification(justification);
             justification.setAttachment(attachment);
         }
-        return repository.save(justification);
     }
 
     private String saveFile(MultipartFile file) {
@@ -71,13 +109,6 @@ public class JustificationService {
         } catch (IOException e) {
             throw new RuntimeException("Erro ao salvar arquivo da justificativa!");
         }
-    }
-
-    public void update(Justification justification){
-        if(justification.getId() == null){
-            throw new EntityNotFoundException("Para atualizar é necessário que a justificativa esteja cadastrado!");
-        }
-        repository.save(justification);
     }
 
     public List<Justification> findByProcessJustification(Long idProcess){

@@ -59,21 +59,21 @@ class JustificationRepositoryImpl implements IJustificationRepository {
       return Left(ServerFailure("Erro inesperado!"));
     }
   }
-  
-  // @override
-  // Future<Either<Failure, String>> putJustification(int idJustification, JustificationRequestEntity justification) async{
-  //    try {
-  //     final result = await remoteDataSource.putJustificattion(
-  //       idJustification,
-  //       justification,
-  //     );
-  //     return Right(result);
-  //   } on ServerException catch (e) {
-  //     return Left(ServerFailure(e.message));
-  //   } on NetworkException catch (e) {
-  //     return Left(NetworkFailure(e.message));
-  //   } catch (e) {
-  //     return Left(ServerFailure("Erro inesperado!"));
-  //   }
-  // }
+
+  @override
+  Future<Either<Failure, String>> putJustification(int justificationId, JustificationRequestEntity justification) async{
+     try {
+      final result = await remoteDataSource.putJustificattion(
+        justificationId,
+        justification,
+      );
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure("Erro inesperado!"));
+    }
+  }
 }

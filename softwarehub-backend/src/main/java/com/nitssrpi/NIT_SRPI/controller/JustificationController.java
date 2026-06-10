@@ -48,6 +48,7 @@ public class JustificationController implements  GenericController{
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
     })
     public ResponseEntity<Void> save(@ModelAttribute @Valid JustificationRequestDTO dto) {
+        Justification justification = new Justification();
         Justification saved = service.save(dto.processId(), dto.reason(), dto.file());
         URI location = generateHeaderLocation(saved.getId());
         return ResponseEntity.created(location).build();
@@ -73,22 +74,10 @@ public class JustificationController implements  GenericController{
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
             @ApiResponse(responseCode = "404", description = "Justificativa não encontrado!"),
     })
-    public ResponseEntity<Object> updateIpTypes
-            (@RequestBody @Valid JustificationRequestDTO dto, @PathVariable("id") String id ) {
-        var idJustification = Long.parseLong(id);
-        //Buscando na base se existe alguem com esse id
-        Optional<Justification> justificationOptional = service.getById(idJustification);
-        //Se for vazio eu retorno notFound
-        if(justificationOptional.isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        var justification = justificationOptional.get();
-        justification.setReason(dto.reason());
-
-        Optional<Process> process  = processService.getById(dto.processId());
-        process.ifPresent(justification::setProcess);
-
-        service.update(justification);
+    public ResponseEntity<Object> update
+            (@ModelAttribute @Valid JustificationRequestDTO dto, @PathVariable("id") String id ) {
+        var justificationId = Long.parseLong(id);
+        service.update(justificationId, dto.processId(), dto.reason(), dto.file());
         return ResponseEntity.noContent().build();
     }
 
