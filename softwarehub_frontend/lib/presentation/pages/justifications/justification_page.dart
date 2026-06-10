@@ -15,8 +15,6 @@ class JustificationPage extends GetView<JustificationController> {
     final int? justificationId = args['justificationId'];
     final String? reason = args['reason'];
 
-    // Nome do anexo atual vindo da tela anterior/API.
-    // Ajuste a chave se no seu arguments estiver com outro nome.
     final String? attachmentFileName = args['attachmentFileName'];
 
     final bool isEditMode = justificationId != null;
@@ -24,7 +22,6 @@ class JustificationPage extends GetView<JustificationController> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    // Preenche campo automaticamente no modo edição.
     if (isEditMode &&
         reason != null &&
         controller.reasonController.text.isEmpty) {

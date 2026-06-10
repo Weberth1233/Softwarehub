@@ -30,6 +30,10 @@ public class ProcessSpecs {
         return (root, query, cb) -> cb.equal(root.get("status"), status);
     }
 
+    public static Specification<Process> differentStatusProcess(StatusProcess status) {
+        return (root, query, cb) -> cb.notEqual(root.get("status"), status);
+    }
+
     public static Specification<Process> equalCreatorId(Long creatorId) {
         return (root, query, cb) -> {
             // Assumindo que sua entidade Process tem um atributo 'creator' que é um User

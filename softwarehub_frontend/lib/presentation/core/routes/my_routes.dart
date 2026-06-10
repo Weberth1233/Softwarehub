@@ -26,9 +26,9 @@ import '../../pages/nice_classification/bindings/nice_classification_binding.dar
 import '../../pages/nice_classification/nice_classification_page.dart';
 import '../../pages/process/bindings/external_author_bindigs.dart'
     show ExternalAuthorBindigs;
-import '../../pages/process/bindings/process_detail_bindings.dart';
+import '../../pages/process_detail/bindings/process_detail_bindings.dart';
 import '../../pages/process/bindings/user_bindings.dart';
-import '../../pages/process/process_detail_page.dart';
+import '../../pages/process_detail/process_detail_page.dart';
 import '../../pages/process/process_external_author_form_page.dart';
 import '../../pages/process/process_external_author_page.dart';
 import '../../pages/process/process_page.dart';

@@ -353,6 +353,7 @@ public class ProcessService {
             Integer pageSize
     ) {
         Specification<Process> specs = Specification.where((root, query, cb) -> cb.conjunction());
+        specs = specs.and(ProcessSpecs.differentStatusProcess(StatusProcess.INATIVO));
 
         if (title != null && !title.isEmpty()) {
             specs = specs.and(ProcessSpecs.likeTitle(title));
@@ -381,7 +382,7 @@ public class ProcessService {
 
         if (user.getRole() == UserRole.USER) {
             Specification<Process> specs = Specification.where(
-                    ProcessSpecs.creatorOrAuthor(user.getId())
+                    ProcessSpecs.creatorOrAuthor(user.getId()).and(ProcessSpecs.differentStatusProcess(StatusProcess.INATIVO))
             );
 
             if (title != null && !title.isEmpty()) {
@@ -409,7 +410,8 @@ public class ProcessService {
     }
 
     public void delete(Process process) {
-        repository.delete(process);
+        process.setStatus(StatusProcess.INATIVO);
+        repository.save(process);
     }
 
     public List<Process> getAllProcess() {

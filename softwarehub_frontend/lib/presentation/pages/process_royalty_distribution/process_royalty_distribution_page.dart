@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'controllers/process_royalty_distribution_controller.dart';
 import 'widgets/share_form_model.dart';
 
@@ -13,147 +12,181 @@ class ProcessRoyaltyDistributionPage
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.onSecondary,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: colorScheme.primary,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 70,
-        centerTitle: false,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: SizedBox(
-              height: 46,
-              width: 46,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colorScheme.onSecondary,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Icon(Icons.arrow_back, color: colorScheme.primary),
-                  onPressed: () =>
-                      Get.back(result: controller.process.value!.id),
+    return Obx(() {
+      final bool isEditMode = controller.isEditMode.value;
 
-                  // Ou, se quiser mandar mais de uma coisa, pode mandar um Map:
-                  // Get.back(result: {'processId': controller.process.value!.id});
+      return Scaffold(
+        backgroundColor: colorScheme.onSecondary,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: colorScheme.primary,
+          automaticallyImplyLeading: false,
+          toolbarHeight: 70,
+          centerTitle: false,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                height: 46,
+                width: 46,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSecondary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: Icon(Icons.arrow_back, color: colorScheme.primary),
+                    onPressed: () {
+                      final process = controller.process.value;
+
+                      if (process != null) {
+                        Get.back(result: process.id);
+                      } else {
+                        Get.back();
+                      }
+                    },
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        title: Text(
-          "Distribuição de cotas",
-          style: theme.textTheme.headlineSmall?.copyWith(
-            color: colorScheme.onSecondary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
-            fontSize: 20,
+          title: Text(
+            isEditMode
+                ? "Editar distribuição de cotas"
+                : "Distribuição de cotas",
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: colorScheme.onSecondary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+              fontSize: 20,
+            ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Form(
-          key: controller.formKey,
-          child: Column(
-            children: [
-              Obx(
-                () => _RoyaltySummaryCard(
-                  processId: controller.processId,
-                  processTitle: controller.processTitle,
-                  totalPercentage: controller.totalPercentage,
-                  remainingPercentage: controller.remainingPercentage,
-                  isValid: controller.isTotalValid,
+        body: SafeArea(
+          child: Form(
+            key: controller.formKey,
+            child: Column(
+              children: [
+                Obx(
+                  () => _RoyaltySummaryCard(
+                    processId: controller.processId,
+                    processTitle: controller.processTitle,
+                    totalPercentage: controller.totalPercentage,
+                    remainingPercentage: controller.remainingPercentage,
+                    isValid: controller.isTotalValid,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Obx(() {
-                  if (controller.shares.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "Nenhuma cota encontrada.",
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.secondary,
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    if (controller.shares.isEmpty) {
+                      return Center(
+                        child: Text(
+                          "Nenhuma cota encontrada.",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.secondary,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                      itemCount: controller.shares.length,
+                      itemBuilder: (context, index) {
+                        final share = controller.shares[index];
+
+                        return _ShareReadonlyCard(
+                          key: ValueKey(share.id),
+                          index: index,
+                          share: share,
+                          onSliderChanged: (value) =>
+                              controller.updatePercentage(
+                            index,
+                            value,
+                            fromText: false,
+                          ),
+                          onTextChanged: (value) =>
+                              controller.updatePercentage(
+                            index,
+                            value,
+                            fromText: true,
+                          ),
+                          onRequestUniversityChange:
+                              controller.requestUniversityChange,
+                        );
+                      },
+                    );
+                  }),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      top: BorderSide(
+                        color: colorScheme.onSurface.withOpacity(0.4),
+                        width: 1,
+                      ),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Obx(() {
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : controller.submit,
+                        icon: controller.isLoading.value
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Icon(
+                                isEditMode ? Icons.save_as : Icons.check,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                        label: Text(
+                          controller.isLoading.value
+                              ? "Salvando..."
+                              : isEditMode
+                                  ? "Atualizar distribuição"
+                                  : "Salvar distribuição",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     );
-                  }
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                    itemCount: controller.shares.length,
-                    itemBuilder: (context, index) {
-                      final share = controller.shares[index];
-
-                      return _ShareReadonlyCard(
-                        key: ValueKey(share.id),
-                        index: index,
-                        share: share,
-                        // Aqui avisamos o controller se a mudança veio do Slider ou do Texto
-                        onSliderChanged: (value) => controller.updatePercentage(
-                          index,
-                          value,
-                          fromText: false,
-                        ),
-                        onTextChanged: (value) => controller.updatePercentage(
-                          index,
-                          value,
-                          fromText: true,
-                        ),
-                        onRequestUniversityChange:
-                            controller.requestUniversityChange,
-                      );
-                    },
-                  );
-                }),
-              ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(
-                      color: colorScheme.onSurface.withOpacity(0.4),
-                      width: 1,
-                    ),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, -4),
-                    ),
-                  ],
+                  }),
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    onPressed: controller.submit,
-                    icon: const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    label: Text(
-                      "Salvar distribuição",
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
@@ -180,8 +213,8 @@ class _RoyaltySummaryCard extends StatelessWidget {
     final Color statusColor = isValid
         ? const Color(0XFF1CDF0B)
         : totalPercentage > 100
-        ? Colors.red
-        : Colors.orange;
+            ? Colors.red
+            : Colors.orange;
 
     return Container(
       width: double.infinity,
@@ -256,7 +289,7 @@ class _RoyaltySummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                "${totalPercentage.toStringAsFixed(2)}%", // AQUI garante as 2 casas decimais visualmente
+                "${totalPercentage.toStringAsFixed(2)}%",
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: statusColor,
@@ -272,7 +305,7 @@ class _RoyaltySummaryCard extends StatelessWidget {
   String _statusText() {
     if (isValid) return "Distribuição completa";
     if (totalPercentage > 100) return "Total excedido";
-    return "Restante: ${remainingPercentage.toStringAsFixed(2)}%"; // AQUI também padroniza 2 casas
+    return "Restante: ${remainingPercentage.toStringAsFixed(2)}%";
   }
 }
 
@@ -519,7 +552,6 @@ class _PercentageField extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            // --- BOTÃO DE DIMINUIR (-) ---
             if (enabled)
               IconButton(
                 padding: EdgeInsets.zero,
@@ -536,8 +568,6 @@ class _PercentageField extends StatelessWidget {
                   }
                 },
               ),
-
-            // --- SLIDER ---
             Expanded(
               child: SliderTheme(
                 data: SliderTheme.of(context).copyWith(
@@ -561,8 +591,6 @@ class _PercentageField extends StatelessWidget {
                 ),
               ),
             ),
-
-            // --- BOTÃO DE AUMENTAR (+) ---
             if (enabled)
               IconButton(
                 padding: EdgeInsets.zero,
@@ -579,10 +607,7 @@ class _PercentageField extends StatelessWidget {
                   }
                 },
               ),
-
             const SizedBox(width: 8),
-
-            // --- CAMPO DE TEXTO TOTALMENTE REFEITO ---
             Container(
               width: 85,
               height: 36,
@@ -613,7 +638,6 @@ class _PercentageField extends StatelessWidget {
                             ? colorScheme.tertiary
                             : colorScheme.secondary,
                       ),
-                      // Removemos o InputTheme padrão para não dar conflito de bordas aqui dentro
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -625,12 +649,13 @@ class _PercentageField extends StatelessWidget {
                         final percentage = double.tryParse(
                           text.replaceAll(",", "."),
                         );
+
                         if (percentage == null) return;
+
                         onTextChanged(percentage);
                       },
                     ),
                   ),
-                  // Colocamos o % fisicamente separado do campo de digitação
                   Padding(
                     padding: const EdgeInsets.only(right: 8.0),
                     child: Text(

@@ -1,28 +1,32 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/process/process_royalty_distribution_request_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process_royalty_distribution/post_process_royalty_distribution.dart';
-import 'package:nit_sgpi_frontend/infra/models/process/process_royalty_distribution_request_model.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
+import '../../../../domain/entities/process/process_royalty_distribution_request_entity.dart';
 import '../../../../domain/entities/process/process_user_entity.dart';
 import '../../../../domain/usecases/process/get_process_by_id.dart';
+import '../../../../domain/usecases/process_royalty_distribution/post_process_royalty_distribution.dart';
+import '../../../../infra/models/process/process_royalty_distribution_request_model.dart';
 import '../../../shared/utils/app_toast.dart';
 import '../widgets/share_form_model.dart';
 
 class ProcessRoyaltyDistributionController extends GetxController {
   final GetProcessById _getProcessById;
   final PostProcessRoyaltyDistribution _postRoyaltyDistribution;
+  // final PutProcessRoyaltyDistribution _putRoyaltyDistribution;
 
   ProcessRoyaltyDistributionController(
     this._getProcessById,
     this._postRoyaltyDistribution,
+    // this._putRoyaltyDistribution,
   );
 
   final formKey = GlobalKey<FormState>();
   final RxBool isLoading = false.obs;
   final Rxn<ProcessResponseEntity> process = Rxn<ProcessResponseEntity>();
+
+  final RxBool isEditMode = false.obs;
+  final RxnInt distributionId = RxnInt();
+
   final RxList<ShareFormModel> shares = <ShareFormModel>[].obs;
 
   static const int unitinsId = 2;
@@ -53,6 +57,18 @@ class ProcessRoyaltyDistributionController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    final args = Get.arguments;
+
+    if (args is Map<String, dynamic>) {
+      final int? receivedDistributionId = args['distributionId'];
+
+      if (receivedDistributionId != null) {
+        distributionId.value = receivedDistributionId;
+        isEditMode.value = true;
+      }
+    }
+
     _loadProcessFromRoute();
   }
 
@@ -79,37 +95,6 @@ class ProcessRoyaltyDistributionController extends GetxController {
     getProcessById(id);
   }
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  Future<void> _postProcessRoyaltyDistribution(
-    ProcessRoyaltyDistributionRequestEntity entity,
-  ) async {
-    try {
-      isLoading.value = true;
-      final result = await _postRoyaltyDistribution(entity);
-
-      result.fold(
-        (failure) {
-          AppToast.error(failure.message);
-        },
-        (success) {
-          AppToast.success(success);
-          Get.back(result: process.value!.id);
-        },
-      );
-    } catch (e) {
-      AppToast.error(
-        "Erro inesperado ao cadastrar distribuição de cotas ao processo ${process.value!.id}.",
-      );
-      Get.back();
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   Future<void> getProcessById(int id) async {
     try {
       isLoading.value = true;
@@ -126,8 +111,10 @@ class ProcessRoyaltyDistributionController extends GetxController {
         },
         (success) {
           process.value = success;
+
           debugPrint('ID DA URL USADO: $id');
           debugPrint('ID RETORNADO DA API: ${success.id}');
+
           _buildSharesFromProcess(success);
         },
       );
@@ -141,6 +128,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
   void _buildSharesFromProcess(ProcessResponseEntity process) {
     shares.clear();
+
     final creator = process.creator;
     final members = process.authors
         .where((author) => author.id != creator.id)
@@ -148,6 +136,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
     final availableForMembers =
         100.0 - universityFixedPercentage - creatorMinimumPercentage;
+
     final memberPercentages = _distributePercentage(
       total: availableForMembers,
       quantity: members.length,
@@ -175,6 +164,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
     for (int i = 0; i < members.length; i++) {
       final member = members[i];
+
       shares.add(
         ShareFormModel(
           type: ShareType.member,
@@ -194,13 +184,17 @@ class ProcessRoyaltyDistributionController extends GetxController {
     required int quantity,
   }) {
     if (quantity <= 0) return [];
+
     final base = double.parse((total / quantity).toStringAsFixed(2));
     final values = List<double>.filled(quantity, base);
+
     final currentTotal = values.fold(0.0, (sum, value) => sum + value);
     final difference = double.parse((total - currentTotal).toStringAsFixed(2));
+
     values[quantity - 1] = double.parse(
       (values.last + difference).toStringAsFixed(2),
     );
+
     return values;
   }
 
@@ -227,6 +221,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
     double lockedSum = shares
         .where((s) => s.isLocked)
         .fold(0.0, (sum, s) => sum + s.percentage.value);
+
     double maxAllowed = 100.0 - lockedSum;
 
     double reservedMin = shares
@@ -252,6 +247,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
     var otherShares = shares
         .where((s) => !s.isLocked && s != targetShare)
         .toList();
+
     if (otherShares.isNotEmpty) {
       double deltaPerShare = delta / otherShares.length;
 
@@ -278,6 +274,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
       0.0,
       (sum, s) => sum + s.percentage.value,
     );
+
     double diff = 100.0 - currentTotal;
 
     if (diff != 0) {
@@ -291,6 +288,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
         flexibleShare.percentage.value = double.parse(
           (flexibleShare.percentage.value + diff).toStringAsFixed(2),
         );
+
         flexibleShare.percentageController.text = flexibleShare.percentage.value
             .toStringAsFixed(2);
       }
@@ -310,6 +308,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
     }
 
     final creator = creatorShare;
+
     if (creator == null) {
       AppToast.warning("Criador não encontrado na distribuição.");
       return false;
@@ -344,13 +343,81 @@ class ProcessRoyaltyDistributionController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
 
     if (!validate()) return;
+
     final json = buildJson();
+
+    debugPrint(json.toString());
+
     final entity = ProcessRoyaltyDistributionRequestModel.fromJson(
       json,
     ).toEntity();
-    _postProcessRoyaltyDistribution(entity);
-    debugPrint(json.toString());
+
+    if (isEditMode.value) {
+      // await _putProcessRoyaltyDistribution(entity);
+    } else {
+      await _postProcessRoyaltyDistribution(entity);
+    }
   }
+
+  Future<void> _postProcessRoyaltyDistribution(
+    ProcessRoyaltyDistributionRequestEntity entity,
+  ) async {
+    try {
+      isLoading.value = true;
+
+      final result = await _postRoyaltyDistribution(entity);
+
+      result.fold(
+        (failure) {
+          AppToast.error(failure.message);
+        },
+        (success) {
+          AppToast.success(success);
+          Get.back(result: process.value!.id);
+        },
+      );
+    } catch (e) {
+      AppToast.error(
+        "Erro inesperado ao cadastrar distribuição de cotas ao processo ${process.value!.id}.",
+      );
+      Get.back();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Future<void> _putProcessRoyaltyDistribution(
+  //   ProcessRoyaltyDistributionRequestEntity entity,
+  // ) async {
+  //   final id = distributionId.value;
+
+  //   if (id == null) {
+  //     AppToast.error("ID da distribuição não encontrado.");
+  //     return;
+  //   }
+
+  //   try {
+  //     isLoading.value = true;
+
+  //     final result = await _putRoyaltyDistribution(id, entity);
+
+  //     result.fold(
+  //       (failure) {
+  //         AppToast.error(failure.message);
+  //       },
+  //       (success) {
+  //         AppToast.success(success);
+  //         Get.back(result: process.value!.id);
+  //       },
+  //     );
+  //   } catch (e) {
+  //     AppToast.error(
+  //       "Erro inesperado ao atualizar distribuição de cotas do processo ${process.value!.id}.",
+  //     );
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
   void _syncControllers() {
     for (final share in shares) {
@@ -365,6 +432,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
     for (final share in shares) {
       share.dispose();
     }
+
     super.onClose();
   }
 }

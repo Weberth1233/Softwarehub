@@ -34,6 +34,7 @@ public interface ProcessRepository extends JpaRepository<Process, Long>, JpaSpec
             SELECT p.status AS status,
             COUNT(p) AS amount
             FROM Process p
+            WHERE p.status <> 'INATIVO'
             GROUP BY p.status
            """)
     List<ProcessStatusCountDTO> countProcessStatusAdmin();
