@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../domain/entities/nice_classification_entity.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
+import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
+import '../../shared/utils/app_toast.dart';
 import 'controllers/process_detail_controller.dart';
 
 class ProcessDetailPage extends StatefulWidget {
@@ -962,6 +964,8 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           phoneNumber: author.phoneNumber,
           profession: author.profession,
           trailingIcon: Icons.person_outline,
+          userEducationalInstitutionLinks:
+              entity.creator.userEducationalInstitutionLinks,
         );
       },
     );
@@ -996,6 +1000,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           phoneNumber: "",
           profession: "",
           trailingIcon: Icons.person_outline,
+          userEducationalInstitutionLinks: [],
         );
       },
     );
@@ -1356,8 +1361,65 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                     ),
                     if (controller.isAdmin)
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 12,
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            onPressed: () async {
+                              if (justification.attachment != null) {
+                                await controller.getAttachmentFile(
+                                  justification.attachment!.id,
+                                );
+
+                                final bytes = controller.attachmentBytes.value;
+
+                                if (bytes == null || bytes.isEmpty) {
+                                  AppToast.error(
+                                    "Não foi possível carregar o arquivo.",
+                                  );
+                                  return;
+                                }
+
+                                if (controller.isAttachmentImage) {
+                                  Get.dialog(
+                                    Dialog(
+                                      insetPadding: const EdgeInsets.all(24),
+                                      child: Container(
+                                        constraints: const BoxConstraints(
+                                          maxWidth: 800,
+                                          maxHeight: 700,
+                                        ),
+                                        padding: const EdgeInsets.all(16),
+                                        child: Image.memory(
+                                          bytes,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                } else if (controller.isAttachmentPdf) {
+                                  controller.openPdfInNewTab();
+                                } else {
+                                  AppToast.error(
+                                    "Tipo de arquivo não suportado para visualização.",
+                                  );
+                                }
+                              } else {
+                                AppToast.warning(
+                                  "Não há documento disponível para essa justificativa!.",
+                                );
+                              }
+                            },
+                            icon: const Icon(
+                              Icons.document_scanner,
+                              color: Colors.blueGrey,
+                              size: 22,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
                           IconButton(
                             onPressed: () async {
                               final result = await Get.toNamed(
@@ -1382,7 +1444,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
-                          const SizedBox(width: 12),
+
                           IconButton(
                             onPressed: _isDeletingJustification
                                 ? null
@@ -1685,7 +1747,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               }
             },
             child: Text(
-              "Distribuir cotas ao processo ffff",
+              "Distribuir cotas ao processo",
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -1721,6 +1783,58 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     );
   }
 
+  Widget _buildInfoRow(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    bool compact = false,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: compact ? 0 : 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: colors.primary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: colors.primary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: colors.secondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value.trim().isNotEmpty ? value : "Não informado",
+                  style: TextStyle(
+                    color: colors.tertiary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCreatorCard(BuildContext context, ProcessResponseEntity entity) {
     return _buildPersonRowCard(
       context,
@@ -1729,6 +1843,8 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
       birthDate: entity.creator.birthDate,
       phoneNumber: entity.creator.phoneNumber,
       profession: entity.creator.profession,
+      userEducationalInstitutionLinks:
+          entity.creator.userEducationalInstitutionLinks,
       trailingIcon: Icons.star_border,
     );
   }
@@ -1790,6 +1906,8 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     required String phoneNumber,
     required String birthDate,
     required String profession,
+    required List<UserEducationalInstitutionLinkEntity>
+    userEducationalInstitutionLinks,
     required IconData trailingIcon,
   }) {
     final colors = Theme.of(context).colorScheme;
@@ -1797,6 +1915,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     final displayName = name.trim().isNotEmpty
         ? name.trim()
         : "Nome não informado";
+
     final firstLetter = displayName != "Nome não informado"
         ? displayName.substring(0, 1).toUpperCase()
         : "?";
@@ -1805,13 +1924,14 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
       context,
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(left: 56, right: 12, bottom: 12),
+        childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         leading: CircleAvatar(
+          radius: 22,
           backgroundColor: colors.primary,
           child: Text(
             firstLetter,
             style: TextStyle(
-              color: colors.onSecondary,
+              color: colors.onPrimary,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -1820,45 +1940,107 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           displayName,
           style: TextStyle(fontWeight: FontWeight.w800, color: colors.tertiary),
         ),
+        subtitle: Text(
+          email.trim().isNotEmpty ? email : "E-mail não informado",
+          style: TextStyle(color: colors.secondary, fontSize: 13),
+        ),
         trailing: Icon(trailingIcon, color: colors.secondary),
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 8),
+
+          _buildInfoRow(
+            context,
+            icon: Icons.email_outlined,
+            label: "E-mail",
+            value: email.trim().isNotEmpty ? email : "E-mail não informado",
+          ),
+
+          _buildInfoRow(
+            context,
+            icon: Icons.phone_outlined,
+            label: "Telefone",
+            value: phoneNumber.trim().isNotEmpty
+                ? _formatPhone(phoneNumber)
+                : "Telefone não informado",
+          ),
+
+          _buildInfoRow(
+            context,
+            icon: Icons.cake_outlined,
+            label: "Data de nascimento",
+            value: birthDate.trim().isNotEmpty
+                ? _formatBirthDate(birthDate)
+                : "Data de nascimento não informada",
+          ),
+
+          _buildInfoRow(
+            context,
+            icon: Icons.work_outline,
+            label: "Profissão",
+            value: profession.trim().isNotEmpty
+                ? profession
+                : "Profissão não informada",
+          ),
+
+          if (userEducationalInstitutionLinks.isNotEmpty) ...[
+            const SizedBox(height: 12),
+
+            Row(
               children: [
+                Icon(Icons.school_outlined, size: 20, color: colors.primary),
+                const SizedBox(width: 8),
                 Text(
-                  email.trim().isNotEmpty ? email : "E-mail não informado",
-                  textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  phoneNumber.trim().isNotEmpty
-                      ? _formatPhone(phoneNumber)
-                      : "Telefone não informado",
-                  textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  birthDate.trim().isNotEmpty
-                      ? _formatBirthDate(birthDate)
-                      : "Data de nascimento não informada",
-                  textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  profession.trim().isNotEmpty
-                      ? profession
-                      : "Profissão não informada",
-                  textAlign: TextAlign.start,
-                  style: TextStyle(color: colors.secondary),
+                  "Instituições de ensino",
+                  style: TextStyle(
+                    color: colors.tertiary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                  ),
                 ),
               ],
             ),
-          ),
+
+            const SizedBox(height: 8),
+
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: userEducationalInstitutionLinks.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final result = userEducationalInstitutionLinks[index];
+
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withOpacity(0.45),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colors.outline.withOpacity(0.15)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildInfoRow(
+                        context,
+                        icon: Icons.account_balance_outlined,
+                        label: "Instituição",
+                        value: result.educationalInstitution.name,
+                        compact: true,
+                      ),
+                      const SizedBox(height: 6),
+                      _buildInfoRow(
+                        context,
+                        icon: Icons.badge_outlined,
+                        label: "Vínculo",
+                        value: result.typesLink.name,
+                        compact: true,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

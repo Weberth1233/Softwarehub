@@ -11,20 +11,16 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Justification {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(columnDefinition = "TEXT", nullable = false)
     private String reason;
-
     @ManyToOne
     @JoinColumn(name = "process_id", nullable = false)
     private Process process;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    // getters e setters
+    @OneToOne(mappedBy = "justification", cascade = CascadeType.ALL, orphanRemoval = true)
+    private JustificationAttachment attachment;
 }

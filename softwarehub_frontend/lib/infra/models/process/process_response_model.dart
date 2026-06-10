@@ -2,7 +2,7 @@ import 'package:nit_sgpi_frontend/infra/models/base_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/external_author_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/ip_types/ip_types_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/nice_classification_model.dart';
-import 'package:nit_sgpi_frontend/infra/models/process/process_justification_model.dart';
+import 'package:nit_sgpi_frontend/infra/models/justification/justification_response_model.dart';
 
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../attachment_model.dart';
@@ -21,7 +21,7 @@ class ProcessResponseModel implements BaseModel {
   final IpTypeModel ipType;
   final List<ProcessUserModel> authors;
   final List<AttachmentModel> attachments;
-  final List<ProcessJustificationModel> justifications;
+  final List<JustificationResponseModel> justifications;
   final List<ExternalAuthorModel> externalAuthors;
   final ProcessUserModel creator;
   final NiceClassificationModel niceClassificationModel;
@@ -66,7 +66,7 @@ class ProcessResponseModel implements BaseModel {
           .toList(),
       justifications: (json['justifications'] as List? ?? [])
           .map(
-            (e) => ProcessJustificationModel.fromJson(
+            (e) => JustificationResponseModel.fromJson(
               Map<String, dynamic>.from(e),
             ),
           )

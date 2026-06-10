@@ -21,7 +21,9 @@ class JustificationPage extends GetView<JustificationController> {
     final colors = theme.colorScheme;
 
     // Preenche campo automaticamente no modo edição
-    if (isEditMode && reason != null && controller.reasonController.text.isEmpty) {
+    if (isEditMode &&
+        reason != null &&
+        controller.reasonController.text.isEmpty) {
       controller.reasonController.text = reason;
     }
 
@@ -119,6 +121,7 @@ class JustificationPage extends GetView<JustificationController> {
                           ),
                         ),
                         const SizedBox(height: 18),
+
                         CustomTextField(
                           controller: controller.reasonController,
                           label: "Justificativa",
@@ -134,7 +137,15 @@ class JustificationPage extends GetView<JustificationController> {
                             return null;
                           },
                         ),
+
                         const SizedBox(height: 18),
+
+                        _AttachmentPickerCard(
+                          isEditMode: isEditMode,
+                        ),
+
+                        const SizedBox(height: 18),
+
                         Obx(() {
                           return SizedBox(
                             height: 52,
@@ -142,9 +153,13 @@ class JustificationPage extends GetView<JustificationController> {
                               onPressed: controller.isLoading.value
                                   ? null
                                   : () {
-                                      if (!controller.formKey.currentState!.validate()) return;
+                                      if (!controller.formKey.currentState!
+                                          .validate()) {
+                                        return;
+                                      }
+
                                       if (isEditMode) {
-                                        controller.put(justificationId, idProcess);
+                                        // controller.put(justificationId, idProcess);
                                       } else {
                                         controller.post(idProcess);
                                       }
@@ -169,11 +184,11 @@ class JustificationPage extends GetView<JustificationController> {
                                     )
                                   : Text(
                                       isEditMode ? "Atualizar" : "Enviar",
-                                      style: theme.textTheme.bodyMedium!
-                                          .copyWith(
-                                            color: colors.onSecondary,
-                                            fontWeight: FontWeight.w800,
-                                          ),
+                                      style:
+                                          theme.textTheme.bodyMedium!.copyWith(
+                                        color: colors.onSecondary,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
                             ),
                           );
@@ -191,8 +206,174 @@ class JustificationPage extends GetView<JustificationController> {
   }
 }
 
+class _AttachmentPickerCard extends GetView<JustificationController> {
+  final bool isEditMode;
+
+  const _AttachmentPickerCard({
+    required this.isEditMode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Obx(() {
+      final fileName = controller.selectedFileName.value;
+      final hasFile = fileName != null && fileName.isNotEmpty;
+
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colors.outline.withOpacity(0.25),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.attach_file_rounded,
+                  color: colors.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Anexo opcional",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: colors.tertiary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              "Você pode anexar uma imagem, PDF ou documento para complementar a justificativa.",
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors.secondary,
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            if (hasFile)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colors.onSecondary,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: colors.primary.withOpacity(0.25),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _getFileIcon(fileName),
+                      color: colors.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        fileName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.tertiary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: "Remover arquivo",
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.removeSelectedFile,
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: colors.error,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              OutlinedButton.icon(
+                onPressed: controller.isLoading.value
+                    ? null
+                    : controller.pickFile,
+                icon: const Icon(Icons.upload_file_rounded),
+                label: const Text("Selecionar arquivo"),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                  foregroundColor: colors.primary,
+                  side: BorderSide(
+                    color: colors.primary.withOpacity(0.45),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+
+            if (hasFile) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: controller.isLoading.value
+                    ? null
+                    : controller.pickFile,
+                icon: const Icon(Icons.swap_horiz_rounded),
+                label: const Text("Trocar arquivo"),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 46),
+                  foregroundColor: colors.primary,
+                  side: BorderSide(
+                    color: colors.primary.withOpacity(0.45),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    });
+  }
+
+  IconData _getFileIcon(String fileName) {
+    final lower = fileName.toLowerCase();
+
+    if (lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg')) {
+      return Icons.image_rounded;
+    }
+
+    if (lower.endsWith('.pdf')) {
+      return Icons.picture_as_pdf_rounded;
+    }
+
+    if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
+      return Icons.description_rounded;
+    }
+
+    return Icons.insert_drive_file_rounded;
+  }
+}
+
 class _DiagonalLinesPainter extends CustomPainter {
   final Color color;
+
   _DiagonalLinesPainter({required this.color});
 
   @override
@@ -202,6 +383,7 @@ class _DiagonalLinesPainter extends CustomPainter {
       ..strokeWidth = 1;
 
     const spacing = 80.0;
+
     for (double i = -size.height; i < size.width; i += spacing) {
       canvas.drawLine(
         Offset(i, 0),

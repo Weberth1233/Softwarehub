@@ -46,7 +46,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                                 .requestMatchers(HttpMethod.POST, "api/auth/forgot-password").permitAll()
                                 .requestMatchers(HttpMethod.POST, "api/auth/reset-password").permitAll()
-
+//                                .requestMatchers("/uploads/justifications/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "educational-institution").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/educational-institution/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/educational-institution/**").hasRole("ADMIN")

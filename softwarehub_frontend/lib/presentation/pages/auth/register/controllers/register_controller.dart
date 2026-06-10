@@ -6,7 +6,7 @@ import '../../../../../domain/entities/address_api_entity.dart';
 import '../../../../../domain/entities/educational_institution_entity.dart';
 import '../../../../../domain/entities/types_link_entity.dart';
 import '../../../../../domain/entities/user/user_entity.dart';
-import '../../../../../domain/entities/user_educational_institution_link_entity.dart';
+import '../../../../../domain/entities/user/user_educational_institution_link_entity.dart';
 import '../../../../../domain/usecases/address/get_by_zipcode.dart';
 import '../../../../../domain/usecases/educational_institution/get_educational_institutions.dart';
 import '../../../../../domain/usecases/types_link/get_types_links.dart';

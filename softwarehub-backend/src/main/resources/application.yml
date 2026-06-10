@@ -10,7 +10,7 @@ spring:
   application:
     name: srpi
   mail:
-    host: smtp-relay.brevo.com
+    host: smtp-relay.brevo.com'
     port: 587
     username: a374cd001@smtp-brevo.com
     password: ${SENDINBLUE_SMTP_KEY}

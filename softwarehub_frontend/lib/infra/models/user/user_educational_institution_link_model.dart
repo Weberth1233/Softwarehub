@@ -1,6 +1,6 @@
 import '../educational_institution_model.dart';
 import '../types_link_model.dart';
-import '../../../domain/entities/user_educational_institution_link_entity.dart';
+import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
 
 class UserEducationalInstitutionLinkModel {
   final int? id;

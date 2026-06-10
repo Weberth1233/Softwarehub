@@ -2,7 +2,7 @@ import '../attachment_entity.dart';
 import '../external_author/external_author_entity.dart';
 import '../ip_type_entity.dart';
 import '../nice_classification_entity.dart';
-import 'process_justification_entity.dart';
+import '../justification/justification_response_entity.dart';
 import 'process_royalty_distribution_response_entity.dart';
 import 'process_user_entity.dart';
 
@@ -16,7 +16,7 @@ class ProcessResponseEntity {
   final IpTypeEntity ipType;
   final List<ProcessUserEntity> authors;
   final List<AttachmentEntity> attachments;
-  final List<ProcessJustificationEntity> justifications;
+  final List<JustificationResponseEntity> justifications;
   final List<ExternalAuthorEntity> externalAuthors;
   final ProcessUserEntity creator;
   final NiceClassificationEntity niceClassificationModel;

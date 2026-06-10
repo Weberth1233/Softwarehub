@@ -3,19 +3,31 @@ import com.nitssrpi.NIT_SRPI.controller.dto.JustificationRequestDTO;
 import com.nitssrpi.NIT_SRPI.controller.dto.JustificationResponseDTO;
 import com.nitssrpi.NIT_SRPI.controller.mappers.JustificationMapper;
 import com.nitssrpi.NIT_SRPI.model.Justification;
+import com.nitssrpi.NIT_SRPI.model.JustificationAttachment;
 import com.nitssrpi.NIT_SRPI.model.Process;
+import com.nitssrpi.NIT_SRPI.repository.JustificationAttachmentRepository;
 import com.nitssrpi.NIT_SRPI.service.JustificationService;
 import com.nitssrpi.NIT_SRPI.service.ProcessService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.Resource;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,15 +39,16 @@ public class JustificationController implements  GenericController{
     private final JustificationService service;
     private final ProcessService processService;
     private final JustificationMapper mapper;
+    private final JustificationAttachmentRepository attachmentRepository;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Salvar", description = "Cadastrar nova justificativa")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
             @ApiResponse(responseCode = "422", description = "Erro de validação!"),
     })
-    public ResponseEntity<Void> save(@RequestBody @Valid JustificationRequestDTO dto) {
-        Justification saved = service.save(dto.processId(), dto.reason());
+    public ResponseEntity<Void> save(@ModelAttribute @Valid JustificationRequestDTO dto) {
+        Justification saved = service.save(dto.processId(), dto.reason(), dto.file());
         URI location = generateHeaderLocation(saved.getId());
         return ResponseEntity.created(location).build();
     }
@@ -97,5 +110,36 @@ public class JustificationController implements  GenericController{
         //Se não eu deleto
         service.delete(justificationOptional.get());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/attachments/{id}/file")
+    public ResponseEntity<Resource> getAttachmentFile(@PathVariable Long id) {
+        JustificationAttachment attachment = attachmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Arquivo não encontrado!"));
+        try {
+            Path path = Paths.get(attachment.getFilePath()).normalize();
+            Resource resource = new UrlResource(path.toUri());
+            if (!resource.exists()) {
+                throw new EntityNotFoundException("Arquivo não encontrado no servidor!");
+            }
+            String contentType = attachment.getFileType();
+            if (contentType == null || contentType.equals("application/octet-stream")) {
+                contentType = Files.probeContentType(path);
+            }
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + attachment.getFileName() + "\""
+                    )
+                    .body(resource);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Erro ao carregar arquivo!");
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao identificar o tipo do arquivo!");
+        }
     }
 }

@@ -1,10 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/justification/delete_justification.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process/get_process_by_id.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process/process_classification.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process/update_status_process.dart';
+import 'package:universal_html/universal_html.dart' as html;
+
 import '../../../../domain/core/errors/failures.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
+import '../../../../domain/usecases/justification/delete_justification.dart';
+import '../../../../domain/usecases/justification/get_attachment_file.dart';
+import '../../../../domain/usecases/process/get_process_by_id.dart';
+import '../../../../domain/usecases/process/process_classification.dart';
+import '../../../../domain/usecases/process/update_status_process.dart';
 import '../../../../infra/datasources/auth_local_datasource.dart';
 import '../../../shared/utils/app_toast.dart';
 
@@ -13,6 +18,7 @@ class ProcessDetailController extends GetxController {
   final DeleteJustification _deleteJustification;
   final UpdateStatusProcess _updateStatusProcess;
   final ProcessClassification _processClassification;
+  final GetAttachmentFile _attachmentFile;
   final AuthLocalDataSource _authLocal;
 
   ProcessDetailController(
@@ -21,19 +27,31 @@ class ProcessDetailController extends GetxController {
     this._deleteJustification,
     this._updateStatusProcess,
     this._processClassification,
+    this._attachmentFile,
   );
 
   final RxBool isLoading = false.obs;
+  final RxBool isLoadingAttachment = false.obs;
 
   final RxString errorMessage = ''.obs;
-
   final RxString message = ''.obs;
 
   final Rxn<ProcessResponseEntity> process = Rxn<ProcessResponseEntity>();
 
   final RxString userRole = ''.obs;
 
+  final Rxn<Uint8List> attachmentBytes = Rxn<Uint8List>();
+  final RxString attachmentContentType = ''.obs;
+  final RxnString attachmentFileName = RxnString();
+
   bool get isAdmin => userRole.value == 'ADMIN';
+
+  bool get hasAttachmentLoaded => attachmentBytes.value != null;
+
+  bool get isAttachmentImage =>
+      attachmentContentType.value.startsWith('image/');
+
+  bool get isAttachmentPdf => attachmentContentType.value == 'application/pdf';
 
   @override
   void onInit() {
@@ -45,6 +63,9 @@ class ProcessDetailController extends GetxController {
   @override
   void onClose() {
     process.value = null;
+    attachmentBytes.value = null;
+    attachmentContentType.value = '';
+    attachmentFileName.value = null;
     super.onClose();
   }
 
@@ -71,7 +92,6 @@ class ProcessDetailController extends GetxController {
       fetchProcess(finalId);
     } else {
       errorMessage.value = "ID do processo não encontrado.";
-
       AppToast.error("Erro - Não foi possível identificar o ID do processo.");
     }
   }
@@ -84,7 +104,6 @@ class ProcessDetailController extends GetxController {
 
     result.fold(
       (Failure failure) {
-        // Falha
         isLoading.value = false;
         errorMessage.value = failure.message;
         process.value = null;
@@ -92,11 +111,64 @@ class ProcessDetailController extends GetxController {
         AppToast.error("Falha ao carregar processo: ${failure.message}");
       },
       (ProcessResponseEntity success) {
-        // Sucesso
         isLoading.value = false;
         process.value = success;
       },
     );
+  }
+
+  Future<void> getAttachmentFile(int attachmentId) async {
+    try {
+      isLoadingAttachment.value = true;
+      message.value = '';
+
+      final result = await _attachmentFile(attachmentId);
+
+      result.fold(
+        (Failure failure) {
+          message.value = failure.message;
+          AppToast.error("Erro - ${failure.message}");
+        },
+        (file) {
+          attachmentBytes.value = Uint8List.fromList(file.bytes);
+          attachmentContentType.value = file.contentType;
+          attachmentFileName.value = file.fileName;
+
+          AppToast.success("Arquivo carregado com sucesso!");
+        },
+      );
+    } catch (e) {
+      AppToast.error(
+        "Erro inesperado - Ocorreu um erro ao tentar carregar o arquivo.",
+      );
+    } finally {
+      isLoadingAttachment.value = false;
+    }
+  }
+
+  void openPdfInNewTab() {
+    final bytes = attachmentBytes.value;
+
+    if (bytes == null || bytes.isEmpty) {
+      AppToast.error("Arquivo não carregado.");
+      return;
+    }
+
+    final blob = html.Blob([bytes], 'application/pdf');
+
+    final url = html.Url.createObjectUrlFromBlob(blob);
+
+    html.window.open(url, '_blank');
+
+    Future.delayed(const Duration(seconds: 2), () {
+      html.Url.revokeObjectUrl(url);
+    });
+  }
+
+  void clearAttachmentFile() {
+    attachmentBytes.value = null;
+    attachmentContentType.value = '';
+    attachmentFileName.value = null;
   }
 
   Future<void> classifyProcess(int processId, int niceClassCode) async {
@@ -136,24 +208,21 @@ class ProcessDetailController extends GetxController {
       result.fold(
         (failure) {
           message.value = failure.message;
-
           AppToast.error("Erro - ${message.value}");
         },
         (successMessage) async {
           message.value = successMessage;
-
           AppToast.success("Sucesso - ${message.value}");
 
-          // 🔥 Recarrega o processo atualizado
           if (process.value != null) {
             await fetchProcess(process.value!.id);
           }
         },
       );
     } catch (e) {
-      
-      AppToast.error("Erro inesperado - Ocorreu um erro ao tentar remover a justificativa");
-      
+      AppToast.error(
+        "Erro inesperado - Ocorreu um erro ao tentar remover a justificativa",
+      );
     } finally {
       isLoading.value = false;
     }
@@ -169,22 +238,21 @@ class ProcessDetailController extends GetxController {
       result.fold(
         (failure) {
           message.value = failure.message;
-
           AppToast.error("Erro - ${message.value}");
         },
         (successMessage) async {
           message.value = successMessage;
-
           AppToast.success("Sucesso - ${message.value}");
 
-          // 🔥 Recarrega o processo atualizado
           if (process.value != null) {
             await fetchProcess(process.value!.id);
           }
         },
       );
     } catch (e) {
-      AppToast.error("Erro inesperado -Ocorreu um erro ao tentar atualizar o status do processo.");
+      AppToast.error(
+        "Erro inesperado -Ocorreu um erro ao tentar atualizar o status do processo.",
+      );
     } finally {
       isLoading.value = false;
     }

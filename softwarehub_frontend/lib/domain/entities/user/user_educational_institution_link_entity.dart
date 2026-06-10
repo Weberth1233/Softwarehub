@@ -1,5 +1,5 @@
-import 'educational_institution_entity.dart';
-import 'types_link_entity.dart';
+import '../educational_institution_entity.dart';
+import '../types_link_entity.dart';
 
 class UserEducationalInstitutionLinkEntity {
   final int? id;

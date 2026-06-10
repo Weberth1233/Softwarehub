@@ -46,6 +46,7 @@ dependencies:
   url_launcher: ^6.3.0
   web: ^1.1.1
   file_picker: ^10.3.10
+  universal_html: ^2.2.4
 
 
 dev_dependencies:
