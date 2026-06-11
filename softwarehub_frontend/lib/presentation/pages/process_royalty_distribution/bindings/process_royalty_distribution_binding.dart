@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/process_royalty_distribution/put_process_royalty_distribution.dart';
 
 import '../../../../domain/repositories/iprocess_repository.dart';
 import '../../../../domain/repositories/iprocess_royalty_distribution_repository.dart';
@@ -34,6 +35,13 @@ class ProcessRoyaltyDistributionBindings extends Bindings {
       ),
     );
 
+    Get.lazyPut<PutProcessRoyaltyDistribution>(
+      () => PutProcessRoyaltyDistribution(
+        repository: Get.find<IProcessRoyaltyDistributionRepository>(),
+      ),
+    );
+
+
     Get.lazyPut<GetProcessById>(
       () => GetProcessById(repository: Get.find<IProcessRepository>()),
     );
@@ -46,6 +54,7 @@ class ProcessRoyaltyDistributionBindings extends Bindings {
       () => ProcessRoyaltyDistributionController(
         Get.find<GetProcessById>(),
         Get.find<PostProcessRoyaltyDistribution>(),
+        Get.find<PutProcessRoyaltyDistribution>()
       ),
     );
   }

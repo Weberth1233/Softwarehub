@@ -20,19 +20,12 @@ abstract class IProcessRemoteDataSource {
     int page = 0,
     int size = 10,
   });
-
   Future<List<ProcessStatusCountModel>> getProcessesStatusCount();
-
   Future<int> postProcess(ProcessRequestEntity entity);
-
   Future<String> putProcess(int processId, ProcessRequestEntity entity);
-
   Future<String> deleteProcess(int idProcess);
-
   Future<ProcessResponseEntity> getProcessById(int processId);
-
   Future<String> updateStatusProcess(int processId, String newStatus);
-
   Future<String> processClassification(int processId, int niceClassCode);
 }
 

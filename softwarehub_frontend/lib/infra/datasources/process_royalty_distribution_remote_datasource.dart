@@ -7,7 +7,7 @@ import '../models/process/process_royalty_distribution_request_model.dart';
 
 abstract class IProcessRoyaltyDistributionRemoteDatasource
     implements
-        IGenericPostRemoteDatasource<ProcessRoyaltyDistributionRequestEntity> {}
+        IGenericPostRemoteDatasource<ProcessRoyaltyDistributionRequestEntity> , IGenericPutRemoteDatasource<ProcessRoyaltyDistributionRequestEntity>{}
 
 class ProcessRoyaltyDistributionRemoteDatasource
     implements IProcessRoyaltyDistributionRemoteDatasource {
@@ -27,6 +27,19 @@ class ProcessRoyaltyDistributionRemoteDatasource
       onSuccess: (responseBody) {
         return "Distribuição de cotas cadastrada com sucesso!";
       },
+    );
+  }
+  
+  @override
+  Future<String> put(int id, ProcessRoyaltyDistributionRequestEntity entity) {
+    final model = ProcessRoyaltyDistributionRequestModel.fromEntity(entity);
+
+    return helper.put<String>(
+      url: "${BaseUrl.urlWithHttp}/process-royalty-distribution/$id",
+      body: model.toJson(),
+      successStatusCodes: const [204], onSuccess: (responseBody, int statusCode) { 
+        return "Distribuição de cotas atualizado com sucesso!";
+       },
     );
   }
 }

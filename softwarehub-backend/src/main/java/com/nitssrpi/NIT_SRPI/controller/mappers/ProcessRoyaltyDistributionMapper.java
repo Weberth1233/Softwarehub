@@ -43,6 +43,7 @@ public interface ProcessRoyaltyDistributionMapper extends
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+
     void updateEntity(
             ProcessRoyaltyDistributionRequestDTO dto,
             @MappingTarget ProcessRoyaltyDistribution entity

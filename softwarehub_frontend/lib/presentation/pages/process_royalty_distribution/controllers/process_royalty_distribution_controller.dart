@@ -5,6 +5,7 @@ import '../../../../domain/entities/process/process_royalty_distribution_request
 import '../../../../domain/entities/process/process_user_entity.dart';
 import '../../../../domain/usecases/process/get_process_by_id.dart';
 import '../../../../domain/usecases/process_royalty_distribution/post_process_royalty_distribution.dart';
+import '../../../../domain/usecases/process_royalty_distribution/put_process_royalty_distribution.dart';
 import '../../../../infra/models/process/process_royalty_distribution_request_model.dart';
 import '../../../shared/utils/app_toast.dart';
 import '../widgets/share_form_model.dart';
@@ -12,12 +13,12 @@ import '../widgets/share_form_model.dart';
 class ProcessRoyaltyDistributionController extends GetxController {
   final GetProcessById _getProcessById;
   final PostProcessRoyaltyDistribution _postRoyaltyDistribution;
-  // final PutProcessRoyaltyDistribution _putRoyaltyDistribution;
+  final PutProcessRoyaltyDistribution _putRoyaltyDistribution;
 
   ProcessRoyaltyDistributionController(
     this._getProcessById,
     this._postRoyaltyDistribution,
-    // this._putRoyaltyDistribution,
+    this._putRoyaltyDistribution,
   );
 
   final formKey = GlobalKey<FormState>();
@@ -116,6 +117,10 @@ class ProcessRoyaltyDistributionController extends GetxController {
           debugPrint('ID RETORNADO DA API: ${success.id}');
 
           _buildSharesFromProcess(success);
+
+          if(isEditMode.value && distributionId.value != null){
+            _applySavedRoyaltyDistribution(success);
+          }
         },
       );
     } catch (e) {
@@ -124,6 +129,49 @@ class ProcessRoyaltyDistributionController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _applySavedRoyaltyDistribution(ProcessResponseEntity process) {
+    final id = distributionId.value;
+
+    if (id == null) return;
+
+    final distribution = process.royaltyDistributions.firstWhereOrNull(
+      (distribution) => distribution.id == id,
+    );
+
+    if (distribution == null) {
+      AppToast.error("Distribuição de cotas não encontrada para edição.");
+      return;
+    }
+
+    for (final formShare in shares) {
+      final savedShare = distribution.shares.firstWhereOrNull((saved) {
+        final sameUser =
+            formShare.userId != null &&
+            saved.userId != null &&
+            saved.userId == formShare.userId;
+
+        final sameInstitution =
+            formShare.educationalInstitutionId != null &&
+            saved.educationalInstitutionId != null &&
+            saved.educationalInstitutionId ==
+                formShare.educationalInstitutionId;
+
+        return sameUser || sameInstitution;
+      });
+
+      if (savedShare == null) continue;
+
+      formShare.percentage.value = double.parse(
+        savedShare.percentage.toStringAsFixed(2),
+      );
+
+      formShare.percentageController.text = formShare.percentage.value
+          .toStringAsFixed(2);
+    }
+
+    shares.refresh();
   }
 
   void _buildSharesFromProcess(ProcessResponseEntity process) {
@@ -353,7 +401,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
     ).toEntity();
 
     if (isEditMode.value) {
-      // await _putProcessRoyaltyDistribution(entity);
+      await _putProcessRoyaltyDistribution(entity);
     } else {
       await _postProcessRoyaltyDistribution(entity);
     }
@@ -386,38 +434,38 @@ class ProcessRoyaltyDistributionController extends GetxController {
     }
   }
 
-  // Future<void> _putProcessRoyaltyDistribution(
-  //   ProcessRoyaltyDistributionRequestEntity entity,
-  // ) async {
-  //   final id = distributionId.value;
+  Future<void> _putProcessRoyaltyDistribution(
+    ProcessRoyaltyDistributionRequestEntity entity,
+  ) async {
+    final id = distributionId.value;
 
-  //   if (id == null) {
-  //     AppToast.error("ID da distribuição não encontrado.");
-  //     return;
-  //   }
+    if (id == null) {
+      AppToast.error("ID da distribuição não encontrado.");
+      return;
+    }
 
-  //   try {
-  //     isLoading.value = true;
+    try {
+      isLoading.value = true;
 
-  //     final result = await _putRoyaltyDistribution(id, entity);
+      final result = await _putRoyaltyDistribution(id, entity);
 
-  //     result.fold(
-  //       (failure) {
-  //         AppToast.error(failure.message);
-  //       },
-  //       (success) {
-  //         AppToast.success(success);
-  //         Get.back(result: process.value!.id);
-  //       },
-  //     );
-  //   } catch (e) {
-  //     AppToast.error(
-  //       "Erro inesperado ao atualizar distribuição de cotas do processo ${process.value!.id}.",
-  //     );
-  //   } finally {
-  //     isLoading.value = false;
-  //   }
-  // }
+      result.fold(
+        (failure) {
+          AppToast.error(failure.message);
+        },
+        (success) {
+          AppToast.success(success);
+          Get.back(result: process.value!.id);
+        },
+      );
+    } catch (e) {
+      AppToast.error(
+        "Erro inesperado ao atualizar distribuição de cotas do processo ${process.value!.id}.",
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void _syncControllers() {
     for (final share in shares) {

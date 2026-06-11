@@ -95,6 +95,7 @@ class ProcessDetailController extends GetxController {
       AppToast.error("Erro - Não foi possível identificar o ID do processo.");
     }
   }
+  
 
   Future<void> fetchProcess(int id) async {
     isLoading.value = true;

@@ -78,6 +78,83 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
     }
 
     @Override
+    @Transactional
+    public ProcessRoyaltyDistribution update(ProcessRoyaltyDistribution processRoyaltyDistribution) {
+
+        if (processRoyaltyDistribution.getId() == null) {
+            throw new IllegalArgumentException("O ID da distribuição é obrigatório para atualização.");
+        }
+        ProcessRoyaltyDistribution distribution = repository.findById(processRoyaltyDistribution.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Distribuição de cotas não encontrada."));
+
+        Process process = distribution.getProcess();
+
+        if (process == null || process.getId() == null) {
+            throw new IllegalStateException("Distribuição não possui processo vinculado.");
+        }
+
+        process = processRepository.findById(process.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado."));
+
+        distribution.setProcess(process);
+
+        validateCanUpdateDistribution(process);
+        updateShares(distribution, processRoyaltyDistribution);
+
+        validateDistribution(distribution);
+        validateSharesParticipants(distribution, process);
+        bindSharesToDistribution(distribution);
+
+        process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
+
+        return repository.save(distribution);
+    }
+
+    private void updateShares(
+            ProcessRoyaltyDistribution distribution,
+            ProcessRoyaltyDistribution request
+    ) {
+        if (request.getShares() == null || request.getShares().isEmpty()) {
+            throw new IllegalArgumentException("A distribuição precisa ter cotas informadas.");
+        }
+
+        distribution.getShares().clear();
+
+        for (RoyaltyShare requestShare : request.getShares()) {
+            RoyaltyShare share = new RoyaltyShare();
+
+            share.setType(requestShare.getType());
+            share.setPercentage(requestShare.getPercentage());
+
+            share.setUser(requestShare.getUser());
+            share.setEducationalInstitution(requestShare.getEducationalInstitution());
+
+            share.setDistribution(distribution);
+
+            distribution.getShares().add(share);
+        }
+    }
+    private void validateCanUpdateDistribution(Process process) {
+        if (process.getStatus() == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException(
+                    "Processo finalizado não permite atualizar distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException(
+                    "Processo inativo não permite atualizar distribuição de cotas."
+            );
+        }
+
+        if (process.getStatus() == StatusProcess.CORRECAO) {
+            throw new OperationNotAllowedException(
+                    "Processo em correção não permite atualizar distribuição de cotas antes de ser corrigido."
+            );
+        }
+    }
+
+    @Override
     public Long getEntityId(ProcessRoyaltyDistribution processRoyaltyDistribution) {
         return processRoyaltyDistribution.getId();
     }
@@ -462,6 +539,9 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
     }
 
     private void bindSharesToDistribution(ProcessRoyaltyDistribution distribution) {
+        if(distribution.getShares() == null){
+            return;
+        }
         for (RoyaltyShare share : distribution.getShares()) {
             share.setDistribution(distribution);
         }

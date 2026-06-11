@@ -1063,6 +1063,25 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ),
                     ),
                   ),
+                   ElevatedButton(
+            onPressed: () async {
+              
+              final result = await Get.toNamed(
+                '/home/process-detail/${entity.id}/royalty-distribution',
+                arguments: {
+                  "distributionId": distribution.id
+                }
+              );
+              if (result != null && result is int) {
+                print("Atualizando o processo");
+                await controller.fetchProcess(result);
+              }
+            },
+            child: Text(
+              "Atualizar distribuição de cotas",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
