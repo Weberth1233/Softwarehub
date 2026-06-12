@@ -1,12 +1,12 @@
 package com.nitssrpi.NIT_SRPI.controller;
-import com.nitssrpi.NIT_SRPI.controller.dto.TypesLinkRequestDTO;
-import com.nitssrpi.NIT_SRPI.controller.dto.TypesLinkResponseDTO;
-import com.nitssrpi.NIT_SRPI.controller.mappers.TypesLinkMapper;
-import com.nitssrpi.NIT_SRPI.generic.controller.GenericController;
+
+import com.nitssrpi.NIT_SRPI.controller.dto.ApplicationAreaRequestDTO;
+import com.nitssrpi.NIT_SRPI.controller.dto.ApplicationAreaResponseDTO;
+import com.nitssrpi.NIT_SRPI.controller.mappers.ApplicationAreaMapper;
 import com.nitssrpi.NIT_SRPI.generic.mapper.GenericMapper;
 import com.nitssrpi.NIT_SRPI.generic.service.GenericService;
-import com.nitssrpi.NIT_SRPI.model.TypesLink;
-import com.nitssrpi.NIT_SRPI.service.TypesLinkService;
+import com.nitssrpi.NIT_SRPI.model.ApplicationArea;
+import com.nitssrpi.NIT_SRPI.service.ApplicationAreaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,23 +15,24 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.nitssrpi.NIT_SRPI.generic.controller.GenericController;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/types-link")
+@RequestMapping("/application-area")
 @RequiredArgsConstructor
-@Tag(name = "Tipos de vínculos")
-public class TypesLinkController extends GenericController<TypesLink, TypesLinkRequestDTO, TypesLinkResponseDTO, Long> {
-    private final TypesLinkService service;
-    private final TypesLinkMapper mapper;
+@Tag(name = "Áreas de aplicação")
+public class ApplicationAreaController extends GenericController<ApplicationArea, ApplicationAreaRequestDTO, ApplicationAreaResponseDTO, Long> {
+    final ApplicationAreaService service;
+    private final ApplicationAreaMapper mapper;
 
     @Override
-    protected GenericService<TypesLink, Long> getService() {
+    protected GenericService<ApplicationArea, Long> getService() {
         return service;
     }
 
     @Override
-    protected GenericMapper<TypesLink, TypesLinkRequestDTO, TypesLinkResponseDTO> getMapper() {
+    protected GenericMapper<ApplicationArea, ApplicationAreaRequestDTO, ApplicationAreaResponseDTO> getMapper() {
         return mapper;
     }
 
@@ -43,19 +44,19 @@ public class TypesLinkController extends GenericController<TypesLink, TypesLinkR
     })
     public ResponseEntity<Object> update(
             @PathVariable Long id,
-            @RequestBody @Valid TypesLinkRequestDTO dto
+            @RequestBody @Valid ApplicationAreaRequestDTO dto
     ) {
-        Optional<TypesLink> optional =
+        Optional<ApplicationArea> optional =
                 service.getById(id);
         if (optional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        TypesLink entity = optional.get();
+        ApplicationArea entity = optional.get();
 
         mapper.updateEntity(dto,entity);
 
         service.update(entity);
         return ResponseEntity.noContent().build();
     }
-
 }
+

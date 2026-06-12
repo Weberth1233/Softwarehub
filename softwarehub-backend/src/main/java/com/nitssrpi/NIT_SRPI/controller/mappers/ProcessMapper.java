@@ -27,7 +27,7 @@ public interface ProcessMapper {
     @Mapping(target = "updatedAt", ignore = true)
 
     @Mapping(target = "creator", ignore = true)
-    @Mapping(target = "niceClassification", ignore = true)
+//    @Mapping(target = "niceClassification", ignore = true)
 
     @Mapping(target = "attachments", ignore = true)
     @Mapping(target = "justifications", ignore = true)

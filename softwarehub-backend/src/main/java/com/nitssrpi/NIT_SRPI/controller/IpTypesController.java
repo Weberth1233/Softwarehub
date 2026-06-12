@@ -37,18 +37,7 @@ public class IpTypesController implements GenericController{
         URI location = generateHeaderLocation(ipTypes.getId());
         return ResponseEntity.created(location).build();
     }
-/*
-* {
-  "email": "caiojorge23@hotmail.com",
-  "password": "caio2333"
-  }
-  *
-  {
-  "email": "mariadoloris@hotmail.com",
-  "password": "maria123"
-}
-  *
-}*/
+
     @GetMapping
     @Operation(summary = "Obter", description = "Obter todos as propriedades intelectuais")
     @ApiResponses({

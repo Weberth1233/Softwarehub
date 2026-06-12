@@ -39,52 +39,37 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
 
     @Transactional
     public RoyaltyDistributionChangeRequest save(RoyaltyDistributionChangeRequest changeRequest) {
-
         validateProcess(changeRequest);
         validateRequestedBy(changeRequest);
         validateRequestedPercentage(changeRequest);
         validateJustification(changeRequest);
         validateAttachment(changeRequest);
-
         Long processId = changeRequest.getProcess().getId();
         Long requestedById = changeRequest.getRequestedBy().getId();
         Long attachmentId = changeRequest.getAttachment().getId();
 
         validateNoPendingRequest(changeRequest);
-
         Process process = processRepository.findById(processId)
                 .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado."));
-
         validateCanCreateChangeRequest(process);
-
         User requestedBy = userRepository.findById(requestedById)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário solicitante não encontrado."));
-
         ChangeRequestAttachment attachment = changeRequestAttachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new EntityNotFoundException("Anexo da solicitação não encontrado."));
-
         BigDecimal currentUniversityPercentage = getCurrentUniversityPercentage(process.getId());
-
         if (currentUniversityPercentage.compareTo(changeRequest.getRequestedUniversityPercentage()) == 0) {
             throw new IllegalArgumentException(
                     "O novo percentual da universidade deve ser diferente do percentual atual."
             );
         }
-
         changeRequest.setProcess(process);
         changeRequest.setRequestedBy(requestedBy);
         changeRequest.setAttachment(attachment);
-
         changeRequest.setCurrentUniversityPercentage(currentUniversityPercentage);
         changeRequest.setStatus(ChangeRequestStatus.PENDING);
         changeRequest.setReviewedBy(null);
         changeRequest.setReviewedAt(null);
         changeRequest.setRejectionReason(null);
-
-        /*
-         * Como foi criada uma solicitação relacionada às cotas,
-         * o processo fica marcado como cotas distribuídas.
-         */
         process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
         processRepository.save(process);
 
@@ -98,25 +83,14 @@ public class RoyaltyDistributionChangeRequestService extends GenericServiceImpl<
     ) {
         RoyaltyDistributionChangeRequest changeRequest =
                 getPendingChangeRequest(changeRequestId);
-
         User reviewedBy = userRepository.findById(reviewedById)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Usuário responsável pela análise não encontrado.")
                 );
-
         changeRequest.setStatus(ChangeRequestStatus.APPROVED);
         changeRequest.setReviewedBy(reviewedBy);
         changeRequest.setReviewedAt(LocalDateTime.now());
         changeRequest.setRejectionReason(null);
-
-        /*
-         * Aqui você pode aplicar a alteração da distribuição,
-         * caso seu fluxo faça isso na aprovação.
-         *
-         * Exemplo:
-         * distributionService.applyChangeRequest(changeRequest);
-         */
-
         return repository.save(changeRequest);
     }
 

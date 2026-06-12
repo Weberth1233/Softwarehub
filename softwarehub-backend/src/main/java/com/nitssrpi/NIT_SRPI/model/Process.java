@@ -10,9 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 @Table(name = "processes", schema = "public")
@@ -29,9 +27,6 @@ public class Process {
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(255)") // Força a coluna a ser apenas um texto sem Check
     private StatusProcess status;
-
-//    @Column(name = "is_featured")
-//    private boolean isFeatured;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
@@ -75,9 +70,13 @@ public class Process {
     @OneToMany(mappedBy = "process", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Justification> justifications = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nice_class_code", nullable = true)
-    private NiceClassification niceClassification;
+    @ManyToMany
+    @JoinTable(
+            name = "process_application_field",
+            joinColumns = @JoinColumn(name = "process_id"),
+            inverseJoinColumns = @JoinColumn(name = "application_field_id")
+    )
+    private Set<ApplicationField> applicationFields = new HashSet<>();
 
     @OneToMany(mappedBy = "process", fetch = FetchType.LAZY)
     private List<ProcessRoyaltyDistribution> royaltyDistributions = new ArrayList<>();

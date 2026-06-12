@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/auth/")
+@RequestMapping("/api/auth/")
 @CrossOrigin(origins = "*")
 @Tag(name = "Esqueci a senha")
 public class AuthController {

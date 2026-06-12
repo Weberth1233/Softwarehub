@@ -14,8 +14,8 @@ public class NiceClassification {
     private String name;
     @Enumerated(EnumType.STRING)
     private NiceType type;
-    @Column(columnDefinition = "TEXT")
-    private String description;
+
+
 }
 
 

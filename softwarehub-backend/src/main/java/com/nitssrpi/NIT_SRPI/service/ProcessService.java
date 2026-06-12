@@ -38,7 +38,7 @@ public class ProcessService {
 
         process.setCreator(user);
         process.setStatus(StatusProcess.PENDENTE_DISTRIBUICAO_COTAS);
-        process.setNiceClassification(null);
+//        process.setNiceClassification(null);
 
         IpTypes type = prepareProcessBasicRelations(process);
 
@@ -97,7 +97,7 @@ public class ProcessService {
                                 new EntityNotFoundException("Classe NICE não encontrada")
                         );
 
-        process.setNiceClassification(niceClassification);
+//        process.setNiceClassification(niceClassification);
         process.setStatus(StatusProcess.CLASSIFICADO);
 
         repository.save(process);
@@ -210,11 +210,11 @@ public class ProcessService {
 
         validateAllAttachmentsSigned(process);
 
-        if (process.getNiceClassification() == null) {
-            throw new OperationNotAllowedException(
-                    "O processo ainda não foi classificado."
-            );
-        }
+//        if (process.getNiceClassification() == null) {
+//            throw new OperationNotAllowedException(
+//                    "O processo ainda não foi classificado."
+//            );
+//        }
     }
 
     private void validateHasQuotaDistribution(Process process) {

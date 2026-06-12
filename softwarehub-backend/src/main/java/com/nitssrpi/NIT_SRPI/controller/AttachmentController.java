@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("attachments")
+@RequestMapping("/attachments")
 @RequiredArgsConstructor
 @Tag(name = "Documentação")
 public class AttachmentController {
