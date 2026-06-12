@@ -21,12 +21,12 @@ class RegisterController extends GetxController {
   final GetTypesLinks _getTypesLinks;
 
   RegisterController(
-    this._postUser,
-    this._putUser,
-    this._getByZipcode,
-    this._getEducationalInstitutions,
-    this._getTypesLinks,
-  );
+      this._postUser,
+      this._putUser,
+      this._getByZipcode,
+      this._getEducationalInstitutions,
+      this._getTypesLinks,
+      );
 
   // Dados pessoais
   final TextEditingController nameController = TextEditingController();
@@ -58,6 +58,10 @@ class RegisterController extends GetxController {
 
   final RxString message = ''.obs;
 
+  /// Mapa de erros por campo, populado a partir das mensagens de erro
+  /// retornadas pelo backend (heurística por palavras-chave).
+  final RxMap<String, String?> fieldErrors = <String, String?>{}.obs;
+
   final Rxn<AddressApiEntity> addressApiEntity = Rxn<AddressApiEntity>();
 
   final RxList<EducationalInstitutionEntity> educationalInstitutions =
@@ -73,9 +77,9 @@ class RegisterController extends GetxController {
   void onInit() {
     super.onInit();
     fetchInitialData();
-  } 
+  }
 
-   void clearForm() {
+  void clearForm() {
     userController.clear();
     nameController.clear();
     emailController.clear();
@@ -95,6 +99,8 @@ class RegisterController extends GetxController {
     neighborhoodController.clear();
     cityController.clear();
     stateController.clear();
+
+    fieldErrors.clear();
 
     clearEducationalInstitutionLinks();
   }
@@ -134,6 +140,37 @@ class RegisterController extends GetxController {
     await Future.wait([fetchEducationalInstitutions(), fetchTypesLinks()]);
   }
 
+  /// Limpa o erro de um campo específico (chamado ao usuário editar o campo).
+  void clearFieldError(String key) {
+    if (fieldErrors[key] != null) {
+      fieldErrors[key] = null;
+    }
+  }
+
+  /// Mapeia a mensagem de erro retornada pelo backend para o campo
+  /// correspondente, usando palavras-chave presentes na mensagem.
+  void _mapFailureToField(Failure failure) {
+    fieldErrors.clear();
+
+    final msg = failure.message.toLowerCase();
+
+    if (msg.contains('cpf')) {
+      fieldErrors['cpf'] = failure.message;
+    } else if (msg.contains('e-mail') || msg.contains('email')) {
+      fieldErrors['email'] = failure.message;
+    } else if (msg.contains('nome de usuário') ||
+        msg.contains('usuário') ||
+        msg.contains('username')) {
+      fieldErrors['userName'] = failure.message;
+    } else if (msg.contains('telefone')) {
+      fieldErrors['phone'] = failure.message;
+    } else if (msg.contains('cep')) {
+      fieldErrors['cep'] = failure.message;
+    }
+
+    AppToast.error(failure.message);
+  }
+
   Future<void> post(UserEntity user) async {
     if (isLoadingSubmit.value) return;
 
@@ -144,10 +181,10 @@ class RegisterController extends GetxController {
       final result = await _postUser(user);
 
       result.fold(
-        (Failure failure) {
-          AppToast.error(failure.message);
+            (Failure failure) {
+          _mapFailureToField(failure);
         },
-        (success) {
+            (success) {
           AppToast.success(success);
           clearForm();
         },
@@ -167,11 +204,12 @@ class RegisterController extends GetxController {
       final result = await _putUser(idUser, user);
 
       result.fold(
-        (Failure failure) {
-          AppToast.error(failure.message);
+            (Failure failure) {
+          _mapFailureToField(failure);
         },
-        (success) {
+            (success) {
           AppToast.success(success);
+          fieldErrors.clear();
         },
       );
     } finally {
@@ -188,11 +226,11 @@ class RegisterController extends GetxController {
       final result = await _getByZipcode(cep);
 
       return result.fold(
-        (Failure failure) {
+            (Failure failure) {
           AppToast.error(failure.message);
           return null;
         },
-        (AddressApiEntity address) {
+            (AddressApiEntity address) {
           addressApiEntity.value = address;
           return address;
         },
@@ -212,11 +250,10 @@ class RegisterController extends GetxController {
       final result = await _getEducationalInstitutions();
 
       result.fold(
-        (Failure failure) {
+            (Failure failure) {
           AppToast.error(failure.message);
-
         },
-        (List<EducationalInstitutionEntity> result) {
+            (List<EducationalInstitutionEntity> result) {
           educationalInstitutions.assignAll(result);
         },
       );
@@ -235,10 +272,10 @@ class RegisterController extends GetxController {
       final result = await _getTypesLinks();
 
       result.fold(
-        (Failure failure) {
+            (Failure failure) {
           AppToast.error(failure.message);
         },
-        (List<TypesLinkEntity> result) {
+            (List<TypesLinkEntity> result) {
           typesLinks.assignAll(result);
         },
       );
@@ -252,8 +289,8 @@ class RegisterController extends GetxController {
     required TypesLinkEntity typesLink,
   }) {
     final alreadyExists = selectedEducationalInstitutionLinks.any(
-      (link) =>
-          link.educationalInstitution.id == educationalInstitution.id &&
+          (link) =>
+      link.educationalInstitution.id == educationalInstitution.id &&
           link.typesLink.id == typesLink.id,
     );
 
@@ -272,8 +309,8 @@ class RegisterController extends GetxController {
   }
 
   void removeEducationalInstitutionLink(
-    UserEducationalInstitutionLinkEntity link,
-  ) {
+      UserEducationalInstitutionLinkEntity link,
+      ) {
     selectedEducationalInstitutionLinks.remove(link);
   }
 
