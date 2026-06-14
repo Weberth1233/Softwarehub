@@ -424,20 +424,20 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ? null
                       : () async {
                           final result = await Get.toNamed(
-                            '/home/process-detail/${entity.id}/nice-classification',
+                            '/home/process-detail/${entity.id}/application-field',
                           );
 
-                          if (result is NiceClassificationEntity) {
-                            await _runAction(
-                              setLoading: (value) => _isClassifying = value,
-                              action: () async {
-                                await controller.classifyProcess(
-                                  entity.id,
-                                  result.code,
-                                );
-                              },
-                            );
-                          }
+                          // if (result is NiceClassificationEntity) {
+                          //   await _runAction(
+                          //     setLoading: (value) => _isClassifying = value,
+                          //     action: () async {
+                          //       await controller.classifyProcess(
+                          //         entity.id,
+                          //         result.code,
+                          //       );
+                          //     },
+                          //   );
+                          // }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -661,20 +661,20 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ? null
                       : () async {
                           final result = await Get.toNamed(
-                            '/home/process-detail/${entity.id}/nice-classification',
+                            '/home/process-detail/${entity.id}/application-field',
                           );
 
-                          if (result is NiceClassificationEntity) {
-                            await _runAction(
-                              setLoading: (value) => _isClassifying = value,
-                              action: () async {
-                                await controller.classifyProcess(
-                                  entity.id,
-                                  result.code,
-                                );
-                              },
-                            );
-                          }
+                          // if (result is NiceClassificationEntity) {
+                          //   await _runAction(
+                          //     setLoading: (value) => _isClassifying = value,
+                          //     action: () async {
+                          //       await controller.classifyProcess(
+                          //         entity.id,
+                          //         result.code,
+                          //       );
+                          //     },
+                          //   );
+                          // }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,

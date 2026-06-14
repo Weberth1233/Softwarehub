@@ -1,11 +1,12 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/process/process_status_count_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process/delete_process.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process/get_process_status_count.dart';
-import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../../domain/core/errors/failures.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
+import '../../../../domain/entities/process/process_status_count_entity.dart';
+import '../../../../domain/usecases/process/delete_process.dart';
 import '../../../../domain/usecases/process/get_process.dart';
+import '../../../../domain/usecases/process/get_process_status_count.dart';
+import '../../../shared/utils/app_toast.dart';
+
 class ProcessController extends GetxController {
   final GetProcesses _getProcesses;
   final GetProcessStatusCount _getProcessStatusCount;
@@ -16,7 +17,6 @@ class ProcessController extends GetxController {
     this._getProcessStatusCount,
     this._deleteProcess,
   );
-
 
   final RxBool isLoadingList = false.obs;
   final RxBool isDeleting = false.obs;
@@ -70,7 +70,6 @@ class ProcessController extends GetxController {
     isLoadingList.value = false;
   }
 
-  // ===================== PAGINAÇÃO =====================
 
   void nextPage() {
     if (currentPage.value < totalPages.value - 1) {
@@ -88,8 +87,6 @@ class ProcessController extends GetxController {
     fetchProcesses(page: page);
   }
 
-  // ===================== FILTROS =====================
-
   void searchByTitle(String value) {
     title.value = value;
     fetchProcesses(page: 0);
@@ -99,8 +96,6 @@ class ProcessController extends GetxController {
     status.value = newStatus;
     fetchProcesses(page: 0);
   }
-
-  // ===================== STATUS COUNT =====================
 
   Future<void> processStatusCount() async {
     if (isLoadingProcessCount.value) return;
@@ -120,8 +115,6 @@ class ProcessController extends GetxController {
 
     isLoadingProcessCount.value = false;
   }
-
-  // ===================== DELETE =====================
 
   Future<void> deleteProcessById(int id) async {
     if (isDeleting.value) return;

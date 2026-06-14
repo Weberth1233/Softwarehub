@@ -2,33 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_user_controller.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/process/widgets/process_title_field.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/theme/theme_color.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../domain/entities/external_author/external_author_entity.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/widgets/custom_text_field.dart';
+import '../../shared/widgets/diagonal_lines_painter.dart';
+import 'models/first_stage_process.dart';
+import 'utils/safe_string.dart';
+import 'widgets/process_app_bar.dart';
 import 'widgets/search_field_high_light.dart';
-
-class FirstStageProcess {
-  final int? idProcess;
-  final String title;
-  final List<int> idsUser;
-  final List<int> idsExternalAuthors;
-  final bool isEdit;
-  final String? originalIpTypeId;
-  final Map<String, dynamic>? originalFormData;
-
-  FirstStageProcess({
-    this.idProcess,
-    required this.title,
-    required this.idsUser,
-    required this.idsExternalAuthors,
-    this.isEdit = false,
-    this.originalIpTypeId,
-    this.originalFormData,
-  });
-}
 
 class ProcessPage extends StatefulWidget {
   final bool isEditMode;
@@ -170,52 +155,13 @@ class _ProcessPageState extends State<ProcessPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: ThemeColor.primaryColor,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 74,
-        titleSpacing: 12,
-        title: Row(
-          children: [
-            SizedBox(
-              height: 46,
-              width: 46,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Icon(Icons.arrow_back, color: Colors.grey.shade900),
-                  onPressed: () => Get.back(),
-                  tooltip: "Voltar",
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                widget.isEditMode ? "Editar Processo" : "Cadastro de Processo",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: ProcessAppBar(isEditMode: widget.isEditMode,),
       backgroundColor: const Color(0xFFCBD5E1),
       body: Stack(
         children: [
           Positioned.fill(
             child: CustomPaint(
-              painter: _DiagonalLinesPainter(
+              painter: DiagonalLinesPainter(
                 color: Colors.black.withOpacity(0.03),
               ),
             ),
@@ -282,47 +228,8 @@ class _ProcessPageState extends State<ProcessPage> {
                           ),
 
                           const SizedBox(height: 30),
-
-                          // ── Campo de título com errorText ───────────────
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 150,
-                                child: Text(
-                                  "Título da API:",
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    // A label fica vermelha quando há erro,
-                                    // espelhando o comportamento do CustomTextField
-                                    color: _titleError != null
-                                        ? Colors.red.shade700
-                                        : Colors.black87,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: CustomTextField(
-                                  controller: titleController,
-                                  label: "",
-                                  hintText:
-                                  "Ex: Registro de Patente de Software",
-                                  // errorText aciona a borda vermelha e a
-                                  // mensagem de erro no CustomTextField
-                                  errorText: _titleError,
-                                  textCapitalization:
-                                  TextCapitalization.sentences,
-                                  textInputAction: TextInputAction.next,
-                                ),
-                              ),
-                            ],
-                          ),
-
+                          ProcessTitleField(controller: titleController, errorText: _titleError),
                           const SizedBox(height: 45),
-
-                          // ── Seção de colaboradores ──────────────────────
                           Obx(() {
                             if (userController.isLoading.value &&
                                 userController.users.isEmpty) {
@@ -846,8 +753,8 @@ class _MembersList extends StatelessWidget {
         final id = u.id;
         final selected = id != null && selectedUsersMap.containsKey(id);
 
-        final fullName = _safeString(() => u.fullName, fallback: "Nome");
-        final email = _safeString(() => u.email, fallback: "Email");
+        final fullName = safeString(() => u.fullName, fallback: "Nome");
+        final email = safeString(() => u.email, fallback: "Email");
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -1011,7 +918,7 @@ class _SelectedMembersPanel extends StatelessWidget {
               itemBuilder: (context, i) {
                 final u = selectedUsers[i];
                 final int id = u.id!;
-                final name = _safeString(
+                final name = safeString(
                       () => u.fullName,
                   fallback: "Nome",
                 );
@@ -1027,7 +934,7 @@ class _SelectedMembersPanel extends StatelessWidget {
                     ),
                   ),
                   subtitle: Text(
-                    _safeString(() => u.email, fallback: "Email"),
+                    safeString(() => u.email, fallback: "Email"),
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey.shade600,
@@ -1136,7 +1043,7 @@ class _SelectedMembersExternalPanel extends StatelessWidget {
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, i) {
                 final u = externalAuthors[i];
-                final name = _safeString(
+                final name = safeString(
                       () => u.fullName,
                   fallback: "Nome",
                 );
@@ -1193,37 +1100,4 @@ class _SelectedMembersExternalPanel extends StatelessWidget {
   }
 }
 
-String _safeString(String? Function() getter, {required String fallback}) {
-  try {
-    final v = getter();
-    if (v == null) return fallback;
-    final s = v.toString().trim();
-    return s.isEmpty ? fallback : s;
-  } catch (_) {
-    return fallback;
-  }
-}
 
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-
-  _DiagonalLinesPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-    const spacing = 80.0;
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

@@ -1,4 +1,7 @@
 import 'package:get/get_navigation/get_navigation.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/application_field/application_field_page.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/application_field/bindings/application_field_bindings.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/application_field/controllers/application_field_controller.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process_royalty_distribution/bindings/process_royalty_distribution_binding.dart';
 import '../../middlewares/auth_middleware.dart';
 import '../../pages/attachments/attachments_page.dart';
@@ -24,13 +27,13 @@ import '../../pages/justifications/bindings/justification_bindings.dart';
 import '../../pages/justifications/justification_page.dart';
 import '../../pages/nice_classification/bindings/nice_classification_binding.dart';
 import '../../pages/nice_classification/nice_classification_page.dart';
-import '../../pages/process/bindings/external_author_bindigs.dart'
+import '../../pages/process_external_author/bindings/external_author_bindigs.dart'
     show ExternalAuthorBindigs;
 import '../../pages/process_detail/bindings/process_detail_bindings.dart';
 import '../../pages/process/bindings/user_bindings.dart';
 import '../../pages/process_detail/process_detail_page.dart';
-import '../../pages/process/process_external_author_form_page.dart';
-import '../../pages/process/process_external_author_page.dart';
+import '../../pages/process_external_author/process_external_author_form_page.dart';
+import '../../pages/process_external_author/process_external_author_page.dart';
 import '../../pages/process/process_page.dart';
 import '../../pages/process_royalty_distribution/process_royalty_distribution_page.dart';
 import '../../pages/unauthenticated_page.dart';
@@ -158,17 +161,23 @@ class MyRoutes {
       middlewares: [AuthMiddleware()],
     ),
 
-   /* GetPage(
+    /* GetPage(
       name: '/consent-term',
       page: () => const ConsentTermPage(),
       binding: ConsentTermBinding(),
       middlewares: [AuthMiddleware()],
     ),*/
-
     GetPage(
       name: '/home/process-detail/:id/nice-classification',
       page: () => const NiceClassificationPage(),
       binding: NiceClassificationBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    GetPage(
+      name: '/home/process-detail/:id/application-field',
+      page: () => const ApplicationFieldPage(),
+      binding: ApplicationFieldBindings(),
       middlewares: [AuthMiddleware()],
     ),
 

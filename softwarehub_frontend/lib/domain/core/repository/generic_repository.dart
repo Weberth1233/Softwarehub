@@ -1,9 +1,14 @@
 import 'package:dartz/dartz.dart';
 
+import '../../entities/paged_result_entity.dart';
 import '../errors/failures.dart';
 
 abstract class IGenericListRepository<T> {
   Future<Either<Failure, List<T>>> getList();
+}
+
+abstract class IGenericPaginatedListRepository<T>{
+  Future<Either<Failure, PagedResultEntity<T>>> getPaginatedList(Map<String, String> values);
 }
 
 abstract class IGenericPostRepository<TRequest, TResponse> {

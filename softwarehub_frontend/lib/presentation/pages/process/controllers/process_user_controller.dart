@@ -14,10 +14,6 @@ class ProcessUserController extends GetxController {
 
   final RxString searchFilter = ''.obs;
 
-  // final RxString fullNameFilter = ''.obs;
-  // final RxString emailFilter = ''.obs;
-  // final RxString cpfFilter = ''.obs;
-
   final RxInt page = 0.obs;
   final int size = 6;
   final RxBool hasMore = true.obs;
@@ -46,16 +42,6 @@ class ProcessUserController extends GetxController {
     searchFilter.value = query;
     fetchUsers(loadMore: false);
   }
-
-  // void searchByEmail(String query) {
-  //   emailFilter.value = query;
-  //   fetchUsers(loadMore: false);
-  // }
-
-  // void searchByCPF(String query) {
-  //   cpfFilter.value = query;
-  //   fetchUsers(loadMore: false);
-  // }
 
   Future<void> fetchUsers({bool loadMore = false}) async {
     if (isLoading.value || (loadMore && !hasMore.value)) return;

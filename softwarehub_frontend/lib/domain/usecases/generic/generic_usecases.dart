@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../core/errors/failures.dart';
 import '../../core/repository/generic_repository.dart';
+import '../../entities/paged_result_entity.dart';
 
 class GetListUsecase<E, R extends IGenericListRepository<E>> {
   final R repository;
@@ -10,6 +11,15 @@ class GetListUsecase<E, R extends IGenericListRepository<E>> {
 
   Future<Either<Failure, List<E>>> call() {
     return repository.getList();
+  }
+}
+
+class GetPaginatedList<T, R extends IGenericPaginatedListRepository<T>>{
+  final R repository;
+  GetPaginatedList({required this.repository});
+  
+  Future<Either<Failure, PagedResultEntity<T>>> call(Map<String, String> values){
+    return repository.getPaginatedList(values);
   }
 }
 

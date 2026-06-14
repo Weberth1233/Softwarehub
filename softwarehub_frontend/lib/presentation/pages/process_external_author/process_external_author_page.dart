@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/external_author/external_author_entity.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_external_author_controller.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/process_external_author/controllers/process_external_author_controller.dart';
 import 'dart:math' as math;
 import '../../shared/utils/responsive.dart';
 import '../../shared/widgets/custom_text_field.dart';
-import 'widgets/search_field_high_light.dart';
+import '../process/widgets/search_field_high_light.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/widgets/shared_background.dart';
 
 class ProcessExternalAuthorPage extends StatefulWidget {

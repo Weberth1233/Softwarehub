@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:nit_sgpi_frontend/infra/utils/error_formatter.dart';
 import '../../../domain/core/errors/exceptions.dart';
+import '../../../domain/entities/paged_result_entity.dart';
+import '../../models/paged_result_model.dart';
 import 'api_client.dart';
 
 class RemoteDatasourceHelper {
@@ -23,6 +25,41 @@ class RemoteDatasourceHelper {
     String? errorMessage,
   }) {
     return ServerException(ApiErrorFormatter.formatFromBody(body));
+  }
+
+  Future<PagedResultEntity<TEntity>> getPagedList<TModel, TEntity>({
+    required String url,
+    required TModel Function(Map<String, dynamic> json) fromJson,
+    required TEntity Function(TModel model) toEntity,
+    String? errorMessage,
+    bool authenticated = true,
+    List<int> successStatusCodes = const [200],
+  }) async {
+    try {
+      final response = await apiClient.get(url, authenticated: authenticated);
+
+      if (_isSuccessStatus(response.statusCode, successStatusCodes)) {
+        final decoded = _decodeBody(response.body);
+
+        final pagedModel = PagedResultModel<TModel>.fromJson(
+          decoded as Map<String, dynamic>,
+          (e) => fromJson(e),
+        );
+
+        return pagedModel.toEntity(toEntity);
+      }
+
+      throw _buildServerException(
+        statusCode: response.statusCode,
+        body: response.body,
+        errorMessage: errorMessage,
+      );
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      print(e);
+      throw NetworkException('Erro de conexão com o servidor!');
+    }
   }
 
   Future<List<T>> getList<T>({

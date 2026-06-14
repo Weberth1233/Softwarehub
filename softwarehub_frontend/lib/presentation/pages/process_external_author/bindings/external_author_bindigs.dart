@@ -5,7 +5,7 @@ import 'package:nit_sgpi_frontend/domain/usecases/external_author/get_external_a
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/post_external_author.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/put_external_author.dart';
 import 'package:nit_sgpi_frontend/infra/datasources/external_author_datasource.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_external_author_controller.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/process_external_author/controllers/process_external_author_controller.dart';
 
 import '../../../../domain/usecases/external_author/delete_external_author.dart';
 import '../../../../infra/core/network/api_client.dart';
