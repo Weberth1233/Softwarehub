@@ -1,10 +1,10 @@
 import 'package:nit_sgpi_frontend/infra/models/base_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/external_author_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/ip_types/ip_types_model.dart';
-import 'package:nit_sgpi_frontend/infra/models/nice_classification_model.dart';
 import 'package:nit_sgpi_frontend/infra/models/justification/justification_response_model.dart';
 
 import '../../../domain/entities/process/process_response_entity.dart';
+import '../application_field_model.dart';
 import '../attachment_model.dart';
 import 'process_royalty_distribution_response_model.dart';
 import 'process_user_model.dart';
@@ -24,8 +24,8 @@ class ProcessResponseModel implements BaseModel {
   final List<JustificationResponseModel> justifications;
   final List<ExternalAuthorModel> externalAuthors;
   final ProcessUserModel creator;
-  final NiceClassificationModel niceClassificationModel;
   final List<ProcessRoyaltyDistributionResponseModel> royaltyDistributions;
+  final List<ApplicationFieldModel> applicationFields;
 
   ProcessResponseModel({
     required this.id,
@@ -40,8 +40,8 @@ class ProcessResponseModel implements BaseModel {
     required this.justifications,
     required this.externalAuthors,
     required this.creator,
-    required this.niceClassificationModel,
     required this.royaltyDistributions,
+    required this.applicationFields,
   });
 
   factory ProcessResponseModel.fromJson(Map<String, dynamic> json) {
@@ -52,18 +52,27 @@ class ProcessResponseModel implements BaseModel {
       statusLabel: json['statusLabel'],
       createdAt: DateTime.parse(json['createdAt']),
       formData: Map<String, dynamic>.from(json['formData'] ?? {}),
-      ipType: IpTypeModel.fromJson(json['ipType']),
-      niceClassificationModel: json['niceClassification'] == null
-          ? NiceClassificationModel.empty()
-          : NiceClassificationModel.fromJson(
-              Map<String, dynamic>.from(json['niceClassification']),
-            ),
+
+      ipType: IpTypeModel.fromJson(
+        Map<String, dynamic>.from(json['ipType']),
+      ),
+
       authors: (json['authors'] as List? ?? [])
-          .map((e) => ProcessUserModel.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => ProcessUserModel.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
           .toList(),
+
       attachments: (json['attachments'] as List? ?? [])
-          .map((e) => AttachmentModel.fromJson(Map<String, dynamic>.from(e)))
+          .map(
+            (e) => AttachmentModel.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
           .toList(),
+
       justifications: (json['justifications'] as List? ?? [])
           .map(
             (e) => JustificationResponseModel.fromJson(
@@ -71,15 +80,30 @@ class ProcessResponseModel implements BaseModel {
             ),
           )
           .toList(),
-      creator: ProcessUserModel.fromJson(json['creator']),
+
+      creator: ProcessUserModel.fromJson(
+        Map<String, dynamic>.from(json['creator']),
+      ),
+
       externalAuthors: (json['externalAuthors'] as List? ?? [])
           .map(
-            (e) => ExternalAuthorModel.fromJson(Map<String, dynamic>.from(e)),
+            (e) => ExternalAuthorModel.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
           )
           .toList(),
+
       royaltyDistributions: (json['royaltyDistributions'] as List? ?? [])
           .map(
             (e) => ProcessRoyaltyDistributionResponseModel.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
+          .toList(),
+
+      applicationFields: (json['applicationFields'] as List? ?? [])
+          .map(
+            (e) => ApplicationFieldModel.fromJson(
               Map<String, dynamic>.from(e),
             ),
           )
@@ -97,7 +121,6 @@ class ProcessResponseModel implements BaseModel {
       createdAt: createdAt,
       formData: formData,
       ipType: ipType.toEntity(),
-      niceClassificationModel: niceClassificationModel.toEntity(),
       authors: authors.map((e) => e.toEntity()).toList(),
       attachments: attachments.map((e) => e.toEntity()).toList(),
       creator: creator.toEntity(),
@@ -106,6 +129,7 @@ class ProcessResponseModel implements BaseModel {
       royaltyDistributions: royaltyDistributions
           .map((e) => e.toEntity())
           .toList(),
+      applicationFields: applicationFields.map((e) => e.toEntity()).toList(),
     );
   }
 }

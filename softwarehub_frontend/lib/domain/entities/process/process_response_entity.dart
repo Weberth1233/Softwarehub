@@ -1,7 +1,7 @@
+import '../application_field_entity.dart';
 import '../attachment_entity.dart';
 import '../external_author/external_author_entity.dart';
 import '../ip_type_entity.dart';
-import '../nice_classification_entity.dart';
 import '../justification/justification_response_entity.dart';
 import 'process_royalty_distribution_response_entity.dart';
 import 'process_user_entity.dart';
@@ -19,8 +19,8 @@ class ProcessResponseEntity {
   final List<JustificationResponseEntity> justifications;
   final List<ExternalAuthorEntity> externalAuthors;
   final ProcessUserEntity creator;
-  final NiceClassificationEntity niceClassificationModel;
   final List<ProcessRoyaltyDistributionResponseEntity> royaltyDistributions;
+  final List<ApplicationFieldEntity> applicationFields;
 
   ProcessResponseEntity({
     required this.id,
@@ -35,8 +35,7 @@ class ProcessResponseEntity {
     required this.justifications,
     required this.externalAuthors,
     required this.creator,
-    required this.niceClassificationModel,
     required this.royaltyDistributions,
+    required this.applicationFields,
   });
-
 }

@@ -26,7 +26,7 @@ abstract class IProcessRemoteDataSource {
   Future<String> deleteProcess(int idProcess);
   Future<ProcessResponseEntity> getProcessById(int processId);
   Future<String> updateStatusProcess(int processId, String newStatus);
-  Future<String> processClassification(int processId, int niceClassCode);
+  Future<String> processClassification(int processId, List<int> applicationFields);
 }
 
 class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
@@ -239,11 +239,11 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
   }
 
   @override
-  Future<String> processClassification(int processId, int niceClassCode) async {
+  Future<String> processClassification(int processId, List<int> applicationFields) async {
     try {
       final response = await apiClient.patch(
         "${BaseUrl.urlWithHttp}/process/$processId/classification",
-        body: {'niceClassCode': niceClassCode},
+        body: {'applicationFields': applicationFields},
       );
       if (response.statusCode == 204) {
         return 'Processo classificado com sucesso!';

@@ -168,13 +168,12 @@ public class ProcessController implements GenericController{
     }
 
     @PatchMapping("/{id}/classification")
-    @Operation(summary = "Classificar classe nice do processo", description = "Atualizar status de um processo passando o id como parâmetro")
+    @Operation(summary = "Classificar processo", description = "Classificar processo passando uma lista de campos de aplicações")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Classificado com sucesso!"),
     })
     public ResponseEntity<Void> classifyProcess(
             @PathVariable Long id,
-
             @RequestBody @Valid ProcessClassificationRequestDTO request){
         service.classifyProcess(id, request);
         return  ResponseEntity.noContent().build();

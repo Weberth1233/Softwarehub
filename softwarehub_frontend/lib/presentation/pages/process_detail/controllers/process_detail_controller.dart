@@ -172,7 +172,7 @@ class ProcessDetailController extends GetxController {
     attachmentFileName.value = null;
   }
 
-  Future<void> classifyProcess(int processId, int niceClassCode) async {
+  Future<void> classifyProcess(int processId, List<int> niceClassCode) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';

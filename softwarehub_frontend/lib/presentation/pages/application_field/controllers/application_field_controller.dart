@@ -147,6 +147,7 @@ class ApplicationFieldController extends GetxController {
   }
 
   void confirmSelection() {
+    print(selectedFieldIds.toList());
     Get.back(
       result: selectedFieldIds.toList(),
     );

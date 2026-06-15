@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../../domain/entities/nice_classification_entity.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
 import '../../shared/utils/app_toast.dart';
@@ -427,17 +426,17 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                             '/home/process-detail/${entity.id}/application-field',
                           );
 
-                          // if (result is NiceClassificationEntity) {
-                          //   await _runAction(
-                          //     setLoading: (value) => _isClassifying = value,
-                          //     action: () async {
-                          //       await controller.classifyProcess(
-                          //         entity.id,
-                          //         result.code,
-                          //       );
-                          //     },
-                          //   );
-                          // }
+                          if (result is List<int>) {
+                            await _runAction(
+                              setLoading: (value) => _isClassifying = value,
+                              action: () async {
+                                await controller.classifyProcess(
+                                  entity.id,
+                                  result,
+                                );
+                              },
+                            );
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -664,17 +663,17 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                             '/home/process-detail/${entity.id}/application-field',
                           );
 
-                          // if (result is NiceClassificationEntity) {
-                          //   await _runAction(
-                          //     setLoading: (value) => _isClassifying = value,
-                          //     action: () async {
-                          //       await controller.classifyProcess(
-                          //         entity.id,
-                          //         result.code,
-                          //       );
-                          //     },
-                          //   );
-                          // }
+                           if (result is List<int>) {
+                            await _runAction(
+                              setLoading: (value) => _isClassifying = value,
+                              action: () async {
+                                await controller.classifyProcess(
+                                  entity.id,
+                                  result,
+                                );
+                              },
+                            );
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
@@ -903,7 +902,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
       case 6:
         title = "CLASSIFICAÇÃO DE NICE";
         subtitle = "Classificação vinculada ao processo.";
-        content = _buildNiceClassificationCard(context, entity);
+        content = _buildApplicationFieldsCard(context, entity);
         break;
       case 7:
         title = "DISTRIBUIÇÃO DE COTAS";
@@ -1063,25 +1062,22 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ),
                     ),
                   ),
-                   ElevatedButton(
-            onPressed: () async {
-              
-              final result = await Get.toNamed(
-                '/home/process-detail/${entity.id}/royalty-distribution',
-                arguments: {
-                  "distributionId": distribution.id
-                }
-              );
-              if (result != null && result is int) {
-                print("Atualizando o processo");
-                await controller.fetchProcess(result);
-              }
-            },
-            child: Text(
-              "Atualizar distribuição de cotas",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await Get.toNamed(
+                        '/home/process-detail/${entity.id}/royalty-distribution',
+                        arguments: {"distributionId": distribution.id},
+                      );
+                      if (result != null && result is int) {
+                        print("Atualizando o processo");
+                        await controller.fetchProcess(result);
+                      }
+                    },
+                    child: Text(
+                      "Atualizar distribuição de cotas",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -1251,12 +1247,12 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     }
   }
 
-  Widget _buildNiceClassificationCard(
+  Widget _buildApplicationFieldsCard(
     BuildContext context,
     ProcessResponseEntity entity,
   ) {
     final colors = Theme.of(context).colorScheme;
-    final niceClassification = entity.niceClassificationModel;
+    final applicationFields = entity.applicationFields;
 
     return _buildSimpleCard(
       context,
@@ -1268,7 +1264,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               Icon(Icons.category_outlined, color: colors.primary),
               const SizedBox(width: 8),
               Text(
-                "Classificação de Nice",
+                "Campos de Aplicação",
                 style: TextStyle(
                   color: colors.primary,
                   fontWeight: FontWeight.w900,
@@ -1277,38 +1273,110 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
               ),
             ],
           ),
+
           const SizedBox(height: 16),
-          Text(
-            "Código",
-            style: TextStyle(
-              color: colors.secondary,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
+
+          if (applicationFields.isEmpty)
+            Text(
+              "Nenhum campo de aplicação vinculado ao processo.",
+              style: TextStyle(
+                color: colors.secondary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            )
+          else
+            Column(
+              children: applicationFields.map((applicationField) {
+                return Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colors.outline.withOpacity(0.25)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        applicationField.applicationAreaName,
+                        style: TextStyle(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13,
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Text(
+                        "Código",
+                        style: TextStyle(
+                          color: colors.secondary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        applicationField.code,
+                        style: TextStyle(
+                          color: colors.tertiary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Text(
+                        "Nome",
+                        style: TextStyle(
+                          color: colors.secondary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        applicationField.name,
+                        style: TextStyle(
+                          color: colors.tertiary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Text(
+                        "Descrição",
+                        style: TextStyle(
+                          color: colors.secondary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        applicationField.description.isNotEmpty
+                            ? applicationField.description
+                            : "Sem descrição informada.",
+                        style: TextStyle(color: colors.tertiary, height: 1.4),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            niceClassification.code.toString(),
-            style: TextStyle(
-              color: colors.tertiary,
-              fontWeight: FontWeight.w900,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "Descrição",
-            style: TextStyle(
-              color: colors.secondary,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            niceClassification.description,
-            style: TextStyle(color: colors.tertiary, height: 1.4),
-          ),
         ],
       ),
     );
@@ -1447,7 +1515,8 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                                   'processId': entity.id,
                                   'justificationId': justification.id,
                                   'reason': justification.reason,
-                                  'attachmentFileName': justification.attachment?.fileName
+                                  'attachmentFileName':
+                                      justification.attachment?.fileName,
                                 },
                               );
 

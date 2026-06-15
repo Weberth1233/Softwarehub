@@ -8,10 +8,10 @@ class ProcessClassification {
 
   ProcessClassification({required this.repository});
 
-  Future<Either<Failure, String>> call(int processId, int niceClassCode) async {
+  Future<Either<Failure, String>> call(int processId, List<int> applicationFields) async {
     final result = await repository.processClassification(
       processId,
-      niceClassCode,
+      applicationFields,
     );
     return result;
   }

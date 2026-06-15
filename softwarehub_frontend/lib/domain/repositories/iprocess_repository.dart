@@ -13,5 +13,5 @@ abstract class IProcessRepository {
   Future<Either<Failure, String>> putProcess(int processId, ProcessRequestEntity entity);
   Future<Either<Failure, ProcessResponseEntity>> getProcessById(int processId); 
   Future<Either<Failure, String>> deleteProcessById(int processId); 
-  Future<Either<Failure, String>> processClassification(int processId, int niceClassCode);
+  Future<Either<Failure, String>> processClassification(int processId,  List<int> applicationFields);
 }

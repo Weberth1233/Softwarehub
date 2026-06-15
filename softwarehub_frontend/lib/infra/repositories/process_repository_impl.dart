@@ -131,9 +131,9 @@ class ProcessRepositoryImpl implements IProcessRepository {
   }
   
   @override
-  Future<Either<Failure, String>> processClassification(int processId, int niceClassCode) async{
+  Future<Either<Failure, String>> processClassification(int processId,  List<int> applicationFields) async{
     try {
-      final result = await remoteDataSource.processClassification(processId, niceClassCode);
+      final result = await remoteDataSource.processClassification(processId, applicationFields);
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message));

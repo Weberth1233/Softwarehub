@@ -28,7 +28,8 @@ public class ProcessService {
     private final ProcessRepository repository;
     private final UserRepository userRepository;
     private final IpTypesRepository ipTypesRepository;
-    private final NiceClassificationRepository niceClassificationRepository;
+  //  private final NiceClassificationRepository niceClassificationRepository;
+    private final ApplicationFieldRepository applicationFieldRepository;
     private final ExternalAuthorRepository externalAuthorRepository;
     private final SecurityService securityService;
 
@@ -73,10 +74,6 @@ public class ProcessService {
         processDb.setAuthors(process.getAuthors());
         processDb.setExternalAuthors(process.getExternalAuthors());
 
-        /*
-         * Se o admin colocou o processo em correção,
-         * quando o usuário atualizar o processo, ele vira CORRIGIDO.
-         */
         if (processDb.getStatus() == StatusProcess.CORRECAO) {
             processDb.setStatus(StatusProcess.CORRIGIDO);
         }
@@ -91,15 +88,12 @@ public class ProcessService {
 
         validateCanClassify(process);
 
-        NiceClassification niceClassification =
-                niceClassificationRepository.findById(requestDTO.niceClassCode())
-                        .orElseThrow(() ->
-                                new EntityNotFoundException("Classe NICE não encontrada")
-                        );
+        for(Long applicationFieldId: requestDTO.applicationFields()){
+            ApplicationField applicationField =  applicationFieldRepository.findById(applicationFieldId).orElseThrow(() -> new EntityNotFoundException("Campo de aplicação não encontrado!"));
+            process.getApplicationFields().add(applicationField);
+        }
 
-//        process.setNiceClassification(niceClassification);
         process.setStatus(StatusProcess.CLASSIFICADO);
-
         repository.save(process);
     }
 

@@ -16,7 +16,8 @@ import org.mapstruct.Mapping;
                 IpTypesMapper.class,
                 UserMapper.class,
                 NiceClassificationMapper.class,
-                ProcessRoyaltyDistributionMapper.class
+                ProcessRoyaltyDistributionMapper.class,
+                ApplicationFieldMapper.class
         }
 )
 public interface ProcessMapper {
@@ -32,6 +33,7 @@ public interface ProcessMapper {
     @Mapping(target = "attachments", ignore = true)
     @Mapping(target = "justifications", ignore = true)
     @Mapping(target = "royaltyDistributions", ignore = true)
+    @Mapping(target = "applicationFields", ignore = true)
 
     @Mapping(target = "ipType", source = "ipTypeId")
     @Mapping(target = "authors", source = "authorIds")
