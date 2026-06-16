@@ -5,6 +5,7 @@ import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/ip_types/controllers/ip_types_controller.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/responsive.dart';
 
+import '../../shared/widgets/diagonal_lines_painter.dart';
 import '../process/models/first_stage_process.dart';
 
 class SecondStageProcess {
@@ -23,29 +24,6 @@ class SecondStageProcess {
   });
 }
 
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-
-  _DiagonalLinesPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-    const spacing = 80.0;
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
 
 class IpTypesPage extends StatelessWidget {
   const IpTypesPage({super.key});
@@ -114,7 +92,7 @@ class IpTypesPage extends StatelessWidget {
           // Textura de Fundo
           Positioned.fill(
             child: CustomPaint(
-              painter: _DiagonalLinesPainter(
+              painter: DiagonalLinesPainter(
                 color: Colors.black.withOpacity(0.04),
               ),
             ),
@@ -223,7 +201,7 @@ class IpTypesPage extends StatelessWidget {
                                         );
 
                                     Get.toNamed(
-                                      '/consent-term-check',
+                                      AppRoutes.consentTermCheck,
                                       arguments: {
                                         'ipTypeId': secondStageProcess.item.id,
                                         'nextRoute': AppRoutes.ipTypesForm,

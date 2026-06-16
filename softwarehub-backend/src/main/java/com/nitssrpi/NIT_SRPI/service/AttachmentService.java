@@ -1,10 +1,9 @@
 package com.nitssrpi.NIT_SRPI.service;
 
 import com.nitssrpi.NIT_SRPI.model.Attachment;
-import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.repository.AttachmentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -17,22 +16,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
-
 
 @Service
-@RequiredArgsConstructor
 public class AttachmentService {
 
     private final Path fileStorageLocation;
+    private final AttachmentRepository attachmentRepository;
+    private final ProcessService processService;
 
-    @Autowired
-    public AttachmentService(@Value("${file.upload-dir}") String uploadDir) {
-        // Converte './uploads' em um caminho real no seu PC
+    public AttachmentService(
+            @Value("${file.upload-dir}") String uploadDir,
+            AttachmentRepository attachmentRepository,
+            ProcessService processService
+    ) {
         this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
+        this.attachmentRepository = attachmentRepository;
+        this.processService = processService;
+
         System.out.println("📁 Upload dir REAL: " + this.fileStorageLocation);
+
         try {
-            // Cria as pastas caso você mude de PC e elas não existam
             Files.createDirectories(this.fileStorageLocation.resolve("templates"));
             Files.createDirectories(this.fileStorageLocation.resolve("attachments"));
         } catch (Exception ex) {
@@ -40,31 +43,46 @@ public class AttachmentService {
         }
     }
 
-
-    // Método para Download
     public Resource loadFile(String relativePath) {
         try {
             Path filePath = this.fileStorageLocation.resolve(relativePath).normalize();
+
             System.out.println("📄 Tentando abrir: " + filePath);
+
             Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists()) return resource;
+
+            if (resource.exists()) {
+                return resource;
+            }
+
             throw new RuntimeException("Arquivo não encontrado: " + relativePath);
+
         } catch (MalformedURLException ex) {
             throw new RuntimeException("Erro no caminho do arquivo", ex);
         }
     }
 
-    // Método para Upload
+    @Transactional
     public void saveSignedFile(MultipartFile file, Attachment attachment) {
         try {
-            // Nome único: attachments/processo_1_doc_5_assinado.pdf
-            String fileName = "attachments/proc_" + attachment.getProcess().getId() + "_att_" + attachment.getId() + ".pdf";
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+            Attachment attachmentFromDb = attachmentRepository.findById(attachment.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Anexo não encontrado."));
+
+            Long processId = attachmentFromDb.getProcess().getId();
+
+            String fileName = "attachments/proc_" + processId + "_att_" + attachmentFromDb.getId() + ".pdf";
+
+            Path targetLocation = this.fileStorageLocation.resolve(fileName).normalize();
 
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            attachment.setSignedFilePath(fileName);
-            attachment.setStatus("SIGNED");
+            attachmentFromDb.setSignedFilePath(fileName);
+            attachmentFromDb.setStatus("SIGNED");
+
+            attachmentRepository.save(attachmentFromDb);
+
+            processService.refreshStatusAfterRequirementsChange(processId);
+
         } catch (IOException ex) {
             throw new RuntimeException("Erro ao salvar arquivo assinado", ex);
         }

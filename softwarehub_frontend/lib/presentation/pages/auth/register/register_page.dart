@@ -1088,14 +1088,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       fullName: registerController
                                           .nameController
                                           .text,
-                                      role:
-                                      userControllerGet.user.value !=
-                                          null
-                                          ? userControllerGet
-                                          .user
-                                          .value!
-                                          .role
-                                          : 'USER',
+                                      
                                       isEnabled: true,
                                       userEducationalInstitutionLinks:
                                       registerController

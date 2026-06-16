@@ -1710,7 +1710,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
         return InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => AppRoutes.processAttachmentsById(entity.id),
+          onTap: () => Get.toNamed(AppRoutes.processAttachmentsById(entity.id)),
           child: _buildSimpleCard(
             context,
             child: Row(

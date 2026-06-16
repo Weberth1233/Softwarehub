@@ -28,6 +28,8 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
   final RxBool openedFromProcessFlow = false.obs;
 
+  bool isEdit = false;
+
   final RxBool isEditMode = false.obs;
   final RxnInt distributionId = RxnInt();
 
@@ -76,6 +78,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
       }
 
       openedFromProcessFlow.value = args['openedFromProcessFlow'] == true;
+      isEdit = args['editProcess'] == true;
     }
 
     _loadProcessFromRoute();
@@ -436,6 +439,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
         },
         (success) {
           AppToast.success(success);
+
           if (openedFromProcessFlow.value) {
             Get.offAllNamed(AppRoutes.home);
           } else {
@@ -474,7 +478,11 @@ class ProcessRoyaltyDistributionController extends GetxController {
         },
         (success) {
           AppToast.success(success);
-          Get.back(result: process.value!.id);
+          if (isEdit) {
+            Get.toNamed(AppRoutes.home);
+          } else {
+            Get.back(result: process.value!.id);
+          }
         },
       );
     } catch (e) {

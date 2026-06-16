@@ -17,9 +17,7 @@ import 'widgets/process_app_bar.dart';
 import 'widgets/search_field_high_light.dart';
 
 class ProcessPage extends StatefulWidget {
-  final bool isEditMode;
-
-  const ProcessPage({super.key, this.isEditMode = false});
+  const ProcessPage({super.key});
 
   @override
   State<ProcessPage> createState() => _ProcessPageState();
@@ -29,6 +27,7 @@ class _ProcessPageState extends State<ProcessPage> {
   final ProcessResponseEntity? process = Get.arguments is ProcessResponseEntity
       ? Get.arguments
       : null;
+  bool isEditMode = false;
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController searchController = TextEditingController();
@@ -61,11 +60,11 @@ class _ProcessPageState extends State<ProcessPage> {
   @override
   void initState() {
     super.initState();
-
-    // Rebuilds errorText reactively as the user types
-    titleController.addListener(() {
-      if (_showValidationErrors) setState(() {});
-    });
+    isEditMode = process != null;
+        // Rebuilds errorText reactively as the user types
+        titleController.addListener(() {
+          if (_showValidationErrors) setState(() {});
+        });
 
     if (process != null) {
       titleController.text = process!.title;
@@ -77,8 +76,8 @@ class _ProcessPageState extends State<ProcessPage> {
             .toSet();
 
         _usersWorker = ever(userController.users, (
-            List<UserEntity> loadedUsers,
-            ) {
+          List<UserEntity> loadedUsers,
+        ) {
           if (pendingIds.isEmpty) return;
 
           for (var user in loadedUsers) {
@@ -122,14 +121,24 @@ class _ProcessPageState extends State<ProcessPage> {
       return;
     }
 
+    final activeRoyaltyDistributions = process?.royaltyDistributions
+        .where((distribution) => distribution.status == "ACTIVE")
+        .toList() ??
+    [];
+
+final activeRoyaltyDistribution = activeRoyaltyDistributions.isNotEmpty
+    ? activeRoyaltyDistributions.first
+    : null;
+
     final auxProcess = FirstStageProcess(
       idProcess: process?.id,
       title: titleController.text.trim(),
       idsUser: userController.selectedUsers.keys.toList(),
       idsExternalAuthors: idsExternalAuthors,
-      isEdit: widget.isEditMode,
+      isEdit: isEditMode,
       originalIpTypeId: process?.ipType.id.toString(),
       originalFormData: process?.formData,
+      activeRoyaltyDistribution: activeRoyaltyDistribution
     );
     await Get.toNamed(AppRoutes.ipTypes, arguments: auxProcess);
   }
@@ -156,7 +165,7 @@ class _ProcessPageState extends State<ProcessPage> {
     }
 
     return Scaffold(
-      appBar: ProcessAppBar(isEditMode: widget.isEditMode,),
+      appBar: ProcessAppBar(isEditMode: isEditMode),
       backgroundColor: const Color(0xFFCBD5E1),
       body: Stack(
         children: [
@@ -203,7 +212,7 @@ class _ProcessPageState extends State<ProcessPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.isEditMode
+                                isEditMode
                                     ? "Editar seu Processo"
                                     : "Cadastre seu Processo",
                                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -214,7 +223,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                 ),
                               ),
                               Text(
-                                widget.isEditMode
+                                isEditMode
                                     ? "Insira as informações necessárias para atualizar seu processo no sistema."
                                     : "Insira as informações necessárias para cadastrar seu processo no sistema.",
                                 maxLines: 1,
@@ -229,7 +238,10 @@ class _ProcessPageState extends State<ProcessPage> {
                           ),
 
                           const SizedBox(height: 30),
-                          ProcessTitleField(controller: titleController, errorText: _titleError),
+                          ProcessTitleField(
+                            controller: titleController,
+                            errorText: _titleError,
+                          ),
                           const SizedBox(height: 45),
                           Obx(() {
                             if (userController.isLoading.value &&
@@ -267,102 +279,102 @@ class _ProcessPageState extends State<ProcessPage> {
 
                             final Widget membersView = list.isEmpty
                                 ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 20,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Sem resultados!",
-                                      style: theme.textTheme.bodyLarge
-                                          ?.copyWith(
-                                        color: Colors.grey.shade600,
-                                        fontWeight: FontWeight.w700,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 20,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            "Sem resultados!",
+                                            style: theme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                                  color: Colors.grey.shade600,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(height: 20),
-                                  ],
-                                ),
-                              ),
-                            )
+                                  )
                                 : _MembersList(
-                              users: list,
-                              selectedUsersMap:
-                              userController.selectedUsers,
-                              onToggle: (user) {
-                                userController.toggleUser(user);
-                                // Limpa erro de colaborador ao selecionar
-                                if (_showValidationErrors) {
-                                  setState(() {});
-                                }
-                              },
-                            );
+                                    users: list,
+                                    selectedUsersMap:
+                                        userController.selectedUsers,
+                                    onToggle: (user) {
+                                      userController.toggleUser(user);
+                                      // Limpa erro de colaborador ao selecionar
+                                      if (_showValidationErrors) {
+                                        setState(() {});
+                                      }
+                                    },
+                                  );
 
                             final Widget paginationButtons =
-                            userController.errorMessage.isEmpty
+                                userController.errorMessage.isEmpty
                                 ? Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  OutlinedButton(
-                                    onPressed:
-                                    userController.isLoading.value ||
-                                        userController.page.value == 0
-                                        ? null
-                                        : () => userController
-                                        .fetchPreviousPage(),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.black87,
-                                      side: const BorderSide(
-                                        color: Colors.grey,
-                                      ),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
                                     ),
-                                    child: Text(
-                                      "Anterior",
-                                      style: TextStyle(
-                                        color: ThemeColor.primaryColor
-                                            .withOpacity(0.5),
-                                      ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        OutlinedButton(
+                                          onPressed:
+                                              userController.isLoading.value ||
+                                                  userController.page.value == 0
+                                              ? null
+                                              : () => userController
+                                                    .fetchPreviousPage(),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.black87,
+                                            side: const BorderSide(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "Anterior",
+                                            style: TextStyle(
+                                              color: ThemeColor.primaryColor
+                                                  .withOpacity(0.5),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 24),
+                                        Text(
+                                          "Página ${userController.page.value + 1}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 24),
+                                        OutlinedButton(
+                                          onPressed:
+                                              userController.isLoading.value ||
+                                                  !userController.hasMore.value
+                                              ? null
+                                              : () => userController.fetchUsers(
+                                                  loadMore: true,
+                                                ),
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: Colors.black87,
+                                            side: const BorderSide(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "Próxima",
+                                            style: TextStyle(
+                                              color: ThemeColor.primaryColor
+                                                  .withOpacity(0.5),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(width: 24),
-                                  Text(
-                                    "Página ${userController.page.value + 1}",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 24),
-                                  OutlinedButton(
-                                    onPressed:
-                                    userController.isLoading.value ||
-                                        !userController.hasMore.value
-                                        ? null
-                                        : () => userController.fetchUsers(
-                                      loadMore: true,
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.black87,
-                                      side: const BorderSide(
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      "Próxima",
-                                      style: TextStyle(
-                                        color: ThemeColor.primaryColor
-                                            .withOpacity(0.5),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
+                                  )
                                 : const SizedBox.shrink();
 
                             final Widget searchAuthorWidget = LayoutBuilder(
@@ -370,7 +382,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                 final isDesktopSearch = constr.maxWidth > 850;
                                 final isTabletSearch =
                                     constr.maxWidth > 500 &&
-                                        constr.maxWidth <= 850;
+                                    constr.maxWidth <= 850;
 
                                 void onSearchChanged(String value) {
                                   if (value.trim().isEmpty) {
@@ -388,7 +400,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                           controller: searchController,
                                           label: "",
                                           hintText:
-                                          "Procure por Nome, CPF ou email",
+                                              "Procure por Nome, CPF ou email",
                                           onChanged: onSearchChanged,
                                           onFieldSubmitted: (_) =>
                                               userController.searchByFilter(
@@ -427,7 +439,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                 if (isDesktopSearch) {
                                   return Row(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Expanded(flex: 5, child: filter),
                                       const SizedBox(width: 16),
@@ -436,11 +448,11 @@ class _ProcessPageState extends State<ProcessPage> {
                                 } else if (isTabletSearch) {
                                   return Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       Row(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Expanded(child: filter),
                                           const SizedBox(width: 16),
@@ -452,7 +464,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                 } else {
                                   return Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       filter,
                                       const SizedBox(height: 10),
@@ -511,7 +523,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                     ),
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
+                                          CrossAxisAlignment.stretch,
                                       children: [
                                         collaboratorPanelHeader,
                                         Container(
@@ -553,7 +565,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                     title: "Colaboradores selecionados",
                                     selectedUsers: selectedUsersList,
                                     selectedIdsCount:
-                                    userController.selectedUsers.length,
+                                        userController.selectedUsers.length,
                                     onRemove: (id) {
                                       userController.removeUserById(id);
                                       if (_showValidationErrors) {
@@ -565,7 +577,7 @@ class _ProcessPageState extends State<ProcessPage> {
 
                                   _SelectedMembersExternalPanel(
                                     title:
-                                    "Colaboradores externos selecionados",
+                                        "Colaboradores externos selecionados",
                                     externalAuthors: listExternalAuthor,
                                     onManage: handleManageExternals,
                                   ),
@@ -579,7 +591,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
+                                        CrossAxisAlignment.stretch,
                                     children: [
                                       Container(
                                         decoration: BoxDecoration(
@@ -598,17 +610,17 @@ class _ProcessPageState extends State<ProcessPage> {
                                         ),
                                         child: Column(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
+                                              CrossAxisAlignment.stretch,
                                           children: [
                                             collaboratorPanelHeader,
                                             Container(
                                               padding:
-                                              const EdgeInsets.fromLTRB(
-                                                12,
-                                                12,
-                                                12,
-                                                0,
-                                              ),
+                                                  const EdgeInsets.fromLTRB(
+                                                    12,
+                                                    12,
+                                                    12,
+                                                    0,
+                                                  ),
                                               child: searchAuthorWidget,
                                             ),
                                             Padding(
@@ -665,7 +677,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                         title: "Selecionados",
                                         selectedUsers: selectedUsersList,
                                         selectedIdsCount:
-                                        userController.selectedUsers.length,
+                                            userController.selectedUsers.length,
                                         onRemove: (id) {
                                           userController.removeUserById(id);
                                           if (_showValidationErrors) {
@@ -677,7 +689,7 @@ class _ProcessPageState extends State<ProcessPage> {
 
                                       _SelectedMembersExternalPanel(
                                         title:
-                                        "Colaboradores externos selecionados",
+                                            "Colaboradores externos selecionados",
                                         externalAuthors: listExternalAuthor,
                                         onManage: handleManageExternals,
                                       ),
@@ -903,57 +915,57 @@ class _SelectedMembersPanel extends StatelessWidget {
           Expanded(
             child: selectedIdsCount == 0
                 ? Center(
-              child: Text(
-                "Nenhum selecionado",
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w600,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            )
+                    child: Text(
+                      "Nenhum selecionado",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w600,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  )
                 : ListView.separated(
-              padding: const EdgeInsets.all(12),
-              itemCount: selectedUsers.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, i) {
-                final u = selectedUsers[i];
-                final int id = u.id!;
-                final name = safeString(
-                      () => u.fullName,
-                  fallback: "Nome",
-                );
+                    padding: const EdgeInsets.all(12),
+                    itemCount: selectedUsers.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, i) {
+                      final u = selectedUsers[i];
+                      final int id = u.id!;
+                      final name = safeString(
+                        () => u.fullName,
+                        fallback: "Nome",
+                      );
 
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Text(
-                    name,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w800,
-                    ),
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(
+                          name,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        subtitle: Text(
+                          safeString(() => u.email, fallback: "Email"),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        trailing: IconButton(
+                          tooltip: "Remover",
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () => onRemove(id),
+                          icon: Icon(
+                            Icons.close,
+                            size: 25,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    safeString(() => u.email, fallback: "Email"),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    tooltip: "Remover",
-                    visualDensity: VisualDensity.compact,
-                    onPressed: () => onRemove(id),
-                    icon: Icon(
-                      Icons.close,
-                      size: 25,
-                      color: Colors.redAccent,
-                    ),
-                  ),
-                );
-              },
-            ),
           ),
         ],
       ),
@@ -1029,39 +1041,39 @@ class _SelectedMembersExternalPanel extends StatelessWidget {
           Expanded(
             child: externalAuthors.isEmpty
                 ? Center(
-              child: Text(
-                "Nenhum selecionado",
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w600,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            )
-                : ListView.separated(
-              padding: const EdgeInsets.all(12),
-              itemCount: externalAuthors.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, i) {
-                final u = externalAuthors[i];
-                final name = safeString(
-                      () => u.fullName,
-                  fallback: "Nome",
-                );
-
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Text(
-                    name,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w800,
+                    child: Text(
+                      "Nenhum selecionado",
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w600,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: externalAuthors.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, i) {
+                      final u = externalAuthors[i];
+                      final name = safeString(
+                        () => u.fullName,
+                        fallback: "Nome",
+                      );
+
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: Text(
+                          name,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
           // Botão no rodapé do bloco de colaboradores externos
           Container(
@@ -1100,5 +1112,3 @@ class _SelectedMembersExternalPanel extends StatelessWidget {
     );
   }
 }
-
-

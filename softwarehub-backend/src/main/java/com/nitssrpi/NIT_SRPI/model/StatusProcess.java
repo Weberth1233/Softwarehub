@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 public enum StatusProcess {
-
     PENDENTE_DISTRIBUICAO_COTAS("Aguardando distribuição de cotas"),
     COTAS_DISTRIBUIDAS("Cotas distribuídas"),
     CORRECAO("Em correção"),
     CORRIGIDO("Corrigido"),
     CLASSIFICADO("Classificado"),
+    PENDENTE_DOCUMENTACAO("Documentação pendente"),
     FINALIZADO("Finalizado"),
     INATIVO("Inativo");
 

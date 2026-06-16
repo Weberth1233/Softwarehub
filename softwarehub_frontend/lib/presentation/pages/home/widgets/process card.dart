@@ -89,7 +89,7 @@ class ProcessCard extends StatelessWidget {
                   color: Colors.blue,
                   tooltip: "Editar processo",
                   onTap: () {
-                    Get.toNamed(AppRoutes.process, arguments: item);
+                    Get.toNamed(AppRoutes.process, arguments: item,);
                   },
                 ),
               ),

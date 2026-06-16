@@ -4,6 +4,7 @@ import 'package:nit_sgpi_frontend/domain/entities/ip_type_entity.dart';
 import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/ip_types/ip_types_page.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
+import '../../../core/routes/app_routes.dart';
 import '../../process/controllers/process_post_controller.dart'
     show ProcessPostController;
 
@@ -253,6 +254,24 @@ class IpTypesFormController extends GetxController {
         await processController.put(
           secondStageProcess.firstStageProcess.idProcess!,
           request,
+        );
+
+        Get.toNamed(
+          AppRoutes.processRoyaltyDistributionById(
+            secondStageProcess.firstStageProcess.idProcess!,
+          ),
+          arguments: {
+            if (secondStageProcess
+                    .firstStageProcess
+                    .activeRoyaltyDistribution !=
+                null)
+              "distributionId": secondStageProcess
+                  .firstStageProcess
+                  .activeRoyaltyDistribution!
+                  .id,
+            'openedFromProcessFlow': true,
+            "editProcess": true,
+          },
         );
       } else {
         await processController.post(request);

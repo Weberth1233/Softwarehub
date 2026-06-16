@@ -11,6 +11,7 @@ import com.nitssrpi.NIT_SRPI.repository.RoyaltyDistributionChangeRequestReposito
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Objects;
@@ -27,15 +28,18 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
 
     private final ProcessRepository processRepository;
     private final RoyaltyDistributionChangeRequestRepository changeRequestRepository;
+    private final ProcessService processService;
 
     public ProcessRoyaltyDistributionService(
             ProcessRoyaltyDistributionRepository repository,
             ProcessRepository processRepository,
-            RoyaltyDistributionChangeRequestRepository changeRequestRepository
+            RoyaltyDistributionChangeRequestRepository changeRequestRepository,
+            ProcessService processService
     ) {
         super(repository);
         this.processRepository = processRepository;
         this.changeRequestRepository = changeRequestRepository;
+        this.processService = processService;
     }
 
     @Transactional
@@ -72,9 +76,11 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         validateSharesParticipants(distribution, process);
         bindSharesToDistribution(distribution);
 
-        process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
+        ProcessRoyaltyDistribution savedDistribution = repository.save(distribution);
 
-        return repository.save(distribution);
+        processService.refreshStatusAfterRequirementsChange(process.getId());
+
+        return savedDistribution;
     }
 
     @Override
@@ -84,6 +90,7 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         if (processRoyaltyDistribution.getId() == null) {
             throw new IllegalArgumentException("O ID da distribuição é obrigatório para atualização.");
         }
+
         ProcessRoyaltyDistribution distribution = repository.findById(processRoyaltyDistribution.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Distribuição de cotas não encontrada."));
 
@@ -99,15 +106,18 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         distribution.setProcess(process);
 
         validateCanUpdateDistribution(process);
+
         updateShares(distribution, processRoyaltyDistribution);
 
         validateDistribution(distribution);
         validateSharesParticipants(distribution, process);
         bindSharesToDistribution(distribution);
 
-        process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
+        ProcessRoyaltyDistribution savedDistribution = repository.save(distribution);
 
-        return repository.save(distribution);
+        processService.refreshStatusAfterRequirementsChange(process.getId());
+
+        return savedDistribution;
     }
 
     private void updateShares(
@@ -115,7 +125,6 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
             ProcessRoyaltyDistribution request
     ) {
         if (request.getShares() == null || request.getShares().isEmpty()) {
-            System.out.println("Entrei aqui");
             throw new IllegalArgumentException("A distribuição precisa ter cotas informadas.");
         }
 
@@ -135,6 +144,7 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
             distribution.getShares().add(share);
         }
     }
+
     private void validateCanUpdateDistribution(Process process) {
         if (process.getStatus() == StatusProcess.FINALIZADO) {
             throw new OperationNotAllowedException(
@@ -148,11 +158,18 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
             );
         }
 
-        if (process.getStatus() == StatusProcess.CORRECAO) {
-            throw new OperationNotAllowedException(
-                    "Processo em correção não permite atualizar distribuição de cotas antes de ser corrigido."
-            );
-        }
+        /*
+         * Antes você bloqueava CORRECAO aqui, mas isso quebrava sua própria regra,
+         * porque o update tentava corrigir o processo depois.
+         *
+         * Agora o processo pode atualizar cotas em CORRECAO.
+         * Depois disso, o ProcessService decide se vai para:
+         *
+         * - CORRIGIDO
+         * - PENDENTE_DOCUMENTACAO
+         * - PENDENTE_DISTRIBUICAO_COTAS
+         * - COTAS_DISTRIBUIDAS
+         */
     }
 
     @Override
@@ -201,13 +218,11 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
 
         newDistribution.setStatus(RoyaltyDistributionStatus.ACTIVE);
 
-        /*
-         * Ao ativar uma nova distribuição, o processo continua/volta
-         * para cotas distribuídas, aguardando análise/classificação.
-         */
-        process.setStatus(StatusProcess.COTAS_DISTRIBUIDAS);
+        ProcessRoyaltyDistribution savedDistribution = repository.save(newDistribution);
 
-        return repository.save(newDistribution);
+        processService.refreshStatusAfterRequirementsChange(process.getId());
+
+        return savedDistribution;
     }
 
     private void prepareInitialDistribution(
@@ -262,29 +277,41 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
                     "Processo finalizado não permite distribuição de cotas."
             );
         }
+
         if (process.getStatus() == StatusProcess.INATIVO) {
             throw new OperationNotAllowedException(
                     "Processo inativo não permite distribuição de cotas."
             );
         }
+
         if (process.getStatus() == StatusProcess.CORRECAO) {
             throw new OperationNotAllowedException(
                     "Processo em correção não permite distribuição de cotas antes de ser corrigido."
             );
         }
+
         if (process.getStatus() == StatusProcess.CLASSIFICADO) {
             throw new OperationNotAllowedException(
                     "Processo classificado não permite nova distribuição inicial de cotas."
             );
         }
+
         if (process.getStatus() == StatusProcess.COTAS_DISTRIBUIDAS) {
             throw new OperationNotAllowedException(
                     "Esse processo já possui cotas distribuídas."
             );
         }
+
+        if (process.getStatus() == StatusProcess.PENDENTE_DOCUMENTACAO) {
+            throw new OperationNotAllowedException(
+                    "Esse processo já possui distribuição de cotas e está aguardando documentação."
+            );
+        }
+
         boolean statusPermitido =
                 process.getStatus() == StatusProcess.PENDENTE_DISTRIBUICAO_COTAS ||
                         process.getStatus() == StatusProcess.CORRIGIDO;
+
         if (!statusPermitido) {
             throw new OperationNotAllowedException(
                     "A distribuição inicial de cotas só pode ser realizada quando o processo estiver aguardando distribuição de cotas ou corrigido."
@@ -540,9 +567,10 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
     }
 
     private void bindSharesToDistribution(ProcessRoyaltyDistribution distribution) {
-        if(distribution.getShares() == null){
+        if (distribution.getShares() == null) {
             return;
         }
+
         for (RoyaltyShare share : distribution.getShares()) {
             share.setDistribution(distribution);
         }

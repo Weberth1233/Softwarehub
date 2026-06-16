@@ -1,10 +1,7 @@
 package com.nitssrpi.NIT_SRPI.service;
 
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
-import com.nitssrpi.NIT_SRPI.model.EducationalInstitution;
-import com.nitssrpi.NIT_SRPI.model.TypesLink;
-import com.nitssrpi.NIT_SRPI.model.User;
-import com.nitssrpi.NIT_SRPI.model.UserEducationalInstitutionLink;
+import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +43,7 @@ public class UserService {
             throw new IllegalArgumentException("A senha é obrigatória!");
         }
 
+        user.setRole(UserRole.USER);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return repository.save(user);

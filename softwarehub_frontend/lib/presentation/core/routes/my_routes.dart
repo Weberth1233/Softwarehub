@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../domain/entities/process/process_response_entity.dart';
 import 'app_routes.dart';
 
 import 'package:nit_sgpi_frontend/presentation/pages/application_field/application_field_page.dart';
@@ -45,148 +46,142 @@ class MyRoutes {
   static String get initialRoute => AppRoutes.initial;
 
   static List<GetPage> get pages => [
-        GetPage(
-          name: AppRoutes.initial,
-          page: () => LoginPage(),
-          binding: LoginBindings(),
-        ),
+    GetPage(
+      name: AppRoutes.initial,
+      page: () => LoginPage(),
+      binding: LoginBindings(),
+    ),
 
-        GetPage(
-          name: AppRoutes.register,
-          page: () => RegisterPage(),
-          binding: RegisterBindings(),
-        ),
+    GetPage(
+      name: AppRoutes.register,
+      page: () => RegisterPage(),
+      binding: RegisterBindings(),
+    ),
 
-        GetPage(
-          name: AppRoutes.forgotPassword,
-          page: () => ForgotPasswordPage(),
-          binding: ForgotPasswordBindings(),
-        ),
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => ForgotPasswordPage(),
+      binding: ForgotPasswordBindings(),
+    ),
 
-        GetPage(
-          name: AppRoutes.passwordReset,
-          page: () => PasswordResetPage(),
-          binding: PasswordResetBindings(),
-        ),
+    GetPage(
+      name: AppRoutes.passwordReset,
+      page: () => PasswordResetPage(),
+      binding: PasswordResetBindings(),
+    ),
 
-        GetPage(
-          name: AppRoutes.home,
-          page: () => HomePage(),
-          binding: HomeBindings(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.home,
+      page: () => HomePage(),
+      binding: HomeBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.userLogged,
-          page: () => RegisterPage(isEditMode: true),
-          binding: RegisterBindings(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.userLogged,
+      page: () => RegisterPage(isEditMode: true),
+      binding: RegisterBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        // Criar e editar processo na mesma rota
-        GetPage(
-          name: AppRoutes.process,
-          page: () {
-            final args = Get.arguments;
+    // Criar e editar processo na mesma rota
+    GetPage(
+      name: AppRoutes.process,
+      page: () => ProcessPage(),
+      binding: UserBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-            final bool isEditMode = args is Map<String, dynamic>
-                ? args['isEditMode'] == true
-                : false;
+    GetPage(
+      name: AppRoutes.processExternalAuthor,
+      page: () => ProcessExternalAuthorPage(),
+      binding: ExternalAuthorBindigs(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-            return ProcessPage(isEditMode: isEditMode);
-          },
-          binding: UserBindings(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.processExternalAuthorForm,
+      page: () => ProcessExternalAuthorFormPage(),
+      binding: ExternalAuthorBindigs(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.processExternalAuthor,
-          page: () => ProcessExternalAuthorPage(),
-          binding: ExternalAuthorBindigs(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.ipTypes,
+      page: () => IpTypesPage(),
+      binding: IpTypesBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.processExternalAuthorForm,
-          page: () => ProcessExternalAuthorFormPage(),
-          binding: ExternalAuthorBindigs(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.ipTypesForm,
+      page: () => IpTypesForm(),
+      binding: IpTypesFormBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.ipTypes,
-          page: () => IpTypesPage(),
-          binding: IpTypesBindings(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.consentTerm,
+      page: () => const ConsentTermPage(),
+      binding: ConsentTermBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.ipTypesForm,
-          page: () => IpTypesForm(),
-          binding: IpTypesFormBinding(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.consentTermCheck,
+      page: () => const ConsentTermCheckPage(),
+      binding: ConsentTermBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.processRoyaltyDistribution,
+      page: () => ProcessRoyaltyDistributionPage(),
+      binding: ProcessRoyaltyDistributionBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.consentTerm,
-          page: () => const ConsentTermPage(),
-          binding: ConsentTermBinding(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.processAttachments,
+      page: () => AttachmentsPage(),
+      binding: AttachmentsBindigs(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.consentTermCheck,
-          page: () => const ConsentTermCheckPage(),
-          binding: ConsentTermBinding(),
-          middlewares: [AuthMiddleware()],
-        ),
-        GetPage(
-          name: AppRoutes.processRoyaltyDistribution,
-          page: () => ProcessRoyaltyDistributionPage(),
-          binding: ProcessRoyaltyDistributionBindings(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.processJustification,
+      page: () => JustificationPage(),
+      binding: JustificationBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.processAttachments,
-          page: () => AttachmentsPage(),
-          binding: AttachmentsBindigs(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.processNiceClassification,
+      page: () => const NiceClassificationPage(),
+      binding: NiceClassificationBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.processJustification,
-          page: () => JustificationPage(),
-          binding: JustificationBindings(),
-          middlewares: [AuthMiddleware()],
-        ),
+    GetPage(
+      name: AppRoutes.processApplicationField,
+      page: () => const ApplicationFieldPage(),
+      binding: ApplicationFieldBindings(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.processNiceClassification,
-          page: () => const NiceClassificationPage(),
-          binding: NiceClassificationBinding(),
-          middlewares: [AuthMiddleware()],
-        ),
+    // Rota genérica de detalhes fica depois das específicas
+    GetPage(
+      name: AppRoutes.processDetail,
+      page: () => ProcessDetailPage(),
+      binding: ProcessDetailBindings(),
+      preventDuplicates: false,
+      middlewares: [AuthMiddleware()],
+    ),
 
-        GetPage(
-          name: AppRoutes.processApplicationField,
-          page: () => const ApplicationFieldPage(),
-          binding: ApplicationFieldBindings(),
-          middlewares: [AuthMiddleware()],
-        ),
+   
 
-        // Rota genérica de detalhes fica depois das específicas
-        GetPage(
-          name: AppRoutes.processDetail,
-          page: () => ProcessDetailPage(),
-          binding: ProcessDetailBindings(),
-          preventDuplicates: false,
-          middlewares: [AuthMiddleware()],
-        ),
-
-        GetPage(
-          name: AppRoutes.unauthenticated,
-          page: () => const UnauthenticatedPage(),
-        ),
-      ];
+    GetPage(
+      name: AppRoutes.unauthenticated,
+      page: () => const UnauthenticatedPage(),
+    ),
+  ];
 }

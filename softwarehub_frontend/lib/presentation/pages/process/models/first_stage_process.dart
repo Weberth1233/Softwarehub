@@ -1,3 +1,5 @@
+import '../../../../domain/entities/process/process_royalty_distribution_response_entity.dart' show ProcessRoyaltyDistributionResponseEntity;
+
 class FirstStageProcess {
   final int? idProcess;
   final String title;
@@ -6,6 +8,8 @@ class FirstStageProcess {
   final bool isEdit;
   final String? originalIpTypeId;
   final Map<String, dynamic>? originalFormData;
+    final ProcessRoyaltyDistributionResponseEntity? activeRoyaltyDistribution;
+
 
   FirstStageProcess({
     this.idProcess,
@@ -15,5 +19,6 @@ class FirstStageProcess {
     this.isEdit = false,
     this.originalIpTypeId,
     this.originalFormData,
+    this.activeRoyaltyDistribution
   });
 }

@@ -12,7 +12,6 @@ class UserModel {
   final String birthDate;
   final String profession;
   final String fullName;
-  final String role;
   final bool isEnabled;
   final List<UserEducationalInstitutionLinkModel>
   userEducationalInstitutionLinks;
@@ -28,7 +27,6 @@ class UserModel {
     required this.birthDate,
     required this.profession,
     required this.fullName,
-    required this.role,
     required this.isEnabled,
     required this.userEducationalInstitutionLinks,
     required this.address,
@@ -45,7 +43,6 @@ class UserModel {
       birthDate: json['birthDate'] ?? '',
       profession: json['profession'] ?? '',
       fullName: json['fullName'] ?? '',
-      role: json['role'] ?? '',
       isEnabled: json['isEnabled'] ?? false,
       userEducationalInstitutionLinks:
           (json['userEducationalInstitutionLinks'] as List<dynamic>? ?? [])
@@ -69,7 +66,6 @@ class UserModel {
       "birthDate": birthDate,
       "profession": profession,
       "fullName": fullName,
-      "role": role,
       "isEnabled": isEnabled,
       "userEducationalInstitutionLinks": userEducationalInstitutionLinks
           .map(
@@ -93,7 +89,6 @@ class UserModel {
       birthDate: entity.birthDate,
       profession: entity.profession,
       fullName: entity.fullName,
-      role: entity.role,
       isEnabled: entity.isEnabled,
       userEducationalInstitutionLinks: entity.userEducationalInstitutionLinks
           .map(UserEducationalInstitutionLinkModel.fromEntity)
@@ -113,7 +108,6 @@ class UserModel {
       birthDate: birthDate,
       profession: profession,
       fullName: fullName,
-      role: role,
       isEnabled: isEnabled,
       userEducationalInstitutionLinks: userEducationalInstitutionLinks
           .map((item) => item.toEntity())

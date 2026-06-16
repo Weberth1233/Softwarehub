@@ -11,7 +11,7 @@ class UserEntity {
   final String birthDate;
   final String profession;
   final String fullName;
-  final String role;
+
   final bool isEnabled;
   final List<UserEducationalInstitutionLinkEntity> userEducationalInstitutionLinks;
   final AddressEntity address;
@@ -26,7 +26,6 @@ class UserEntity {
     required this.birthDate,
     required this.profession,
     required this.fullName,
-    required this.role,
     required this.isEnabled,
     required this.userEducationalInstitutionLinks,
     required this.address,

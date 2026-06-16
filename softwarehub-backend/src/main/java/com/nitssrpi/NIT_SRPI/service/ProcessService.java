@@ -148,6 +148,12 @@ public class ProcessService {
             );
         }
 
+        if (process.getStatus() == StatusProcess.PENDENTE_DOCUMENTACAO) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda está aguardando o envio da documentação."
+            );
+        }
+
         if (process.getStatus() == StatusProcess.CORRECAO) {
             throw new OperationNotAllowedException(
                     "O processo está em correção e não pode ser classificado."
@@ -167,6 +173,7 @@ public class ProcessService {
         }
 
         validateHasQuotaDistribution(process);
+        validateAllAttachmentsSigned(process);
     }
 
     private void validateCanFinish(Process process) {
@@ -188,6 +195,12 @@ public class ProcessService {
             );
         }
 
+        if (process.getStatus() == StatusProcess.PENDENTE_DOCUMENTACAO) {
+            throw new OperationNotAllowedException(
+                    "O processo ainda está aguardando o envio da documentação."
+            );
+        }
+
         if (process.getStatus() == StatusProcess.COTAS_DISTRIBUIDAS) {
             throw new OperationNotAllowedException(
                     "O processo ainda precisa ser classificado antes de ser finalizado."
@@ -201,14 +214,7 @@ public class ProcessService {
         }
 
         validateHasQuotaDistribution(process);
-
         validateAllAttachmentsSigned(process);
-
-//        if (process.getNiceClassification() == null) {
-//            throw new OperationNotAllowedException(
-//                    "O processo ainda não foi classificado."
-//            );
-//        }
     }
 
     private void validateHasQuotaDistribution(Process process) {
@@ -340,6 +346,65 @@ public class ProcessService {
         return validExternalAuthors;
     }
 
+    @Transactional
+    public void refreshStatusAfterRequirementsChange(Long processId) {
+        Process process = repository.findById(processId)
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
+
+        if (process.getStatus() == StatusProcess.FINALIZADO) {
+            throw new OperationNotAllowedException("Processo finalizado não pode ser alterado.");
+        }
+
+        if (process.getStatus() == StatusProcess.INATIVO) {
+            throw new OperationNotAllowedException("Processo inativo não pode ser alterado.");
+        }
+
+        StatusProcess nextStatus = resolveNextStatus(process);
+
+        process.setStatus(nextStatus);
+        repository.save(process);
+    }
+
+    private StatusProcess resolveNextStatus(Process process) {
+        boolean hasActiveDistribution = hasActiveQuotaDistribution(process);
+        boolean hasPendingDocumentation = hasPendingDocumentation(process);
+
+        if (!hasActiveDistribution) {
+            return StatusProcess.PENDENTE_DISTRIBUICAO_COTAS;
+        }
+
+        if (hasPendingDocumentation) {
+            return StatusProcess.PENDENTE_DOCUMENTACAO;
+        }
+
+        if (process.getStatus() == StatusProcess.CORRECAO ||
+                process.getStatus() == StatusProcess.CORRIGIDO) {
+            return StatusProcess.CORRIGIDO;
+        }
+
+        if (process.getStatus() == StatusProcess.CLASSIFICADO) {
+            return StatusProcess.CLASSIFICADO;
+        }
+
+        return StatusProcess.COTAS_DISTRIBUIDAS;
+    }
+
+    private boolean hasActiveQuotaDistribution(Process process) {
+        return process.getRoyaltyDistributions() != null &&
+                process.getRoyaltyDistributions()
+                        .stream()
+                        .anyMatch(distribution ->
+                                distribution.getStatus() == RoyaltyDistributionStatus.ACTIVE
+                        );
+    }
+
+    private boolean hasPendingDocumentation(Process process) {
+        return process.getAttachments() != null &&
+                process.getAttachments()
+                        .stream()
+                        .anyMatch(att -> "PENDING".equalsIgnoreCase(att.getStatus()));
+    }
+
     public Page<Process> searchProcess(
             String title,
             StatusProcess statusProcess,
@@ -360,7 +425,7 @@ public class ProcessService {
         Pageable pageRequest = PageRequest.of(
                 page,
                 pageSize,
-                Sort.by(Sort.Direction.DESC, "createdAt")
+                Sort.by(Sort.Direction.DESC, "updatedAt")
         );
 
         return repository.findAll(specs, pageRequest);

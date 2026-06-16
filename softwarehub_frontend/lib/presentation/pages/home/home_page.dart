@@ -44,6 +44,10 @@ class HomePage extends StatelessWidget {
 
         case "INATIVO":
           return Colors.grey;
+        
+        case "PENDENTE_DOCUMENTACAO":
+          return Colors.black;
+      
 
         default:
           return Colors.grey;
@@ -538,6 +542,7 @@ class _FilterHeaderState extends State<FilterHeader> {
     "Em correção",
     "Corrigido",
     "Classificado",
+    "Documentação pendente",
     "Finalizado",
   ];
   int selectedIndex = 0;
@@ -647,7 +652,8 @@ class _FilterHeaderState extends State<FilterHeader> {
                 3: "CORRECAO",
                 4: "CORRIGIDO",
                 5: "CLASSIFICADO",
-                6: "FINALIZADO"
+                6: "PENDENTE_DOCUMENTACAO",
+                7: "FINALIZADO"
               };
               processController.filterByStatus(statusMap[index]!);
             },

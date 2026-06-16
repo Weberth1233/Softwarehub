@@ -77,9 +77,6 @@ public record UserRequestDTO(
         )
         String fullName,
 
-        @NotNull(message = "O perfil do usuário é obrigatório")
-        UserRole role,
-
         @NotEmpty(message = "O usuário deve possuir pelo menos um vínculo institucional")
         @Valid
         List<UserEducationalInstitutionLinkRequestDTO> userEducationalInstitutionLinks,
