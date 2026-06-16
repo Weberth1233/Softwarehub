@@ -38,25 +38,24 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: colors.primary,
-                  ),
+                  icon: Icon(Icons.arrow_back, color: colors.primary),
                   onPressed: () => Get.back(),
                 ),
               ),
             ),
           ),
         ),
-        title: Text(
-          "Campos de Aplicação",
-          style: theme.textTheme.headlineSmall?.copyWith(
-            color: colors.onSecondary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.2,
-            fontSize: 20,
-          ),
-        ),
+        title: Obx(() {
+          return Text(
+            controller.screenTitle,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: colors.onSecondary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+              fontSize: 20,
+            ),
+          );
+        }),
       ),
       backgroundColor: colors.primary,
       body: Stack(
@@ -72,9 +71,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
             if (controller.isLoadingList.value &&
                 controller.applicationFields.isEmpty) {
               return Center(
-                child: CircularProgressIndicator(
-                  color: colors.onSecondary,
-                ),
+                child: CircularProgressIndicator(color: colors.onSecondary),
               );
             }
 
@@ -94,9 +91,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
                   padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 1100,
-                      ),
+                      constraints: const BoxConstraints(maxWidth: 1100),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -108,15 +103,11 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
 
                           const SizedBox(height: 20),
 
-                          ApplicationFieldSearchCard(
-                            controller: controller,
-                          ),
+                          ApplicationFieldSearchCard(controller: controller),
 
                           const SizedBox(height: 14),
 
-                          ApplicationFieldSelectionBar(
-                            controller: controller,
-                          ),
+                          ApplicationFieldSelectionBar(controller: controller),
 
                           const SizedBox(height: 20),
 
@@ -143,9 +134,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
 
                           const SizedBox(height: 20),
 
-                          ApplicationFieldPagination(
-                            controller: controller,
-                          ),
+                          ApplicationFieldPagination(controller: controller),
                         ],
                       ),
                     ),
@@ -168,11 +157,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 60,
-              color: colors.error,
-            ),
+            Icon(Icons.error_outline, size: 60, color: colors.error),
             const SizedBox(height: 16),
             Text(
               controller.errorMessage.value,
@@ -185,9 +170,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => controller.fetchApplicationFields(),
-              style: TextButton.styleFrom(
-                backgroundColor: colors.onSecondary,
-              ),
+              style: TextButton.styleFrom(backgroundColor: colors.onSecondary),
               child: Text(
                 "Tentar novamente",
                 style: TextStyle(

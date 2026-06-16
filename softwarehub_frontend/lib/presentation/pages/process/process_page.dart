@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
+import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process/controllers/process_user_controller.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process/widgets/process_title_field.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/theme/theme_color.dart';
@@ -130,7 +131,7 @@ class _ProcessPageState extends State<ProcessPage> {
       originalIpTypeId: process?.ipType.id.toString(),
       originalFormData: process?.formData,
     );
-    await Get.toNamed("/process/ip-types", arguments: auxProcess);
+    await Get.toNamed(AppRoutes.ipTypes, arguments: auxProcess);
   }
   // ──────────────────────────────────────────────────────────────────────────
 

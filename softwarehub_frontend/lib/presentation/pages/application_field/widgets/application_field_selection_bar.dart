@@ -6,10 +6,7 @@ import '../controllers/application_field_controller.dart';
 class ApplicationFieldSelectionBar extends StatelessWidget {
   final ApplicationFieldController controller;
 
-  const ApplicationFieldSelectionBar({
-    super.key,
-    required this.controller,
-  });
+  const ApplicationFieldSelectionBar({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +38,7 @@ class ApplicationFieldSelectionBar extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.checklist_outlined,
-                  color: colors.primary,
-                ),
+                Icon(Icons.checklist_outlined, color: colors.primary),
                 const SizedBox(width: 12),
                 Text(
                   selectedCount == 0
@@ -63,7 +57,7 @@ class ApplicationFieldSelectionBar extends StatelessWidget {
                   ? null
                   : controller.confirmSelection,
               icon: const Icon(Icons.check),
-              label: const Text("Confirmar seleção"),
+              label: Text(controller.confirmButtonText),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
                 foregroundColor: colors.onSecondary,

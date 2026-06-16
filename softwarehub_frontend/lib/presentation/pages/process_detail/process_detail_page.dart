@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
 import '../../shared/utils/app_toast.dart';
@@ -21,6 +22,21 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
   bool _isDeletingJustification = false;
 
   ProcessDetailController get controller => Get.find<ProcessDetailController>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final args = Get.arguments;
+
+    if (args is Map<String, dynamic>) {
+      final initialSectionIndex = args['initialSectionIndex'];
+
+      if (initialSectionIndex is int) {
+        _selectedIndex = initialSectionIndex;
+      }
+    }
+  }
 
   Future<void> _runAction({
     required Future<void> Function() action,
@@ -423,7 +439,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ? null
                       : () async {
                           final result = await Get.toNamed(
-                            '/home/process-detail/${entity.id}/application-field',
+                            AppRoutes.processApplicationFieldById(entity.id),
                           );
 
                           if (result is List<int>) {
@@ -464,7 +480,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 child: ElevatedButton(
                   onPressed: () async {
                     final result = await Get.toNamed(
-                      '/home/process-detail/${entity.id}/justification',
+                      AppRoutes.processJustificationById(entity.id),
                       arguments: {'processId': entity.id},
                     );
 
@@ -660,10 +676,10 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ? null
                       : () async {
                           final result = await Get.toNamed(
-                            '/home/process-detail/${entity.id}/application-field',
+                            AppRoutes.processApplicationFieldById(entity.id),
                           );
 
-                           if (result is List<int>) {
+                          if (result is List<int>) {
                             await _runAction(
                               setLoading: (value) => _isClassifying = value,
                               action: () async {
@@ -712,7 +728,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 ElevatedButton(
                   onPressed: () async {
                     final result = await Get.toNamed(
-                      '/home/process-detail/${entity.id}/justification',
+                      AppRoutes.processJustificationById(entity.id),
                       arguments: {'processId': entity.id},
                     );
 
@@ -1052,6 +1068,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 children: [
                   Icon(Icons.pie_chart_outline, color: colors.primary),
                   const SizedBox(width: 8),
+
                   Expanded(
                     child: Text(
                       "Distribuição versão ${distribution.version}",
@@ -1062,22 +1079,48 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       ),
                     ),
                   ),
-                  ElevatedButton(
+
+                  TextButton.icon(
                     onPressed: () async {
                       final result = await Get.toNamed(
-                        '/home/process-detail/${entity.id}/royalty-distribution',
-                        arguments: {"distributionId": distribution.id},
+                        AppRoutes.processRoyaltyDistributionById(entity.id),
+                        arguments: {
+                          "distributionId": distribution.id,
+                          'openedFromProcessFlow': false,
+                        },
                       );
+
                       if (result != null && result is int) {
                         print("Atualizando o processo");
                         await controller.fetchProcess(result);
                       }
                     },
-                    child: Text(
-                      "Atualizar distribuição de cotas",
-                      style: TextStyle(color: Colors.white),
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 18,
+                      color: colors.primary,
+                    ),
+                    label: Text(
+                      "Editar",
+                      style: TextStyle(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: colors.primary.withOpacity(0.08),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
                   ),
+
+                  const SizedBox(width: 8),
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -1263,14 +1306,73 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
             children: [
               Icon(Icons.category_outlined, color: colors.primary),
               const SizedBox(width: 8),
-              Text(
-                "Campos de Aplicação",
-                style: TextStyle(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13,
+
+              Expanded(
+                child: Text(
+                  "Campos de Aplicação",
+                  style: TextStyle(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                  ),
                 ),
               ),
+
+              if (applicationFields.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () async {
+                    final result = await Get.toNamed(
+                      AppRoutes.processApplicationFieldById(entity.id),
+                      arguments: {
+                        'isEditMode': true,
+                        'selectedApplicationFieldIds': applicationFields
+                            .map((field) => field.id)
+                            .toList(),
+                      },
+                    );
+
+                    if (result != null && result is List) {
+                      final selectedIds = result
+                          .map((item) => int.parse(item.toString()))
+                          .toList();
+
+                      print("Campos selecionados na edição: $selectedIds");
+
+                      // Aqui você chama o método que atualiza no backend.
+                      // Exemplo:
+                      //
+                      // await controller.updateApplicationFieldsProcess(
+                      //   processId: entity.id,
+                      //   applicationFieldIds: selectedIds,
+                      // );
+                      //
+                      // Depois atualiza os detalhes do processo:
+                      // await controller.fetchProcess(entity.id);
+                    }
+                  },
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: colors.primary,
+                  ),
+                  label: Text(
+                    "Editar",
+                    style: TextStyle(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: colors.primary.withOpacity(0.08),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
             ],
           ),
 
@@ -1510,7 +1612,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                           IconButton(
                             onPressed: () async {
                               final result = await Get.toNamed(
-                                '/home/process-detail/${entity.id}/justification',
+                                AppRoutes.processJustificationById(entity.id),
                                 arguments: {
                                   'processId': entity.id,
                                   'justificationId': justification.id,
@@ -1608,8 +1710,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
         return InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () =>
-              Get.toNamed("/home/process-detail/${entity.id}/attachments"),
+          onTap: () => AppRoutes.processAttachmentsById(entity.id),
           child: _buildSimpleCard(
             context,
             child: Row(
@@ -1825,10 +1926,9 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
           ElevatedButton(
             onPressed: () async {
-              print(process.title);
-              print(process.id);
               final result = await Get.toNamed(
-                '/home/process-detail/${process.id}/royalty-distribution',
+                AppRoutes.processRoyaltyDistributionById(process.id),
+                arguments: {'openedFromProcessFlow': false},
               );
               if (result != null && result is int) {
                 print("Atualizando o processo");

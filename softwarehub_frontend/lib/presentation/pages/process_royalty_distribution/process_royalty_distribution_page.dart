@@ -23,7 +23,7 @@ class ProcessRoyaltyDistributionPage
           automaticallyImplyLeading: false,
           toolbarHeight: 70,
           centerTitle: false,
-          leading: Padding(
+          leading: !controller.openedFromProcessFlow.value ? Padding(
             padding: const EdgeInsets.only(left: 12),
             child: Align(
               alignment: Alignment.centerLeft,
@@ -51,7 +51,7 @@ class ProcessRoyaltyDistributionPage
                 ),
               ),
             ),
-          ),
+          ): SizedBox(),
           title: Text(
             isEditMode
                 ? "Editar distribuição de cotas"

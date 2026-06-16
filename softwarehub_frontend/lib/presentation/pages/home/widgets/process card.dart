@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
+
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../controllers/home_controller.dart';
 
@@ -14,7 +16,7 @@ class ProcessCard extends StatelessWidget {
   Widget build(BuildContext context) {
     const contentColor = Colors.white;
 
-    String color = "0XFF${item.ipType.color}";
+    final String color = "0XFF${item.ipType.color}";
 
     final date = item.createdAt.toLocal();
     final dateFormatted =
@@ -22,12 +24,8 @@ class ProcessCard extends StatelessWidget {
         "${date.month.toString().padLeft(2, '0')}/"
         "${date.year}";
 
-    
-    String textCorrect(){
-      
-      return item.statusLabel;
-
-    }
+    final int justificationCount = item.justifications.length;
+    final bool hasJustifications = justificationCount > 0;
 
     return SizedBox(
       width: 400,
@@ -35,14 +33,14 @@ class ProcessCard extends StatelessWidget {
       child: Card(
         elevation: 8,
         shadowColor: Colors.black26,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () {
-            Get.toNamed('/home/process-detail/${item.id}',
-                preventDuplicates: false);
+            Get.toNamed(
+              AppRoutes.processDetailById(item.id),
+              preventDuplicates: false,
+            );
           },
           child: Stack(
             children: [
@@ -50,10 +48,7 @@ class ProcessCard extends StatelessWidget {
               Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Color(0XFF004093),
-                      Color(0XFF0A5BD8),
-                    ],
+                    colors: [Color(0XFF004093), Color(0XFF0A5BD8)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -94,10 +89,31 @@ class ProcessCard extends StatelessWidget {
                   color: Colors.blue,
                   tooltip: "Editar processo",
                   onTap: () {
-                    Get.toNamed("/process-edit", arguments: item);
+                    Get.toNamed(AppRoutes.process, arguments: item);
                   },
                 ),
               ),
+
+              /// JUSTIFICATION NOTIFICATION
+              if (hasJustifications)
+                Positioned(
+                  top: 10,
+                  right: 90,
+                  child: _actionButton(
+                    icon: Icons.notifications_active_outlined,
+                    color: Colors.orange,
+                    tooltip:
+                        "$justificationCount justificativa(s) vinculada(s) ao processo",
+                    badgeCount: justificationCount,
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.processDetailById(item.id),
+                        preventDuplicates: false,
+                        arguments: {'initialSectionIndex': 5},
+                      );
+                    },
+                  ),
+                ),
 
               /// CONTENT
               Padding(
@@ -144,9 +160,7 @@ class ProcessCard extends StatelessWidget {
 
                     const Spacer(),
 
-                    Divider(
-                      color: Colors.white.withOpacity(0.15),
-                    ),
+                    Divider(color: Colors.white.withOpacity(0.15)),
 
                     const SizedBox(height: 6),
 
@@ -165,7 +179,7 @@ class ProcessCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            textCorrect(),
+                            item.statusLabel,
                             style: context.textTheme.bodySmall!.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -204,39 +218,73 @@ class ProcessCard extends StatelessWidget {
     );
   }
 
-  /// ACTION BUTTON (EDIT / DELETE)
   Widget _actionButton({
     required IconData icon,
     required Color color,
     required String tooltip,
     required VoidCallback onTap,
+    int? badgeCount,
   }) {
+    final bool hasBadge = badgeCount != null && badgeCount > 0;
+
     return Tooltip(
       message: tooltip,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 20,
-          ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, color: Colors.white, size: 20),
+            ),
+
+            if (hasBadge)
+              Positioned(
+                top: -7,
+                right: -7,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: Text(
+                    badgeCount > 99 ? "99+" : badgeCount.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  /// DELETE DIALOG
   void _showDeleteDialog(BuildContext context) {
     Get.defaultDialog(
       title: "Confirmar exclusão",
-      middleText: "Tem certeza que deseja excluir o processo \"${item.title}\"?",
+      middleText:
+          "Tem certeza que deseja excluir o processo \"${item.title}\"?",
       textConfirm: "Excluir",
       textCancel: "Cancelar",
       confirmTextColor: Colors.white,
@@ -248,15 +296,20 @@ class ProcessCard extends StatelessWidget {
     );
   }
 
-  /// STATUS COLOR
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case "aprovado":
+    switch (status.toUpperCase()) {
+      case "FINALIZADO":
+      case "APROVADO":
         return Colors.green.withOpacity(0.25);
-      case "pendente":
+
+      case "EM_ANDAMENTO":
+      case "PENDENTE":
         return Colors.orange.withOpacity(0.25);
-      case "rejeitado":
+
+      case "CORRECAO":
+      case "REJEITADO":
         return Colors.red.withOpacity(0.25);
+
       default:
         return Colors.white.withOpacity(0.15);
     }

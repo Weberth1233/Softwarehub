@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/home/widgets/process%20card.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/theme/theme_color.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/responsive.dart';
@@ -173,7 +174,7 @@ class HomePage extends StatelessWidget {
                           const SizedBox(width: 12),
                           IconButton(
                             onPressed: () {
-                              Get.toNamed("/user-logged");
+                              Get.toNamed(AppRoutes.userLogged);
                             },
                             style: IconButton.styleFrom(
                               backgroundColor: theme.colorScheme.primary,
@@ -302,7 +303,7 @@ class HomePage extends StatelessWidget {
                               ),
                               ElevatedButton(
                                 onPressed: () {
-                                  Get.toNamed("/process");
+                                  Get.toNamed(AppRoutes.process);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: theme.colorScheme.primary,

@@ -265,7 +265,7 @@ class IpTypesFormController extends GetxController {
       );
       clearForm();
 
-      Get.offAllNamed('/home');
+      // Get.offAllNamed('/home');
     } catch (e) {
       AppToast.error("Erro ao enviar processo!");
     }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../domain/entities/process/process_royalty_distribution_request_entity.dart';
 import '../../../../domain/entities/process/process_user_entity.dart';
@@ -24,6 +25,8 @@ class ProcessRoyaltyDistributionController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final RxBool isLoading = false.obs;
   final Rxn<ProcessResponseEntity> process = Rxn<ProcessResponseEntity>();
+
+  final RxBool openedFromProcessFlow = false.obs;
 
   final RxBool isEditMode = false.obs;
   final RxnInt distributionId = RxnInt();
@@ -62,12 +65,17 @@ class ProcessRoyaltyDistributionController extends GetxController {
     final args = Get.arguments;
 
     if (args is Map<String, dynamic>) {
-      final int? receivedDistributionId = args['distributionId'];
+      final receivedDistributionId = args['distributionId'];
 
-      if (receivedDistributionId != null) {
+      if (receivedDistributionId is int) {
         distributionId.value = receivedDistributionId;
         isEditMode.value = true;
+      } else if (receivedDistributionId is String) {
+        distributionId.value = int.tryParse(receivedDistributionId);
+        isEditMode.value = distributionId.value != null;
       }
+
+      openedFromProcessFlow.value = args['openedFromProcessFlow'] == true;
     }
 
     _loadProcessFromRoute();
@@ -75,17 +83,24 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
   void _loadProcessFromRoute() {
     final idStr = Get.parameters['id'];
+
     final idFromUrl = int.tryParse(idStr ?? '');
 
     final args = Get.arguments;
-    final idFromArgs = args is Map<String, dynamic>
-        ? args['processId'] as int?
-        : null;
+
+    int? idFromArgs;
+
+    if (args is Map<String, dynamic>) {
+      final value = args['processId'];
+
+      if (value is int) {
+        idFromArgs = value;
+      } else if (value is String) {
+        idFromArgs = int.tryParse(value);
+      }
+    }
 
     final id = idFromUrl ?? idFromArgs;
-
-    debugPrint('ID DA URL: $idStr');
-    debugPrint('ID USADO NA TELA: $id');
 
     if (id == null) {
       AppToast.error("ID do processo não informado.");
@@ -118,7 +133,7 @@ class ProcessRoyaltyDistributionController extends GetxController {
 
           _buildSharesFromProcess(success);
 
-          if(isEditMode.value && distributionId.value != null){
+          if (isEditMode.value && distributionId.value != null) {
             _applySavedRoyaltyDistribution(success);
           }
         },
@@ -421,7 +436,11 @@ class ProcessRoyaltyDistributionController extends GetxController {
         },
         (success) {
           AppToast.success(success);
-          Get.back(result: process.value!.id);
+          if (openedFromProcessFlow.value) {
+            Get.offAllNamed(AppRoutes.home);
+          } else {
+            Get.back(result: process.value!.id);
+          }
         },
       );
     } catch (e) {

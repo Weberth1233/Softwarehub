@@ -25,6 +25,8 @@ class ApplicationFieldController extends GetxController {
 
   final RxSet<int> selectedFieldIds = <int>{}.obs;
 
+  final RxBool isEditMode = false.obs;
+
   final int size = 10;
 
   Map<String, List<ApplicationFieldEntity>> get groupedByApplicationArea {
@@ -32,36 +34,58 @@ class ApplicationFieldController extends GetxController {
 
     for (final field in applicationFields) {
       final areaName = field.applicationAreaName.trim().isNotEmpty
-          ? field.applicationAreaName
+          ? field.applicationAreaName.trim()
           : 'Área não informada';
 
-      if (!grouped.containsKey(areaName)) {
-        grouped[areaName] = [];
-      }
-
+      grouped.putIfAbsent(areaName, () => []);
       grouped[areaName]!.add(field);
     }
 
     return grouped;
   }
 
+  String get screenTitle {
+    return isEditMode.value
+        ? "Editar Campos de Aplicação"
+        : "Selecionar Campos de Aplicação";
+  }
+
+  String get confirmButtonText {
+    return isEditMode.value ? "Salvar alterações" : "Confirmar seleção";
+  }
+
   @override
   void onInit() {
     super.onInit();
 
+    _loadArguments();
+    fetchApplicationFields();
+  }
+
+  void _loadArguments() {
+    selectedFieldIds.clear();
+    isEditMode.value = false;
+
     final args = Get.arguments;
 
-    if (args is Map<String, dynamic>) {
-      final selectedIds = args['selectedApplicationFieldIds'];
+    if (args is! Map<String, dynamic>) return;
 
-      if (selectedIds is List) {
-        selectedFieldIds.addAll(
-          selectedIds.map((e) => int.parse(e.toString())),
-        );
-      }
+    final editModeArg = args['isEditMode'];
+    if (editModeArg is bool) {
+      isEditMode.value = editModeArg;
     }
 
-    fetchApplicationFields();
+    final selectedIds = args['selectedApplicationFieldIds'];
+
+    if (selectedIds is List) {
+      selectedFieldIds.addAll(
+        selectedIds.map((item) => int.parse(item.toString())),
+      );
+    }
+
+    if (selectedFieldIds.isNotEmpty) {
+      isEditMode.value = true;
+    }
   }
 
   Future<void> fetchApplicationFields({int page = 0}) async {
@@ -76,7 +100,7 @@ class ApplicationFieldController extends GetxController {
     };
 
     if (search.value.trim().isNotEmpty) {
-      values['description'] = search.value.trim();
+      values['name'] = search.value.trim();
     }
 
     final result = await _getPaginatedListApplicationField(values);
@@ -87,7 +111,6 @@ class ApplicationFieldController extends GetxController {
       },
       (pagedResult) {
         applicationFields.assignAll(pagedResult.content);
-
         currentPage.value = pagedResult.number;
         totalPages.value = pagedResult.totalPages;
       },
@@ -147,7 +170,6 @@ class ApplicationFieldController extends GetxController {
   }
 
   void confirmSelection() {
-    print(selectedFieldIds.toList());
     Get.back(
       result: selectedFieldIds.toList(),
     );
@@ -163,6 +185,10 @@ class ApplicationFieldController extends GetxController {
     if (currentPage.value > 0) {
       fetchApplicationFields(page: currentPage.value - 1);
     }
+  }
+
+  void goToPage(int page) {
+    fetchApplicationFields(page: page);
   }
 
   void searchByName(String value) {
