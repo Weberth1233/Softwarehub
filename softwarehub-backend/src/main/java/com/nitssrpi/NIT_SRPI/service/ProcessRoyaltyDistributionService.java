@@ -115,6 +115,7 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
             ProcessRoyaltyDistribution request
     ) {
         if (request.getShares() == null || request.getShares().isEmpty()) {
+            System.out.println("Entrei aqui");
             throw new IllegalArgumentException("A distribuição precisa ter cotas informadas.");
         }
 

@@ -51,8 +51,8 @@ public class ProcessRoyaltyDistributionController extends GenericController<Proc
         return super.save(processRoyaltyDistributionRequestDTO);
     }
 
-    @PutMapping("{id}")
-    @Operation(summary = "Atualizar", description = "Atualizar passando o ID como paramêtro")
+    @PutMapping("/{id}")
+    @Operation(summary = "Atualizar", description = "Atualizar passando o ID como parâmetro")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Atualizado com sucesso!"),
             @ApiResponse(responseCode = "404", description = "Item não encontrado!"),
@@ -61,14 +61,60 @@ public class ProcessRoyaltyDistributionController extends GenericController<Proc
             @PathVariable Long id,
             @RequestBody @Valid ProcessRoyaltyDistributionRequestDTO dto
     ) {
-        Optional<ProcessRoyaltyDistribution> optional =
-                service.getById(id);
+        Optional<ProcessRoyaltyDistribution> optional = service.getById(id);
+
         if (optional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        ProcessRoyaltyDistribution entity = optional.get();
-        mapper.updateEntity(dto,entity);
+
+        System.out.println("========== TESTE UPDATE DISTRIBUIÇÃO ==========");
+        System.out.println("ID recebido na rota: " + id);
+
+        System.out.println(
+                "DTO shares: " +
+                        (dto.shares() == null ? "null" : dto.shares().size())
+        );
+
+        if (dto.shares() != null) {
+            dto.shares().forEach(share -> {
+                System.out.println("DTO share type: " + share.type());
+                System.out.println("DTO share userId: " + share.userId());
+                System.out.println("DTO share educationalInstitutionId: " + share.educationalInstitutionId());
+                System.out.println("DTO share percentage: " + share.percentage());
+                System.out.println("----------------------------------");
+            });
+        }
+
+        ProcessRoyaltyDistribution entity = mapper.toEntity(dto);
+        entity.setId(id);
+
+        System.out.println(
+                "ENTITY shares após mapper.toEntity: " +
+                        (entity.getShares() == null ? "null" : entity.getShares().size())
+        );
+
+        if (entity.getShares() != null) {
+            entity.getShares().forEach(share -> {
+                System.out.println("ENTITY share type: " + share.getType());
+                System.out.println(
+                        "ENTITY share userId: " +
+                                (share.getUser() == null ? "null" : share.getUser().getId())
+                );
+                System.out.println(
+                        "ENTITY share educationalInstitutionId: " +
+                                (share.getEducationalInstitution() == null
+                                        ? "null"
+                                        : share.getEducationalInstitution().getId())
+                );
+                System.out.println("ENTITY share percentage: " + share.getPercentage());
+                System.out.println("----------------------------------");
+            });
+        }
+
+        System.out.println("===============================================");
+
         service.update(entity);
+
         return ResponseEntity.noContent().build();
     }
 }
