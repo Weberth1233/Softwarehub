@@ -167,16 +167,36 @@ public class ProcessController implements GenericController{
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/classification")
-    @Operation(summary = "Classificar processo", description = "Classificar processo passando uma lista de campos de aplicações")
+    @PostMapping("/{id}/classification")
+    @Operation(
+            summary = "Classificar processo",
+            description = "Classifica o processo passando uma lista de campos de aplicação"
+    )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Classificado com sucesso!"),
+            @ApiResponse(responseCode = "204", description = "Classificado com sucesso!"),
     })
     public ResponseEntity<Void> classifyProcess(
             @PathVariable Long id,
-            @RequestBody @Valid ProcessClassificationRequestDTO request){
+            @RequestBody @Valid ProcessClassificationRequestDTO request
+    ) {
         service.classifyProcess(id, request);
-        return  ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/classification")
+    @Operation(
+            summary = "Editar classificação do processo",
+            description = "Edita a classificação do processo substituindo os campos de aplicação atuais"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Classificação editada com sucesso!"),
+    })
+    public ResponseEntity<Void> updateClassification(
+            @PathVariable Long id,
+            @RequestBody @Valid ProcessClassificationRequestDTO request
+    ) {
+        service.updateClassification(id, request);
+        return ResponseEntity.noContent().build();
     }
 
 }

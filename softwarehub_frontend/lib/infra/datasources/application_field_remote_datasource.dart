@@ -35,4 +35,6 @@ class ApplicationFieldRemoteDatasource
       errorMessage: 'Erro ao buscar campos de aplicação!',
     );
   }
+  
+ 
 }

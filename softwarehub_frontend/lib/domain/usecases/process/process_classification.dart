@@ -8,10 +8,13 @@ class ProcessClassification {
 
   ProcessClassification({required this.repository});
 
-  Future<Either<Failure, String>> call(int processId, List<int> applicationFields) async {
+  Future<Either<Failure, String>> call(int processId, List<int> applicationFields, {
+    bool isEdit = false,
+  }) async {
     final result = await repository.processClassification(
       processId,
       applicationFields,
+      isEdit: isEdit
     );
     return result;
   }

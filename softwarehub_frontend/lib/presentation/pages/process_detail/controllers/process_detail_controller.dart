@@ -172,13 +172,15 @@ class ProcessDetailController extends GetxController {
     attachmentFileName.value = null;
   }
 
-  Future<void> classifyProcess(int processId, List<int> niceClassCode) async {
+  Future<void> classifyProcess(int processId, List<int> niceClassCode, {
+    bool isEdit = false,
+  }) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
       message.value = '';
 
-      final result = await _processClassification(processId, niceClassCode);
+      final result = await _processClassification(processId, niceClassCode, isEdit: isEdit);
 
       await result.fold(
         (Failure failure) async {

@@ -17,4 +17,5 @@ class ApplicationFieldRepositoryImpl extends BaseRepository implements IApplicat
       return remoteDataSource.getPaginatedList(values);
     },);
   }
+  
 }

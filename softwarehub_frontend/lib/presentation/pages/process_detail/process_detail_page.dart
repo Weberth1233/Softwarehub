@@ -5,6 +5,7 @@ import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
 import '../../shared/utils/app_toast.dart';
+import '../../shared/widgets/diagonal_lines_painter.dart';
 import 'controllers/process_detail_controller.dart';
 
 class ProcessDetailPage extends StatefulWidget {
@@ -158,7 +159,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: _DiagonalLinesPainter(
+                painter: DiagonalLinesPainter(
                   color: colors.onSecondary.withOpacity(0.04),
                 ),
               ),
@@ -1318,7 +1319,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                 ),
               ),
 
-              if (applicationFields.isNotEmpty)
+              if (controller.isAdmin && applicationFields.isNotEmpty)
                 TextButton.icon(
                   onPressed: () async {
                     final result = await Get.toNamed(
@@ -1338,16 +1339,14 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
 
                       print("Campos selecionados na edição: $selectedIds");
 
-                      // Aqui você chama o método que atualiza no backend.
-                      // Exemplo:
-                      //
-                      // await controller.updateApplicationFieldsProcess(
-                      //   processId: entity.id,
-                      //   applicationFieldIds: selectedIds,
-                      // );
-                      //
-                      // Depois atualiza os detalhes do processo:
-                      // await controller.fetchProcess(entity.id);
+                      if (result is List<int>) {
+                        await _runAction(
+                          setLoading: (value) => _isClassifying = value,
+                          action: () async {
+                            await controller.classifyProcess(entity.id, result, isEdit: true);
+                          },
+                        );
+                      }
                     }
                   },
                   icon: Icon(
@@ -2328,28 +2327,4 @@ class _StatusUi {
   _StatusUi({required this.color, required this.icon, required this.label});
 }
 
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
 
-  _DiagonalLinesPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-
-    const spacing = 80.0;
-
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

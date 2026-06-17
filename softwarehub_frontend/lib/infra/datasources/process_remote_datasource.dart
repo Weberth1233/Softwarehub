@@ -26,7 +26,11 @@ abstract class IProcessRemoteDataSource {
   Future<String> deleteProcess(int idProcess);
   Future<ProcessResponseEntity> getProcessById(int processId);
   Future<String> updateStatusProcess(int processId, String newStatus);
-  Future<String> processClassification(int processId, List<int> applicationFields);
+  Future<String> processClassification(
+    int processId,
+    List<int> applicationFields, {
+    bool isEdit = false,
+  });
 }
 
 class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
@@ -239,14 +243,24 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
   }
 
   @override
-  Future<String> processClassification(int processId, List<int> applicationFields) async {
+  Future<String> processClassification(
+    int processId,
+    List<int> applicationFields, {
+    bool isEdit = false,
+  }) async {
     try {
-      final response = await apiClient.patch(
-        "${BaseUrl.urlWithHttp}/process/$processId/classification",
-        body: {'applicationFields': applicationFields},
-      );
+      final url = "${BaseUrl.urlWithHttp}/process/$processId/classification";
+
+      final body = {'applicationFields': applicationFields};
+
+      final response = isEdit
+          ? await apiClient.put(url, body: body)
+          : await apiClient.post(url, body: body);
+
       if (response.statusCode == 204) {
-        return 'Processo classificado com sucesso!';
+        return isEdit
+            ? 'Classificação atualizada com sucesso!'
+            : 'Processo classificado com sucesso!';
       } else {
         throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }

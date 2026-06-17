@@ -98,6 +98,25 @@ public class ProcessService {
     }
 
     @Transactional
+    public void updateClassification(Long processId, ProcessClassificationRequestDTO requestDTO) {
+        Process process = repository.findById(processId)
+                .orElseThrow(() -> new EntityNotFoundException("Processo não encontrado"));
+
+        process.getApplicationFields().clear();
+
+        for (Long applicationFieldId : requestDTO.applicationFields()) {
+            ApplicationField applicationField = applicationFieldRepository.findById(applicationFieldId)
+                    .orElseThrow(() -> new EntityNotFoundException("Campo de aplicação não encontrado!"));
+
+            process.getApplicationFields().add(applicationField);
+        }
+
+        process.setStatus(StatusProcess.CLASSIFICADO);
+
+        repository.save(process);
+    }
+
+    @Transactional
     public void updateStatus(Long id, StatusProcess newStatus) {
         Process process = repository.findById(id)
                 .orElseThrow(() ->
