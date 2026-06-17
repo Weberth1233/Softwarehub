@@ -2,11 +2,15 @@ import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/users/get_users.dart';
 
+import '../../../../domain/entities/process/process_user_entity.dart';
+import '../models/selected_user_entity.dart';
+
 class ProcessUserController extends GetxController {
   final GetUsers getUsers;
   ProcessUserController(this.getUsers);
 
-  final RxMap<int, UserEntity> selectedUsers = <int, UserEntity>{}.obs;
+  final RxMap<int, SelectedUserEntity> selectedUsers =
+      <int, SelectedUserEntity>{}.obs;
 
   final RxBool isLoading = false.obs;
   final RxList<UserEntity> users = <UserEntity>[].obs;
@@ -25,12 +29,13 @@ class ProcessUserController extends GetxController {
   }
 
   void toggleUser(UserEntity user) {
-    if (user.id == null) return;
+    final id = user.id;
+    if (id == null) return;
 
-    if (selectedUsers.containsKey(user.id)) {
-      selectedUsers.remove(user.id);
+    if (selectedUsers.containsKey(id)) {
+      selectedUsers.remove(id);
     } else {
-      selectedUsers[user.id!] = user;
+      selectedUsers[id] = SelectedUserEntity.fromUserEntity(user);
     }
   }
 
@@ -64,11 +69,11 @@ class ProcessUserController extends GetxController {
     );
 
     result.fold(
-          (failure) {
+      (failure) {
         errorMessage.value = failure.message;
         if (loadMore && page.value > 0) page.value--;
       },
-          (pagedResult) {
+      (pagedResult) {
         users.assignAll(pagedResult.content);
         hasMore.value = pagedResult.content.length >= size;
       },
@@ -92,11 +97,11 @@ class ProcessUserController extends GetxController {
     );
 
     result.fold(
-          (failure) {
+      (failure) {
         errorMessage.value = failure.message;
         page.value++;
       },
-          (pagedResult) {
+      (pagedResult) {
         users.assignAll(pagedResult.content);
         hasMore.value = true;
       },
@@ -105,4 +110,17 @@ class ProcessUserController extends GetxController {
     isLoading.value = false;
   }
 
+  void setInitialSelectedProcessAuthors(List<ProcessUserEntity> authors) {
+    selectedUsers.clear();
+
+    for (final author in authors) {
+      final id = author.id;
+
+      selectedUsers[id] = SelectedUserEntity.fromProcessUserEntity(author);
+    }
+  }
+
+  void clearSelectedUsers() {
+    selectedUsers.clear();
+  }
 }

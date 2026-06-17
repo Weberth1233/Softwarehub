@@ -12,6 +12,7 @@ import '../../shared/utils/responsive.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/diagonal_lines_painter.dart';
 import 'models/first_stage_process.dart';
+import 'models/selected_user_entity.dart';
 import 'utils/safe_string.dart';
 import 'widgets/process_app_bar.dart';
 import 'widgets/search_field_high_light.dart';
@@ -61,38 +62,35 @@ class _ProcessPageState extends State<ProcessPage> {
   void initState() {
     super.initState();
     isEditMode = process != null;
-        // Rebuilds errorText reactively as the user types
-        titleController.addListener(() {
-          if (_showValidationErrors) setState(() {});
-        });
+    // Rebuilds errorText reactively as the user types
+    titleController.addListener(() {
+      if (_showValidationErrors) setState(() {});
+    });
 
     if (process != null) {
       titleController.text = process!.title;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final userController = Get.find<ProcessUserController>();
-        final Set<int> pendingIds = process!.authors
-            .map((u) => u.id)
-            .whereType<int>()
-            .toSet();
-
-        _usersWorker = ever(userController.users, (
-          List<UserEntity> loadedUsers,
-        ) {
-          if (pendingIds.isEmpty) return;
-
-          for (var user in loadedUsers) {
-            if (pendingIds.contains(user.id)) {
-              userController.selectedUsers[user.id!] = user;
-              pendingIds.remove(user.id);
-            }
-          }
+        userController.setInitialSelectedProcessAuthors(process!.authors);
+        setState(() {
+          listExternalAuthor = process!.externalAuthors;
+          idsExternalAuthors = process!.externalAuthors
+              .map((author) => author.id)
+              .whereType<int>()
+              .toList();
         });
 
         if (userController.users.isEmpty) {
           userController.fetchUsers();
         }
+      });
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        userController.clearSelectedUsers();
 
-        listExternalAuthor = process!.externalAuthors;
+        if (userController.users.isEmpty) {
+          userController.fetchUsers();
+        }
       });
     }
   }
@@ -121,14 +119,15 @@ class _ProcessPageState extends State<ProcessPage> {
       return;
     }
 
-    final activeRoyaltyDistributions = process?.royaltyDistributions
-        .where((distribution) => distribution.status == "ACTIVE")
-        .toList() ??
-    [];
+    final activeRoyaltyDistributions =
+        process?.royaltyDistributions
+            .where((distribution) => distribution.status == "ACTIVE")
+            .toList() ??
+        [];
 
-final activeRoyaltyDistribution = activeRoyaltyDistributions.isNotEmpty
-    ? activeRoyaltyDistributions.first
-    : null;
+    final activeRoyaltyDistribution = activeRoyaltyDistributions.isNotEmpty
+        ? activeRoyaltyDistributions.first
+        : null;
 
     final auxProcess = FirstStageProcess(
       idProcess: process?.id,
@@ -138,7 +137,7 @@ final activeRoyaltyDistribution = activeRoyaltyDistributions.isNotEmpty
       isEdit: isEditMode,
       originalIpTypeId: process?.ipType.id.toString(),
       originalFormData: process?.formData,
-      activeRoyaltyDistribution: activeRoyaltyDistribution
+      activeRoyaltyDistribution: activeRoyaltyDistribution,
     );
     await Get.toNamed(AppRoutes.ipTypes, arguments: auxProcess);
   }
@@ -743,7 +742,7 @@ final activeRoyaltyDistribution = activeRoyaltyDistributions.isNotEmpty
 
 class _MembersList extends StatelessWidget {
   final List<UserEntity> users;
-  final Map<int, UserEntity> selectedUsersMap;
+  final Map<int, SelectedUserEntity> selectedUsersMap;
   final void Function(UserEntity user) onToggle;
 
   const _MembersList({
@@ -847,7 +846,7 @@ class _MembersList extends StatelessWidget {
 
 class _SelectedMembersPanel extends StatelessWidget {
   final String title;
-  final List<UserEntity> selectedUsers;
+ final List<SelectedUserEntity> selectedUsers;
   final int selectedIdsCount;
   final void Function(int id) onRemove;
 
