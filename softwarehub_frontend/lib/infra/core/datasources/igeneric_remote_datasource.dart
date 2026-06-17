@@ -23,3 +23,7 @@ abstract class IGenericGetByIdRemoteDatasource<T> {
 abstract class IGenericPaginatedList<T>{
   Future<PagedResultEntity<T>> getPaginatedList(Map<String, String> values);
 }
+
+abstract class IGenericUploadRemoteDatasource<TRequest, TResponse> {
+  Future<TResponse> upload(TRequest entity);
+}

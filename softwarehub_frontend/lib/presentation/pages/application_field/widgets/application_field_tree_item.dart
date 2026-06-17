@@ -23,7 +23,7 @@ class ApplicationFieldTreeItem extends StatelessWidget {
 
       return InkWell(
         borderRadius: BorderRadius.circular(14),
-        onTap: () => controller.toggleFieldSelection(field.id),
+        onTap: () => controller.toggleFieldSelection(field),
         child: Container(
           margin: const EdgeInsets.only(top: 10),
           padding: const EdgeInsets.all(14),
@@ -46,7 +46,7 @@ class ApplicationFieldTreeItem extends StatelessWidget {
                 value: isSelected,
                 activeColor: colors.primary,
                 onChanged: (_) {
-                  controller.toggleFieldSelection(field.id);
+                  controller.toggleFieldSelection(field);
                 },
               ),
 

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:nit_sgpi_frontend/infra/utils/error_formatter.dart';
 import '../../../domain/core/errors/exceptions.dart';
 import '../../../domain/entities/paged_result_entity.dart';
@@ -249,6 +250,55 @@ class RemoteDatasourceHelper {
     } on ServerException {
       rethrow;
     } catch (_) {
+      throw NetworkException('Erro de conexão com o servidor!');
+    }
+  }
+
+  Future<TResponse> multipart<TResponse>({
+    required String url,
+    required String method,
+    required TResponse Function(dynamic responseBody, int statusCode) onSuccess,
+    Map<String, String> fields = const {},
+    String? filePath,
+    Uint8List? fileBytes,
+    String? fileName,
+    String fieldName = "file",
+    String? errorMessage,
+    List<int> successStatusCodes = const [200, 201, 204],
+    Map<int, TResponse Function(String body)>? statusCodeHandlers,
+  }) async {
+    try {
+      final response = await apiClient.multipartRequest(
+        url,
+        method: method,
+        fields: fields,
+        filePath: filePath,
+        fileBytes: fileBytes,
+        fileName: fileName,
+        fieldName: fieldName,
+      );
+
+      if (_isSuccessStatus(response.statusCode, successStatusCodes)) {
+        final decoded = _decodeBody(response.body);
+
+        return onSuccess(decoded, response.statusCode);
+      }
+
+      final handler = statusCodeHandlers?[response.statusCode];
+
+      if (handler != null) {
+        return handler(response.body);
+      }
+
+      throw _buildServerException(
+        statusCode: response.statusCode,
+        body: response.body,
+        errorMessage: errorMessage,
+      );
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      print(e);
       throw NetworkException('Erro de conexão com o servidor!');
     }
   }
