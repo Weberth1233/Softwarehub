@@ -3,6 +3,7 @@ package com.nitssrpi.NIT_SRPI.service;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
 import com.nitssrpi.NIT_SRPI.model.*;
 import com.nitssrpi.NIT_SRPI.repository.UserRepository;
+import com.nitssrpi.NIT_SRPI.repository.specs.UserSpecs;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -109,15 +110,12 @@ public class UserService {
         Specification<User> specs = Specification.where(
                 (root, query, cb) -> cb.conjunction()
         );
+        specs =  specs.and(UserSpecs.notEqualCreatorId(getLoggedUserId()));
 
         if (search != null && !search.trim().isEmpty()) {
             String searchLowerCase = search.toLowerCase();
 
             specs = specs.and((root, query, cb) -> cb.or(
-//                    cb.like(
-//                            cb.lower(root.get("userName")),
-//                            "%" + searchLowerCase + "%"
-//                    ),
                     cb.like(
                             cb.lower(root.get("fullName")),
                             "%" + searchLowerCase + "%"
