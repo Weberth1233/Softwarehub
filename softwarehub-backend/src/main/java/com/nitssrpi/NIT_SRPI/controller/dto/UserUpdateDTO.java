@@ -10,17 +10,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record UserUpdateDTO(
-        @NotBlank(message = "O nome de usuário é obrigatório")
-        @Size(
-                min = 3,
-                max = 50,
-                message = "O nome de usuário deve ter entre 3 e 50 caracteres"
-        )
-        @Pattern(
-                regexp = "^[a-zA-Z0-9._]+$",
-                message = "O nome de usuário deve conter apenas letras, números, ponto e underline"
-        )
-        String userName,
 
         @NotBlank(message = "O CPF é obrigatório")
         @CPF(message = "CPF inválido")
@@ -70,9 +59,6 @@ public record UserUpdateDTO(
         @NotEmpty(message = "O usuário deve possuir pelo menos um vínculo institucional")
         @Valid
         List<UserEducationalInstitutionLinkRequestDTO> userEducationalInstitutionLinks,
-
-        @NotNull(message = "O perfil do usuário é obrigatório")
-        UserRole role,
 
         @NotNull(message = "O status do usuário é obrigatório")
         Boolean isEnabled,

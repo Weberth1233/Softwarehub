@@ -60,6 +60,8 @@ public class UserService {
         User existingUser = repository.findById(user.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado!"));
 
+        UserRole currentRole = existingUser.getRole(); // guarda o role atual do banco
+
         validateDuplicateCpfOrEmailForUpdate(
                 user.getCpf(),
                 user.getEmail(),
@@ -72,6 +74,8 @@ public class UserService {
         updateEducationalInstitutionLinks(existingUser, user);
 
         prepareUserRelations(existingUser);
+
+        existingUser.setRole(currentRole); // restaura o role original
 
         return repository.save(existingUser);
     }
@@ -110,10 +114,10 @@ public class UserService {
             String searchLowerCase = search.toLowerCase();
 
             specs = specs.and((root, query, cb) -> cb.or(
-                    cb.like(
-                            cb.lower(root.get("userName")),
-                            "%" + searchLowerCase + "%"
-                    ),
+//                    cb.like(
+//                            cb.lower(root.get("userName")),
+//                            "%" + searchLowerCase + "%"
+//                    ),
                     cb.like(
                             cb.lower(root.get("fullName")),
                             "%" + searchLowerCase + "%"
@@ -141,7 +145,6 @@ public class UserService {
     }
 
     private void updateBasicData(User existingUser, User user) {
-        existingUser.setUserName(user.getUsername());
         existingUser.setEmail(user.getEmail());
         existingUser.setCpf(user.getCpf());
         existingUser.setPhoneNumber(user.getPhoneNumber());

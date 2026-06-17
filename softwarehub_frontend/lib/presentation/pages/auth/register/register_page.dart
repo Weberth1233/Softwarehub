@@ -69,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (user != null) {
       registerController.nameController.text = user.fullName;
-      registerController.userController.text = user.userName;
+      
       registerController.emailController.text = user.email;
       registerController.cpfController.text = user.cpf;
       registerController.professionController.text = user.profession;
@@ -557,29 +557,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                     const SizedBox(width: 10),
 
-                                    Expanded(
-                                      child: Obx(
-                                            () => CustomTextField(
-                                          controller: registerController
-                                              .userController,
-                                          label: "Nome de usuário",
-                                          size: 600,
-                                          validator: (v) =>
-                                              Validators.required(
-                                                v,
-                                                message:
-                                                "Informe o nome de usuário",
-                                              ),
-                                          errorText: registerController
-                                              .fieldErrors['userName'],
-                                          onChanged: (_) => registerController
-                                              .clearFieldError('userName'),
-                                          prefixIcon: const Icon(
-                                            Icons.alternate_email,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    
                                   ],
                                 ),
 
@@ -1063,9 +1041,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     }
 
                                     final userEntityToSave = UserEntity(
-                                      userName: registerController
-                                          .userController
-                                          .text,
+                                     
                                       email: registerController
                                           .emailController
                                           .text,

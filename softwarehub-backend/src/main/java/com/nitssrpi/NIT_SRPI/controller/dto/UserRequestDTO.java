@@ -12,17 +12,6 @@ import java.util.List;
 
 @Schema(name = "Usuário")
 public record UserRequestDTO(
-        @NotBlank(message = "O nome de usuário é obrigatório")
-        @Size(
-                min = 3,
-                max = 50,
-                message = "O nome de usuário deve ter entre 3 e 50 caracteres"
-        )
-        @Pattern(
-                regexp = "^[a-zA-Z0-9._]+$",
-                message = "O nome de usuário deve conter apenas letras, números, ponto e underline"
-        )
-        String userName,
 
         @NotBlank(message = "O email é obrigatório")
         @Email(message = "Email inválido")

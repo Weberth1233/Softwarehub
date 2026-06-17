@@ -4,7 +4,6 @@ import 'user_educational_institution_link_model.dart';
 
 class UserModel {
   final int? id;
-  final String userName;
   final String email;
   final String cpf;
   final String password;
@@ -19,7 +18,6 @@ class UserModel {
 
   UserModel({
     this.id,
-    required this.userName,
     required this.email,
     required this.cpf,
     required this.password,
@@ -35,7 +33,6 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'],
-      userName: json['userName'] ?? '',
       email: json['email'] ?? '',
       cpf: json['cpf'] ?? '',
       password: json['password'] ?? '',
@@ -58,7 +55,6 @@ class UserModel {
 
   Map<String, dynamic> toJson() {
     return {
-      "userName": userName,
       "email": email,
       "password": password,
       "cpf": cpf,
@@ -81,7 +77,6 @@ class UserModel {
   factory UserModel.fromEntity(UserEntity entity) {
     return UserModel(
       id: entity.id,
-      userName: entity.userName,
       email: entity.email,
       cpf: entity.cpf,
       password: entity.password,
@@ -100,7 +95,6 @@ class UserModel {
   UserEntity toEntity() {
     return UserEntity(
       id: id,
-      userName: userName,
       email: email,
       cpf: cpf,
       password: password,

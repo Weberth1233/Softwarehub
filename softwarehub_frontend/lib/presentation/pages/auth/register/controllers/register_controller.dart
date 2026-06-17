@@ -30,7 +30,6 @@ class RegisterController extends GetxController {
 
   // Dados pessoais
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController userController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController professionController = TextEditingController();
@@ -80,7 +79,6 @@ class RegisterController extends GetxController {
   }
 
   void clearForm() {
-    userController.clear();
     nameController.clear();
     emailController.clear();
     cpfController.clear();
@@ -114,7 +112,6 @@ class RegisterController extends GetxController {
   @override
   void onClose() {
     nameController.dispose();
-    userController.dispose();
     emailController.dispose();
     cpfController.dispose();
     professionController.dispose();

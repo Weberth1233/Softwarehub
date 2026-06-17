@@ -7,9 +7,9 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class UserSpecs {
 
-    public static Specification<User> likeUserName(String userName){
-        return (root, query, cb) -> cb.like(cb.upper(root.get("userName")), "%" + userName.toUpperCase() + "%");
-    }
+//    public static Specification<User> likeUserName(String userName){
+//        return (root, query, cb) -> cb.like(cb.upper(root.get("userName")), "%" + userName.toUpperCase() + "%");
+//    }
 
     public static Specification<User> likeFullName(String fullName){
         return (root, query, cb) -> cb.like(cb.upper(root.get("fullName")), "%" + fullName.toUpperCase() + "%");

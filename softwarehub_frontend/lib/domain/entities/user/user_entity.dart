@@ -3,7 +3,6 @@ import 'user_educational_institution_link_entity.dart';
 
 class UserEntity {
   final int? id;
-  final String userName;
   final String email;
   final String cpf;
   final String password;
@@ -18,7 +17,6 @@ class UserEntity {
 
   UserEntity({
     this.id,
-    required this.userName,
     required this.email,
     required this.cpf,
     required this.password,
