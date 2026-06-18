@@ -1,5 +1,4 @@
 package com.nitssrpi.NIT_SRPI.service;
-
 import com.nitssrpi.NIT_SRPI.controller.exceptions.DuplicateRecordException;
 import com.nitssrpi.NIT_SRPI.controller.exceptions.OperationNotAllowedException;
 import com.nitssrpi.NIT_SRPI.generic.service.GenericServiceImpl;
@@ -11,7 +10,6 @@ import com.nitssrpi.NIT_SRPI.repository.RoyaltyDistributionChangeRequestReposito
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Objects;
@@ -137,6 +135,7 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
             share.setPercentage(requestShare.getPercentage());
 
             share.setUser(requestShare.getUser());
+            share.setExternalAuthor(requestShare.getExternalAuthor());
             share.setEducationalInstitution(requestShare.getEducationalInstitution());
 
             share.setDistribution(distribution);
@@ -157,19 +156,6 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
                     "Processo inativo não permite atualizar distribuição de cotas."
             );
         }
-
-        /*
-         * Antes você bloqueava CORRECAO aqui, mas isso quebrava sua própria regra,
-         * porque o update tentava corrigir o processo depois.
-         *
-         * Agora o processo pode atualizar cotas em CORRECAO.
-         * Depois disso, o ProcessService decide se vai para:
-         *
-         * - CORRIGIDO
-         * - PENDENTE_DOCUMENTACAO
-         * - PENDENTE_DISTRIBUICAO_COTAS
-         * - COTAS_DISTRIBUIDAS
-         */
     }
 
     @Override
@@ -400,6 +386,7 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         validateUniversityShare(distribution);
         validateCreatorShare(distribution);
         validateNoDuplicateUsers(distribution);
+        validateNoDuplicateExternalAuthor(distribution);
     }
 
     private void validateTotalPercentage(ProcessRoyaltyDistribution distribution) {
@@ -479,6 +466,25 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         }
     }
 
+    private void validateNoDuplicateExternalAuthor(ProcessRoyaltyDistribution distribution) {
+        Set<Long> externalAuthorIds = new HashSet<>();
+
+        for (RoyaltyShare share : distribution.getShares()) {
+            if (share.getExternalAuthor() == null ||
+                    share.getExternalAuthor().getId() == null) {
+                continue;
+            }
+
+            Long externalAuthorId = share.getExternalAuthor().getId();
+
+            if (!externalAuthorIds.add(externalAuthorId)) {
+                throw new IllegalArgumentException(
+                        "O membro externo com ID " + externalAuthorId + " foi informado mais de uma vez na distribuição de cotas."
+                );
+            }
+        }
+    }
+
     private void validateSharesParticipants(
             ProcessRoyaltyDistribution distribution,
             Process process
@@ -499,6 +505,7 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         switch (share.getType()) {
             case CREATOR -> validateCreatorShareUser(share, process);
             case MEMBER -> validateMemberShareUser(share, process);
+            case MEMBER_EXTERNAL -> validateMemberExternalShareAuthor(share, process);
             case UNIVERSITY -> validateUniversityShareInstitution(share);
         }
     }
@@ -509,6 +516,20 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
     ) {
         if (share.getUser() == null || share.getUser().getId() == null) {
             throw new IllegalArgumentException("O usuário criador da cota é obrigatório.");
+        }
+
+        if (share.getExternalAuthor() != null &&
+                share.getExternalAuthor().getId() != null) {
+            throw new IllegalArgumentException(
+                    "Cota do tipo CREATOR não deve possuir autor externo vinculado."
+            );
+        }
+
+        if (share.getEducationalInstitution() != null &&
+                share.getEducationalInstitution().getId() != null) {
+            throw new IllegalArgumentException(
+                    "Cota do tipo CREATOR não deve possuir instituição vinculada."
+            );
         }
 
         if (process.getCreator() == null || process.getCreator().getId() == null) {
@@ -533,6 +554,20 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
             throw new IllegalArgumentException("O usuário membro da cota é obrigatório.");
         }
 
+        if (share.getExternalAuthor() != null &&
+                share.getExternalAuthor().getId() != null) {
+            throw new IllegalArgumentException(
+                    "Cota do tipo MEMBER não deve possuir autor externo vinculado."
+            );
+        }
+
+        if (share.getEducationalInstitution() != null &&
+                share.getEducationalInstitution().getId() != null) {
+            throw new IllegalArgumentException(
+                    "Cota do tipo MEMBER não deve possuir instituição vinculada."
+            );
+        }
+
         Long memberIdFromShare = share.getUser().getId();
 
         if (process.getCreator() != null &&
@@ -553,6 +588,43 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         }
     }
 
+    private void validateMemberExternalShareAuthor(
+            RoyaltyShare share,
+            Process process
+    ) {
+        if (share.getExternalAuthor() == null ||
+                share.getExternalAuthor().getId() == null) {
+            throw new IllegalArgumentException("O autor externo da cota é obrigatório.");
+        }
+
+        if (share.getUser() != null && share.getUser().getId() != null) {
+            throw new IllegalArgumentException(
+                    "Cota do tipo MEMBER_EXTERNAL não deve possuir usuário interno vinculado."
+            );
+        }
+
+        if (share.getEducationalInstitution() != null &&
+                share.getEducationalInstitution().getId() != null) {
+            throw new IllegalArgumentException(
+                    "Cota do tipo MEMBER_EXTERNAL não deve possuir instituição vinculada."
+            );
+        }
+
+        Long externalAuthorIdFromShare = share.getExternalAuthor().getId();
+
+        boolean externalAuthorBelongsToProcess = process.getExternalAuthors()
+                .stream()
+                .anyMatch(externalAuthor ->
+                        Objects.equals(externalAuthor.getId(), externalAuthorIdFromShare)
+                );
+
+        if (!externalAuthorBelongsToProcess) {
+            throw new IllegalArgumentException(
+                    "O membro externo informado não está vinculado ao projeto: " + process.getTitle() + "."
+            );
+        }
+    }
+
     private void validateUniversityShareInstitution(RoyaltyShare share) {
         if (share.getEducationalInstitution() == null ||
                 share.getEducationalInstitution().getId() == null) {
@@ -562,6 +634,13 @@ public class ProcessRoyaltyDistributionService extends GenericServiceImpl<
         if (share.getUser() != null && share.getUser().getId() != null) {
             throw new IllegalArgumentException(
                     "Cota do tipo UNIVERSITY não deve possuir usuário vinculado."
+            );
+        }
+
+        if (share.getExternalAuthor() != null &&
+                share.getExternalAuthor().getId() != null) {
+            throw new IllegalArgumentException(
+                    "Cota do tipo UNIVERSITY não deve possuir autor externo vinculado."
             );
         }
     }

@@ -29,8 +29,7 @@ import '../../pages/ip_types/ip_types_form.dart';
 import '../../pages/ip_types/ip_types_page.dart';
 import '../../pages/justifications/bindings/justification_bindings.dart';
 import '../../pages/justifications/justification_page.dart';
-import '../../pages/nice_classification/bindings/nice_classification_binding.dart';
-import '../../pages/nice_classification/nice_classification_page.dart';
+
 import '../../pages/process/bindings/user_bindings.dart';
 import '../../pages/process/process_page.dart';
 import '../../pages/process_detail/bindings/process_detail_bindings.dart';
@@ -154,12 +153,6 @@ class MyRoutes {
       middlewares: [AuthMiddleware()],
     ),
 
-    GetPage(
-      name: AppRoutes.processNiceClassification,
-      page: () => const NiceClassificationPage(),
-      binding: NiceClassificationBinding(),
-      middlewares: [AuthMiddleware()],
-    ),
 
     GetPage(
       name: AppRoutes.processApplicationField,

@@ -13,12 +13,14 @@ class ProcessRoyaltyDistributionRequestEntity {
 class RoyaltyShareEntity {
   final String type;
   final int? userId;
+  final int? externalAuthorId;
   final int? educationalInstitutionId;
   final double percentage;
 
   RoyaltyShareEntity({
     required this.type,
     this.userId,
+    this.externalAuthorId,
     this.educationalInstitutionId,
     required this.percentage,
   });

@@ -1,75 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ShareFormModel {
-  ShareFormModel({
-    required this.type,
-    required this.displayName,
-    required this.percentage,
-    this.userId,
-    this.educationalInstitutionId,
-    this.isLocked = false,
-    this.minPercentage = 0,
-  }) {
-    percentageController.text = percentage.value.toStringAsFixed(2);
-  }
-
-  final String id = UniqueKey().toString();
-
-  final ShareType type;
-
-  final String displayName;
-
-  final int? userId;
-
-  final int? educationalInstitutionId;
-
-  final bool isLocked;
-
-  final double minPercentage;
-
-  final RxDouble percentage;
-
-  final TextEditingController percentageController = TextEditingController();
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{
-      "type": type.apiValue,
-      "percentage": percentage.value,
-    };
-
-    if (type == ShareType.university) {
-      map["educationalInstitutionId"] = educationalInstitutionId;
-    } else {
-      map["userId"] = userId;
-    }
-
-    return map;
-  }
-
-  void dispose() {
-    percentageController.dispose();
-  }
-}
-
 enum ShareType {
   university,
   creator,
   member,
+  memberExternal,
 }
 
 extension ShareTypeExtension on ShareType {
-  String get apiValue {
-    switch (this) {
-      case ShareType.university:
-        return "UNIVERSITY";
-      case ShareType.creator:
-        return "CREATOR";
-      case ShareType.member:
-        return "MEMBER";
-    }
-  }
-
   String get label {
     switch (this) {
       case ShareType.university:
@@ -78,6 +17,79 @@ extension ShareTypeExtension on ShareType {
         return "Criador";
       case ShareType.member:
         return "Membro";
+      case ShareType.memberExternal:
+        return "Membro externo";
     }
+  }
+
+  String get apiValue {
+    switch (this) {
+      case ShareType.university:
+        return "UNIVERSITY";
+      case ShareType.creator:
+        return "CREATOR";
+      case ShareType.member:
+        return "MEMBER";
+      case ShareType.memberExternal:
+        return "MEMBER_EXTERNAL";
+    }
+  }
+}
+
+class ShareFormModel {
+  final String id;
+  final ShareType type;
+  final String displayName;
+
+  final int? userId;
+  final int? externalAuthorId;
+  final int? educationalInstitutionId;
+
+  final RxDouble percentage;
+  final double minPercentage;
+  final bool isLocked;
+
+  final TextEditingController percentageController;
+
+  ShareFormModel({
+    String? id,
+    required this.type,
+    required this.displayName,
+    this.userId,
+    this.externalAuthorId,
+    this.educationalInstitutionId,
+    required this.percentage,
+    this.minPercentage = 0,
+    this.isLocked = false,
+  })  : id = id ??
+            _buildId(
+              type,
+              userId,
+              externalAuthorId,
+              educationalInstitutionId,
+            ),
+        percentageController = TextEditingController();
+
+  static String _buildId(
+    ShareType type,
+    int? userId,
+    int? externalAuthorId,
+    int? educationalInstitutionId,
+  ) {
+    return "${type.name}_${userId ?? externalAuthorId ?? educationalInstitutionId ?? DateTime.now().microsecondsSinceEpoch}";
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "type": type.apiValue,
+      "userId": userId,
+      "externalAuthorId": externalAuthorId,
+      "educationalInstitutionId": educationalInstitutionId,
+      "percentage": percentage.value,
+    };
+  }
+
+  void dispose() {
+    percentageController.dispose();
   }
 }

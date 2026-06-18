@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
-import '../models/selected_user_entity.dart';
+import '../../../../domain/entities/external_author/external_author_entity.dart';
+import '../../../shared/theme/theme_color.dart';
 import '../utils/safe_string.dart';
 
-class SelectedMembersPanel extends StatelessWidget {
+class SelectedMembersExternalPanel extends StatelessWidget {
   final String title;
-  final List<SelectedUserEntity> selectedUsers;
-  final int selectedIdsCount;
-  final void Function(int id) onRemove;
+  final List<ExternalAuthorEntity> externalAuthors;
+  final VoidCallback onManage;
 
-  const SelectedMembersPanel({
+  const SelectedMembersExternalPanel({
     super.key,
     required this.title,
-    required this.selectedUsers,
-    required this.selectedIdsCount,
-    required this.onRemove,
+    required this.externalAuthors,
+    required this.onManage,
   });
 
   @override
@@ -60,7 +59,7 @@ class SelectedMembersPanel extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    "$selectedIdsCount",
+                    "${externalAuthors.length}",
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -72,7 +71,7 @@ class SelectedMembersPanel extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: selectedIdsCount == 0
+            child: externalAuthors.isEmpty
                 ? Center(
                     child: Text(
                       "Nenhum selecionado",
@@ -85,11 +84,11 @@ class SelectedMembersPanel extends StatelessWidget {
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.all(12),
-                    itemCount: selectedUsers.length,
+                    itemCount: externalAuthors.length,
                     separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (context, i) {
-                      final u = selectedUsers[i];
-                      final int id = u.id!;
+                      final u = externalAuthors[i];
+
                       final name = safeString(
                         () => u.fullName,
                         fallback: "Nome",
@@ -105,26 +104,40 @@ class SelectedMembersPanel extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        subtitle: Text(
-                          safeString(() => u.email, fallback: "Email"),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        trailing: IconButton(
-                          tooltip: "Remover",
-                          visualDensity: VisualDensity.compact,
-                          onPressed: () => onRemove(id),
-                          icon: const Icon(
-                            Icons.close,
-                            size: 25,
-                            color: Colors.redAccent,
-                          ),
-                        ),
                       );
                     },
                   ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: ElevatedButton.icon(
+              onPressed: onManage,
+              icon: const Icon(Icons.settings, size: 20),
+              label: Text(
+                "Gerenciar colaboradores externos",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ThemeColor.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 20,
+                ),
+                elevation: 3,
+                shadowColor: ThemeColor.primaryColor.withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
           ),
         ],
       ),

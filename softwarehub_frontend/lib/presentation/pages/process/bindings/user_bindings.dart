@@ -10,39 +10,31 @@ import '../../../../infra/repositories/user_repository_impl.dart';
 class UserBindings extends Bindings {
   @override
   void dependencies() {
-    // Http client puro
     Get.lazyPut<http.Client>(() => http.Client());
 
-    // Local datasource (token)
     Get.lazyPut<AuthLocalDataSource>(() => AuthLocalDataSource());
 
-    // ApiClient (usa http.Client + AuthLocalDataSource)
     Get.lazyPut<ApiClient>(
       () => ApiClient(
         Get.find<http.Client>(),
-        // Get.find<AuthLocalDataSource>(),
       ),
     );
 
-    // Remote datasource
     Get.lazyPut<IUserRemoteDataSource>(
       () => UserRemoteDatasourcesImpl(Get.find<ApiClient>()),
     );
 
-    // Repository
     Get.lazyPut<IUserRepository>(
       () => UserRepositoryImpl(
         remoteDataSource: Get.find<IUserRemoteDataSource>(),
       ),
     );
 
-    // UseCase
     Get.lazyPut<GetUsers>(
       () => GetUsers(
         repository: Get.find<IUserRepository>(),
       ),
     );
-    // Controller
     Get.lazyPut<ProcessUserController>(
       () => ProcessUserController(Get.find<GetUsers>()),
     );

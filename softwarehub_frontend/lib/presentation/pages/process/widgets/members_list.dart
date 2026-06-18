@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../../domain/entities/user/user_entity.dart';
+import '../models/selected_user_entity.dart';
 import '../utils/safe_string.dart';
 
 class MembersList extends StatelessWidget {
   final List<UserEntity> users;
-  final Map<int, UserEntity> selectedUsersMap;
+  final Map<int, SelectedUserEntity> selectedUsersMap;
   final void Function(UserEntity user) onToggle;
 
   const MembersList({
@@ -25,12 +26,12 @@ class MembersList extends StatelessWidget {
       itemCount: users.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final user = users[index];
-        final id = user.id;
+        final u = users[index];
+        final id = u.id;
         final selected = id != null && selectedUsersMap.containsKey(id);
 
-        final fullName = safeString(() => user.fullName, fallback: "Nome");
-        final email = safeString(() => user.email, fallback: "Email");
+        final fullName = safeString(() => u.fullName, fallback: "Nome");
+        final email = safeString(() => u.email, fallback: "Email");
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -48,7 +49,7 @@ class MembersList extends StatelessWidget {
             child: InkWell(
               key: ValueKey(id ?? index),
               borderRadius: BorderRadius.circular(12),
-              onTap: id == null ? null : () => onToggle(user),
+              onTap: id == null ? null : () => onToggle(u),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -69,6 +70,7 @@ class MembersList extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             fullName,

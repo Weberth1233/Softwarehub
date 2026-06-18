@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/external_author/external_author_entity.dart';
+import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process_external_author/controllers/process_external_author_controller.dart';
 import 'dart:math' as math;
 import '../../shared/utils/responsive.dart';
@@ -178,17 +179,16 @@ class _ProcessExternalAuthorPageState extends State<ProcessExternalAuthorPage> {
                                 message: "Clique para cadastrar um novo colaborador que não possui conta no sistema",
                                 child: ElevatedButton.icon(
                                   onPressed: () async {
-                                    await Get.toNamed("/process/process-external-author/forms");
+                                    await Get.toNamed(AppRoutes.processExternalAuthorForm);
                                     externalAuthorController.fetchExternalAuthors(loadMore: false);
                                   },
-                                  // Ícone muito mais semântico para "adicionar pessoa"
                                   icon: const Icon(Icons.person_add_alt_1, size: 22),
                                   label: Text(
-                                    "Novo Cadastro", // Funcionalidade 100% clara
+                                    "Novo Cadastro", 
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 15, // Opcional: um leve ajuste de tamanho para leitura
+                                      fontSize: 15, 
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(

@@ -53,12 +53,14 @@ class ProcessRoyaltyDistributionRequestModel {
 class RoyaltyShareModel {
   final String type;
   final int? userId;
+  final int? externalAuthorId;
   final int? educationalInstitutionId;
   final double percentage;
 
   const RoyaltyShareModel({
     required this.type,
     this.userId,
+    this.externalAuthorId,
     this.educationalInstitutionId,
     required this.percentage,
   });
@@ -67,6 +69,7 @@ class RoyaltyShareModel {
     return RoyaltyShareModel(
       type: json['type'],
       userId: json['userId'],
+      externalAuthorId: json['externalAuthorId'],
       educationalInstitutionId: json['educationalInstitutionId'],
       percentage: (json['percentage'] as num).toDouble(),
     );
@@ -76,6 +79,7 @@ class RoyaltyShareModel {
     return RoyaltyShareModel(
       type: entity.type,
       userId: entity.userId,
+      externalAuthorId: entity.externalAuthorId,
       educationalInstitutionId: entity.educationalInstitutionId,
       percentage: entity.percentage,
     );
@@ -85,6 +89,7 @@ class RoyaltyShareModel {
     return RoyaltyShareEntity(
       type: type,
       userId: userId,
+      externalAuthorId: externalAuthorId,
       educationalInstitutionId: educationalInstitutionId,
       percentage: percentage,
     );
@@ -94,6 +99,7 @@ class RoyaltyShareModel {
     return {
       'type': type,
       'userId': userId,
+      'externalAuthorId': externalAuthorId,
       'educationalInstitutionId': educationalInstitutionId,
       'percentage': percentage,
     };

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../shared/widgets/custom_text_field.dart';
+import '../../shared/widgets/diagonal_lines_painter.dart';
 import 'controllers/ip_types_form_controller.dart';
 
 class IpTypesForm extends GetView<IpTypesFormController> {
@@ -59,7 +60,7 @@ class IpTypesForm extends GetView<IpTypesFormController> {
         children: [
           Positioned.fill(
             child: CustomPaint(
-              painter: _DiagonalLinesPainter(
+              painter: DiagonalLinesPainter(
                 color: Colors.black.withOpacity(0.03),
               ),
             ),
@@ -459,32 +460,4 @@ class IpTypesForm extends GetView<IpTypesFormController> {
 
     return '$year-$month-$day';
   }
-}
-
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-
-  _DiagonalLinesPainter({
-    required this.color,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.0;
-
-    const spacing = 80.0;
-
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

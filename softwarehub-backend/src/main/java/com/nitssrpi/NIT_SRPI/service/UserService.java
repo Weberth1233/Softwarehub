@@ -110,7 +110,7 @@ public class UserService {
         Specification<User> specs = Specification.where(
                 (root, query, cb) -> cb.conjunction()
         );
-        specs =  specs.and(UserSpecs.notEqualCreatorId(getLoggedUserId()));
+//        specs =  specs.and(UserSpecs.notEqualCreatorId(getLoggedUserId()));
 
         if (search != null && !search.trim().isEmpty()) {
             String searchLowerCase = search.toLowerCase();

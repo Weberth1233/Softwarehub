@@ -4,6 +4,8 @@ import 'package:nit_sgpi_frontend/presentation/pages/auth/login/controllers/logi
 import '../../../shared/widgets/custom_text_field.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../shared/widgets/diagonal_lines_painter.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -103,10 +105,9 @@ class _LoginPageState extends State<LoginPage> {
 
           Positioned.fill(
             child: CustomPaint(
-              painter: _DiagonalLinesPainter(
+              painter: DiagonalLinesPainter(
                 color: theme.colorScheme.onSecondary.withOpacity(0.030),
-                spacing: 70,
-                strokeWidth: 1.5,
+              
               ),
             ),
           ),
@@ -388,37 +389,3 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// Seu painter original restaurado
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-  final double spacing;
-  final double strokeWidth;
-
-  _DiagonalLinesPainter({
-    required this.color,
-    required this.spacing,
-    required this.strokeWidth,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth;
-
-    for (double x = -size.height; x < size.width + size.height; x += spacing) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x - size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DiagonalLinesPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.spacing != spacing ||
-        oldDelegate.strokeWidth != strokeWidth;
-  }
-}

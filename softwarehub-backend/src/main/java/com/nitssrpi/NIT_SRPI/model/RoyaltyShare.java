@@ -24,18 +24,14 @@ public class RoyaltyShare {
     @Column(nullable = false, length = 50)
     private RoyaltyShareType type;
 
-    /*
-     * Usado quando type = CREATOR ou MEMBER.
-     * Para UNIVERSITY fica null.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    /*
-     * Usado quando type = UNIVERSITY.
-     * Para CREATOR e MEMBER fica null.
-     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "external_author_id")
+    private ExternalAuthor externalAuthor;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "educational_institution_id")
     private EducationalInstitution educationalInstitution;

@@ -9,6 +9,7 @@ import '../../../../domain/entities/user/user_entity.dart';
 import '../../../shared/utils/responsive.dart';
 import '../../../shared/utils/validators.dart';
 import '../../../shared/widgets/custom_text_field.dart';
+import '../../../shared/widgets/diagonal_lines_painter.dart';
 import '../../users/controllers/user_logged_controller.dart';
 import 'controllers/register_controller.dart';
 
@@ -496,7 +497,7 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: _DiagonalLinesPainter(
+                painter: DiagonalLinesPainter(
                   color: Colors.black.withOpacity(0.04),
                 ),
               ),
@@ -1138,28 +1139,3 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 }
 
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-
-  _DiagonalLinesPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-
-    const spacing = 80.0;
-
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

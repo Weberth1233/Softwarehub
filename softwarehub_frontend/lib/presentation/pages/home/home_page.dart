@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/home/widgets/process%20card.dart';
+import 'package:nit_sgpi_frontend/presentation/pages/home/widgets/process_card.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/theme/theme_color.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/responsive.dart';
 import 'package:nit_sgpi_frontend/infra/datasources/auth_local_datasource.dart';

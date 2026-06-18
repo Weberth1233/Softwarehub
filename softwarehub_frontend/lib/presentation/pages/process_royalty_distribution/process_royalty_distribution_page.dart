@@ -23,35 +23,40 @@ class ProcessRoyaltyDistributionPage
           automaticallyImplyLeading: false,
           toolbarHeight: 70,
           centerTitle: false,
-          leading: !controller.openedFromProcessFlow.value ? Padding(
-            padding: const EdgeInsets.only(left: 12),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: SizedBox(
-                height: 46,
-                width: 46,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSecondary,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: Icon(Icons.arrow_back, color: colorScheme.primary),
-                    onPressed: () {
-                      final process = controller.process.value;
+          leading: !controller.openedFromProcessFlow.value
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      height: 46,
+                      width: 46,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colorScheme.onSecondary,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: colorScheme.primary,
+                          ),
+                          onPressed: () {
+                            final process = controller.process.value;
 
-                      if (process != null) {
-                        Get.back(result: process.id);
-                      } else {
-                        Get.back();
-                      }
-                    },
+                            if (process != null) {
+                              Get.back(result: process.id);
+                            } else {
+                              Get.back();
+                            }
+                          },
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-          ): SizedBox(),
+                )
+              : SizedBox(),
           title: Text(
             isEditMode
                 ? "Editar distribuição de cotas"
@@ -81,9 +86,7 @@ class ProcessRoyaltyDistributionPage
                 Expanded(
                   child: Obx(() {
                     if (controller.isLoading.value) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (controller.shares.isEmpty) {
@@ -107,14 +110,9 @@ class ProcessRoyaltyDistributionPage
                           key: ValueKey(share.id),
                           index: index,
                           share: share,
-                          onSliderChanged: (value) =>
-                              controller.updatePercentage(
-                            index,
-                            value,
-                            fromText: false,
-                          ),
-                          onTextChanged: (value) =>
-                              controller.updatePercentage(
+                          onSliderChanged: (value) => controller
+                              .updatePercentage(index, value, fromText: false),
+                          onTextChanged: (value) => controller.updatePercentage(
                             index,
                             value,
                             fromText: true,
@@ -170,8 +168,8 @@ class ProcessRoyaltyDistributionPage
                           controller.isLoading.value
                               ? "Salvando..."
                               : isEditMode
-                                  ? "Atualizar distribuição"
-                                  : "Salvar distribuição",
+                              ? "Atualizar distribuição"
+                              : "Salvar distribuição",
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -213,8 +211,8 @@ class _RoyaltySummaryCard extends StatelessWidget {
     final Color statusColor = isValid
         ? const Color(0XFF1CDF0B)
         : totalPercentage > 100
-            ? Colors.red
-            : Colors.orange;
+        ? Colors.red
+        : Colors.orange;
 
     return Container(
       width: double.infinity,
@@ -476,6 +474,8 @@ class _ShareReadonlyCard extends StatelessWidget {
         return "Criador do processo";
       case ShareType.member:
         return "Autor/Membro participante";
+      case ShareType.memberExternal:
+        return "Membro externo participante";
     }
   }
 
@@ -487,6 +487,8 @@ class _ShareReadonlyCard extends StatelessWidget {
         return Icons.person_pin_outlined;
       case ShareType.member:
         return Icons.person_outline;
+      case ShareType.memberExternal:
+        return Icons.person_add_alt_1_outlined;
     }
   }
 
@@ -498,6 +500,8 @@ class _ShareReadonlyCard extends StatelessWidget {
         return scheme.secondary;
       case ShareType.member:
         return scheme.tertiary;
+      case ShareType.memberExternal:
+        return Colors.deepOrange;
     }
   }
 }

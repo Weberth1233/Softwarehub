@@ -6,6 +6,8 @@ class ProcessRoyaltyShareModel {
   final String type;
   final int? userId;
   final String? userName;
+  final int? externalAuthorId;
+  final String? externalAuthorName;
   final int? educationalInstitutionId;
   final String? educationalInstitutionName;
   final double percentage;
@@ -15,6 +17,8 @@ class ProcessRoyaltyShareModel {
     required this.type,
     required this.userId,
     required this.userName,
+    required this.externalAuthorId,
+    required this.externalAuthorName,
     required this.educationalInstitutionId,
     required this.educationalInstitutionName,
     required this.percentage,
@@ -26,6 +30,8 @@ class ProcessRoyaltyShareModel {
       type: json['type'],
       userId: json['userId'],
       userName: json['userName'],
+      externalAuthorId: json['externalAuthorId'],
+      externalAuthorName: json['externalAuthorName'],
       educationalInstitutionId: json['educationalInstitutionId'],
       educationalInstitutionName: json['educationalInstitutionName'],
       percentage: (json['percentage'] as num).toDouble(),
@@ -38,6 +44,8 @@ class ProcessRoyaltyShareModel {
       'type': type,
       'userId': userId,
       'userName': userName,
+      'externalAuthorId':externalAuthorId,
+      'externalAuthorName':externalAuthorName,
       'educationalInstitutionId': educationalInstitutionId,
       'educationalInstitutionName': educationalInstitutionName,
       'percentage': percentage,
@@ -50,6 +58,8 @@ class ProcessRoyaltyShareModel {
       type: type,
       userId: userId,
       userName: userName,
+      externalAuthorId: externalAuthorId,
+      externalAuthorName: externalAuthorName,
       educationalInstitutionId: educationalInstitutionId,
       educationalInstitutionName: educationalInstitutionName,
       percentage: percentage,
@@ -64,6 +74,8 @@ class ProcessRoyaltyShareModel {
       type: entity.type,
       userId: entity.userId,
       userName: entity.userName,
+      externalAuthorId: entity.externalAuthorId,
+      externalAuthorName: entity.externalAuthorName,
       educationalInstitutionId: entity.educationalInstitutionId,
       educationalInstitutionName: entity.educationalInstitutionName,
       percentage: entity.percentage,

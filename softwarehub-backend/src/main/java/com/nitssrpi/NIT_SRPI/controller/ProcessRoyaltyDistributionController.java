@@ -79,6 +79,7 @@ public class ProcessRoyaltyDistributionController extends GenericController<Proc
             dto.shares().forEach(share -> {
                 System.out.println("DTO share type: " + share.type());
                 System.out.println("DTO share userId: " + share.userId());
+                System.out.println("DTO share externalAuthorId" + share.externalAuthorId());
                 System.out.println("DTO share educationalInstitutionId: " + share.educationalInstitutionId());
                 System.out.println("DTO share percentage: " + share.percentage());
                 System.out.println("----------------------------------");

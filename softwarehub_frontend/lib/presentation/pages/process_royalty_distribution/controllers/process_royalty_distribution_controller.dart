@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
+import '../../../../domain/entities/external_author/external_author_entity.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../domain/entities/process/process_royalty_distribution_request_entity.dart';
 import '../../../../domain/entities/process/process_user_entity.dart';
@@ -117,12 +118,9 @@ class ProcessRoyaltyDistributionController extends GetxController {
   Future<void> getProcessById(int id) async {
     try {
       isLoading.value = true;
-
       process.value = null;
       shares.clear();
-
       final result = await _getProcessById(id);
-
       result.fold(
         (failure) {
           AppToast.error("Erro ao buscar processo.");
@@ -130,14 +128,13 @@ class ProcessRoyaltyDistributionController extends GetxController {
         },
         (success) {
           process.value = success;
-
-          debugPrint('ID DA URL USADO: $id');
-          debugPrint('ID RETORNADO DA API: ${success.id}');
-
-          _buildSharesFromProcess(success);
-
-          if (isEditMode.value && distributionId.value != null) {
-            _applySavedRoyaltyDistribution(success);
+          try {
+            _buildSharesFromProcess(success);
+            if (isEditMode.value && distributionId.value != null) {
+              _applySavedRoyaltyDistribution(success);
+            }
+          } catch (e) {
+            AppToast.error("Erro ao montar distribuição de cotas.");
           }
         },
       );
@@ -170,13 +167,18 @@ class ProcessRoyaltyDistributionController extends GetxController {
             saved.userId != null &&
             saved.userId == formShare.userId;
 
+        final sameExternalAuthor =
+            formShare.externalAuthorId != null &&
+            saved.externalAuthorId != null &&
+            saved.externalAuthorId == formShare.externalAuthorId;
+
         final sameInstitution =
             formShare.educationalInstitutionId != null &&
             saved.educationalInstitutionId != null &&
             saved.educationalInstitutionId ==
                 formShare.educationalInstitutionId;
 
-        return sameUser || sameInstitution;
+        return sameUser || sameExternalAuthor || sameInstitution;
       });
 
       if (savedShare == null) continue;
@@ -196,16 +198,21 @@ class ProcessRoyaltyDistributionController extends GetxController {
     shares.clear();
 
     final creator = process.creator;
+
     final members = process.authors
         .where((author) => author.id != creator.id)
         .toList();
+
+    final externalMembers = process.externalAuthors;
+
+    final totalParticipants = members.length + externalMembers.length;
 
     final availableForMembers =
         100.0 - universityFixedPercentage - creatorMinimumPercentage;
 
     final memberPercentages = _distributePercentage(
       total: availableForMembers,
-      quantity: members.length,
+      quantity: totalParticipants,
     );
 
     shares.add(
@@ -228,21 +235,52 @@ class ProcessRoyaltyDistributionController extends GetxController {
       ),
     );
 
-    for (int i = 0; i < members.length; i++) {
-      final member = members[i];
+    int percentageIndex = 0;
 
+    for (final member in members) {
       shares.add(
         ShareFormModel(
           type: ShareType.member,
           displayName: _getUserName(member),
           userId: member.id,
-          percentage: memberPercentages[i].obs,
+          percentage: memberPercentages[percentageIndex].obs,
         ),
       );
+
+      percentageIndex++;
+    }
+
+    for (final externalMember in externalMembers) {
+      shares.add(
+        ShareFormModel(
+          type: ShareType.memberExternal,
+          displayName: _getExternalAuthorName(externalMember),
+          externalAuthorId: externalMember.id,
+          percentage: memberPercentages[percentageIndex].obs,
+        ),
+      );
+
+      percentageIndex++;
     }
 
     _syncControllers();
     shares.refresh();
+  }
+
+  String _getExternalAuthorName(ExternalAuthorEntity externalAuthor) {
+    final fullName = externalAuthor.fullName.trim();
+
+    if (fullName.isNotEmpty) {
+      return fullName;
+    }
+
+    final email = externalAuthor.email.trim();
+
+    if (email.isNotEmpty) {
+      return email;
+    }
+
+    return "Membro externo #${externalAuthor.id ?? '-'}";
   }
 
   List<double> _distributePercentage({

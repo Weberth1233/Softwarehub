@@ -1,5 +1,3 @@
-
-// Widget auxiliar para os labels de busca
 import 'package:flutter/material.dart';
 
 class SearchFieldHighlight extends StatelessWidget {

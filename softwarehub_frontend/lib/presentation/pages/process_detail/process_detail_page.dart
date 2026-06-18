@@ -1257,9 +1257,13 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     }
 
     final userName = share.userName;
+    final externalAuthorName = share.externalAuthorName;
 
     if (userName != null && userName.toString().trim().isNotEmpty) {
       return userName.toString();
+    }
+    else if(externalAuthorName != null && externalAuthorName.toString().trim().isNotEmpty ){
+      return externalAuthorName.toString();
     }
 
     return "Usuário não informado";
@@ -1273,6 +1277,8 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         return "Criador";
       case "MEMBER":
         return "Membro";
+      case "MEMBER_EXTERNAL":
+        return "Membro Externo";
       default:
         return share.type.toString();
     }

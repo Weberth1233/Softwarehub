@@ -23,9 +23,11 @@ class ProcessCard extends StatelessWidget {
         "${date.day.toString().padLeft(2, '0')}/"
         "${date.month.toString().padLeft(2, '0')}/"
         "${date.year}";
+      
+     
 
     final int justificationCount = item.justifications.length;
-    final bool hasJustifications = justificationCount > 0;
+    final bool hasJustifications = justificationCount > 0 && item.statusLabel == "Em correção";
 
     return SizedBox(
       width: 400,

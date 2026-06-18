@@ -7,6 +7,8 @@ public record RoyaltyShareResponseDTO(
         RoyaltyShareType type,
         Long userId,
         String userName,
+        Long externalAuthorId,
+        String externalAuthorName,
         Long educationalInstitutionId,
         String educationalInstitutionName,
         BigDecimal percentage

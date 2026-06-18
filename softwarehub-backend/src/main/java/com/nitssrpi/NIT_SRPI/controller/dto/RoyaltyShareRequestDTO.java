@@ -10,6 +10,7 @@ public record RoyaltyShareRequestDTO(
         @NotNull(message = "O tipo da cota é obrigatório")
         RoyaltyShareType type,
         Long userId,
+        Long externalAuthorId,
         Long educationalInstitutionId,
         @NotNull(message = "O percentual da cota é obrigatório")
         @DecimalMin(value = "0.01", message = "O percentual deve ser maior que zero")

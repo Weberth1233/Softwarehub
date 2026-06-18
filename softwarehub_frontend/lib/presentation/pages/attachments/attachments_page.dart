@@ -19,6 +19,7 @@ class _AttachmentsPageState extends State<AttachmentsPage> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (processId != 0) {
         controller.attachments(processId);
@@ -28,249 +29,531 @@ class _AttachmentsPageState extends State<AttachmentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: colors.surface,
       appBar: AppBar(
         title: const Text("Documentos do Processo"),
-        backgroundColor: theme.colorScheme.primary,
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
         scrolledUnderElevation: 0,
       ),
-      backgroundColor: theme.colorScheme.surface,
-      body: Padding(
-        padding: Responsive.getPadding(context),
+      body: SafeArea(
+        child: Padding(
+          padding: Responsive.getPadding(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Obx(
+                () => Padding(
+                  padding: const EdgeInsets.only(top: 50),
+                  child: _buildHeader(
+                    context,
+                    totalAttachments: controller.attachmentList.length,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: Obx(() {
+                  if (controller.attachmentList.isEmpty) {
+                    return _buildEmptyState(context);
+                  }
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isCompact = constraints.maxWidth < 720;
+
+                      return ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        itemCount: controller.attachmentList.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          final entity = controller.attachmentList[index];
+
+                          return _buildAttachmentCard(
+                            context,
+                            entity,
+                            isCompact: isCompact,
+                          );
+                        },
+                      );
+                    },
+                  );
+                }),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(
+    BuildContext context, {
+    required int totalAttachments,
+  }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: colors.primary,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: colors.primary.withOpacity(0.18),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: colors.onPrimary.withOpacity(0.14),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(
+              Icons.folder_copy_outlined,
+              color: colors.onPrimary,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 18),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Anexos necessários",
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colors.onPrimary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "Baixe os modelos, envie os documentos assinados e acompanhe o status dos arquivos.",
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.onPrimary.withOpacity(0.78),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: colors.onPrimary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: colors.onPrimary.withOpacity(0.18),
+              ),
+            ),
+            child: Text(
+              "$totalAttachments ${totalAttachments == 1 ? "item" : "itens"}",
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colors.onPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Center(
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 520),
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: colors.onSecondary,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: colors.outline.withOpacity(0.12),
+          ),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Cabeçalho da Lista
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: colors.primary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.folder_off_outlined,
+                size: 38,
+                color: colors.primary,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              "Nenhum documento encontrado",
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: colors.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Quando existirem anexos vinculados ao processo, eles aparecerão aqui.",
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurface.withOpacity(0.65),
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttachmentCard(
+    BuildContext context,
+    AttachmentEntity entity, {
+    required bool isCompact,
+  }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final bool isSigned =
+        entity.signedFilePath.trim().isNotEmpty ||
+        entity.status.toUpperCase() == "SIGNED";
+
+    return Container(
+      padding: EdgeInsets.all(isCompact ? 16 : 20),
+      decoration: BoxDecoration(
+        color: colors.onSecondary,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: colors.outline.withOpacity(0.12),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDocumentIcon(context, isSigned: isSigned),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildAttachmentInfo(
+                  context,
+                  entity,
+                  isCompact: isCompact,
+                  isSigned: isSigned,
+                ),
+              ),
+              if (!isCompact) ...[
+                const SizedBox(width: 12),
+                _buildStatusChip(context, entity.status, isSigned: isSigned),
+              ],
+            ],
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(isCompact ? 14 : 16),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: colors.outline.withOpacity(0.10),
+              ),
+            ),
+            child: isCompact
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildUploadStatus(context, isSigned: isSigned),
+                      const SizedBox(height: 14),
+                      _buildActions(context, entity, isSigned: isSigned),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: _buildUploadStatus(context, isSigned: isSigned),
+                      ),
+                      const SizedBox(width: 16),
+                      _buildActions(context, entity, isSigned: isSigned),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentIcon(
+    BuildContext context, {
+    required bool isSigned,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 54,
+      height: 54,
+      decoration: BoxDecoration(
+        color: isSigned
+            ? const Color(0xFF1B8F4D).withOpacity(0.10)
+            : colors.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Icon(
+        isSigned ? Icons.task_outlined : Icons.description_outlined,
+        color: isSigned ? const Color(0xFF1B8F4D) : colors.primary,
+        size: 29,
+      ),
+    );
+  }
+
+  Widget _buildAttachmentInfo(
+    BuildContext context,
+    AttachmentEntity entity, {
+    required bool isCompact,
+    required bool isSigned,
+  }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          entity.displayName,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: colors.primary,
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(
+              Icons.insert_drive_file_outlined,
+              size: 17,
+              color: colors.primary.withOpacity(0.54),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
               child: Text(
-                "Anexos Necessários",
-                style: textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+                "Modelo: ${entity.templateFilePath}",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colors.primary.withOpacity(0.62),
                 ),
               ),
             ),
-            
-            Expanded(
-              child: Obx(() {
-                if (controller.attachmentList.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.folder_off_outlined, size: 64, color: theme.colorScheme.outline),
-                        const SizedBox(height: 16),
-                        Text("Nenhum documento encontrado.", style: textTheme.bodyLarge),
-                      ],
-                    ),
-                  );
-                }
-      
-                // 3. Lista de Documentos
-                return ListView.separated(
-                  itemCount: controller.attachmentList.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
-                  itemBuilder: (context, index) {
-                    final entity = controller.attachmentList[index];
-                    return _buildAttachmentCard(context, entity);
-                  },
-                );
-              }),
-            ),
           ],
         ),
-      ),
+        if (isCompact) ...[
+          const SizedBox(height: 12),
+          _buildStatusChip(context, entity.status, isSigned: isSigned),
+        ],
+      ],
     );
   }
 
-  Widget _buildAttachmentCard(BuildContext context, AttachmentEntity entity) {
+  Widget _buildUploadStatus(
+    BuildContext context, {
+    required bool isSigned,
+  }) {
     final theme = Theme.of(context);
-    final bool isSigned = entity.signedFilePath != "";
+    final colors = theme.colorScheme;
 
-    // Cores fixas para o visual desejado (Fundo Azul Escuro, Texto Branco)
-    final cardBackgroundColor = theme.colorScheme.primary; // Assume que sua cor primária é o azul escuro do tema
-    const textColor = Colors.white;
-    final secondaryTextColor = Colors.white.withOpacity(0.7);
-    const iconBackgroundColor = Color(0xFF4A6583); // Um azul mais claro para o fundo do ícone
-    const statusColor = Color(0xFF2ECC71); // Verde para SIGNED/Upload realizado
+    final statusColor = isSigned
+        ? const Color(0xFF1B8F4D)
+        : colors.primary.withOpacity(0.72);
 
-    return Card(
-      elevation: 4,
-      color: cardBackgroundColor, // Define a cor de fundo do Card
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16), // Bordas mais arredondadas
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Linha superior: Ícone + Nome + Status
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: const BoxDecoration(
-                    color: iconBackgroundColor, // Fundo circular azul mais claro
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.description, color: textColor, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entity.displayName,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: textColor, // Texto branco
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Modelo: ${entity.templateFilePath}",
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                           color: secondaryTextColor, // Texto branco secundário
-                           overflow: TextOverflow.ellipsis
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (isSigned) _buildStatusChip(context, entity.status, statusColor),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Arquivo assinado",
+          style: theme.textTheme.bodySmall?.copyWith(
             
-            const SizedBox(height: 20),
-            Divider(height: 1, color: Colors.white.withOpacity(0.2)), // Divisor branco sutil
-            const SizedBox(height: 20),
-
-            // Linha inferior: Ações e Info
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Arquivo Assinado:",
-                        style: theme.textTheme.bodySmall?.copyWith(color: secondaryTextColor),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Text(
-                            isSigned ? "Upload realizado" : "Pendente de envio",
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: isSigned ? statusColor : textColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (isSigned) ...[
-                            const SizedBox(width: 4),
-                            Icon(Icons.check_circle, color: statusColor, size: 18),
-                          ]
-                        ],
-                      ),
-                    ],
-                  ),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSigned ? Icons.check_circle_outline : Icons.schedule_outlined,
+              color: statusColor,
+              size: 19,
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                isSigned ? "Upload realizado" : "Pendente de envio",
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: statusColor,
+                  fontWeight: FontWeight.w800,
                 ),
-                
-                // Ações
-                Row(
-                  children: [
-                    // IconButton(
-                    //   tooltip: "Baixar Modelo",
-                    //   icon: const Icon(Icons.download_rounded, color: textColor),
-                    //   onPressed: () {
-                    //     controller.open(entity.id);
-                    //      // Ação para baixar modelo
-                    //      // controller.downloadTemplate(entity.id);
-                    //   },
-                    // ),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        controller.open(entity.id);
-                      },
-                      icon: Icon(Icons.download, color: textColor),
-                      label: Text("Baixar Modelo", style: const TextStyle(color: textColor)),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: textColor), // Borda branca
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                     entity.status == "SIGNED" ? OutlinedButton.icon(
-                      onPressed: () {
-                        controller.open(entity.id,signed: true);
-                      },
-                      icon: Icon(Icons.download, color: textColor),
-                      label: Text("Baixar Documento assinado", style: const TextStyle(color: textColor)),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: textColor), // Borda branca
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ): SizedBox(),
-                    // const SizedBox(width: 8),
-                    //  entity.status == "SIGNED" ? IconButton(
-                    //   tooltip: "Baixar Documento assinado",
-                    //   icon: const Icon(Icons.download_rounded, color: textColor),
-                    //   onPressed: () {
-                    //     controller.open(entity.id,signed: true);
-                    //      // Ação para baixar modelo
-                    //      // controller.downloadTemplate(entity.id);
-                    //   },
-                    // ): SizedBox(),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        controller.pickAndUpload(attachmentId: entity.id);
-                      },
-                      icon: Icon(isSigned ? Icons.edit : Icons.upload_file, color: textColor),
-                      label: Text(isSigned ? "Alterar" : "Enviar", style: const TextStyle(color: textColor)),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: textColor), // Borda branca
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+              ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions(
+    BuildContext context,
+    AttachmentEntity entity, {
+    required bool isSigned,
+  }) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      alignment: WrapAlignment.end,
+      children: [
+        _buildOutlinedActionButton(
+          context,
+          icon: Icons.download_rounded,
+          label: "Baixar modelo",
+          onPressed: () {
+            controller.open(entity.id);
+          },
+        ),
+        if (entity.status.toUpperCase() == "SIGNED")
+          _buildOutlinedActionButton(
+            context,
+            icon: Icons.file_download_done_outlined,
+            label: "Baixar assinado",
+            onPressed: () {
+              controller.open(entity.id, signed: true);
+            },
+          ),
+        _buildPrimaryActionButton(
+          context,
+          icon: isSigned ? Icons.edit_outlined : Icons.upload_file_outlined,
+          label: isSigned ? "Alterar arquivo" : "Enviar arquivo",
+          onPressed: () {
+            controller.pickAndUpload(attachmentId: entity.id);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOutlinedActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colors.primary,
+        side: BorderSide(
+          color: colors.primary.withOpacity(0.28),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
         ),
       ),
     );
   }
 
-  Widget _buildStatusChip(BuildContext context, String label, Color color) {
+  Widget _buildPrimaryActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(
+    BuildContext context,
+    String status, {
+    required bool isSigned,
+  }) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    final normalizedStatus = status.toUpperCase();
+
+    final Color statusColor = isSigned
+        ? const Color(0xFF1B8F4D)
+        : colors.onSurface.withOpacity(0.65);
+
+    final String label = switch (normalizedStatus) {
+      "SIGNED" => "Assinado",
+      "PENDING" => "Pendente",
+      _ => status.isEmpty ? "Pendente" : status,
+    };
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: color, // Cor de fundo do chip (verde)
-        borderRadius: BorderRadius.circular(4),
+        color: statusColor.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: statusColor.withOpacity(0.18),
+        ),
       ),
       child: Text(
         label.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Colors.white, // Texto branco
-          fontWeight: FontWeight.bold,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: statusColor,
+          fontWeight: FontWeight.w900,
           letterSpacing: 0.5,
         ),
       ),
