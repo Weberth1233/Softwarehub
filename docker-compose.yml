@@ -46,6 +46,7 @@ services:
       - ./softwarehub-backend/.env
     environment:
       JWT_SECRET: my-secret-key
+      SPRING_PROFILES_ACTIVE: dev
     volumes:
       - ./softwarehub-backend/uploads:/app/uploads
 

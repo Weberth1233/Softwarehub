@@ -34,7 +34,8 @@ spring:
     show-sql: true
     hibernate:
       # Como você está usando 'none', lembre-se de criar as tabelas manualmente no banco
-      ddl-auto: update
+     ddl-auto: update
+    #  ddl-auto: create
     properties:
       hibernate:
         format_sql: true
