@@ -86,7 +86,7 @@ class HomePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          HeaderCard(),
+                          HeaderCard(processController: processController,),
                           const SizedBox(height: 32),
                           StatusLabel(processController: processController),
                           const SizedBox(height: 32),

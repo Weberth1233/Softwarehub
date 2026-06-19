@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/routes/app_routes.dart';
+import '../controllers/home_controller.dart';
 
 class HeaderCard extends StatelessWidget {
-  const HeaderCard({super.key});
+  final ProcessController processController;
+  
+  const HeaderCard({super.key, required this.processController});
 
   @override
   Widget build(BuildContext context) {
-        final theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -63,6 +66,15 @@ class HeaderCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        IconButton(
+          tooltip: "Recarregar dados da tela",
+          onPressed: () async{
+            await processController.processStatusCount();
+            await processController.fetchProcesses();
+          },
+          icon: Icon(Icons.replay_outlined),
+          color: theme.colorScheme.primary,
         ),
       ],
     );

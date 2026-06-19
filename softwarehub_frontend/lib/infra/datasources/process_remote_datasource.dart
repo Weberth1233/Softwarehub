@@ -1,17 +1,18 @@
 import 'dart:convert';
 
-import 'package:nit_sgpi_frontend/domain/entities/paged_result_entity.dart';
-import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
-import 'package:nit_sgpi_frontend/domain/entities/process/process_response_entity.dart';
-import 'package:nit_sgpi_frontend/infra/core/network/api_client.dart';
-import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
-import 'package:nit_sgpi_frontend/infra/models/process/proces_status_count_model.dart';
-import 'package:nit_sgpi_frontend/infra/models/process/process_request_model.dart';
-import 'package:nit_sgpi_frontend/infra/utils/error_formatter.dart';
+
 
 import '../../domain/core/errors/exceptions.dart';
+import '../../domain/entities/paged_result_entity.dart';
+import '../../domain/entities/process/process_request_entity.dart';
+import '../../domain/entities/process/process_response_entity.dart';
+import '../core/network/api_client.dart';
+import '../core/network/base_url.dart';
 import '../models/paged_result_model.dart';
+import '../models/process/proces_status_count_model.dart';
+import '../models/process/process_request_model.dart';
 import '../models/process/process_response_model.dart';
+import '../utils/error_formatter.dart';
 
 abstract class IProcessRemoteDataSource {
   Future<PagedResultEntity<ProcessResponseEntity>> getProcesses({
@@ -73,9 +74,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
 
         return pagedEntity;
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} ao buscar processos! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     } on ServerException {
       rethrow; // 👈 mantém a exception original
@@ -133,9 +132,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
 
         return id;
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} erro no cadastro! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     } on ServerException {
       rethrow;
@@ -158,9 +155,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
             ).toEntity();
         return processRequestEntity;
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} ao buscar processos! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     } on ServerException {
       rethrow; // 👈 mantém a exception original
@@ -181,9 +176,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
       } else if (response.statusCode == 404) {
         return "Não encontrou justificativa na base de dados!";
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} erro na deleção! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     } on ServerException {
       rethrow;
@@ -204,7 +197,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
       if (response.statusCode == 204 || response.statusCode == 200) {
         return "Status atualizado com sucesso!";
       } else {
-        throw ServerException('Erro ${response.statusCode}: ${response.body}');
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     } on ServerException {
       rethrow;
@@ -231,9 +224,7 @@ class ProcessRemoteDataSourceImpl implements IProcessRemoteDataSource {
       } else if (response.statusCode == 422) {
         return response.body;
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} erro no cadastro! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
     } on ServerException {
       rethrow;

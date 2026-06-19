@@ -57,7 +57,7 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Termo de Consentimento",
+                    "Termo de Ciência e Aceite das Condições Legais",
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -97,7 +97,7 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Termo de Consentimento',
+                            'Termo de Ciência e Aceite das Condições Legais',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 22,

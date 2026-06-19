@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/auth/login/controllers/login_controller.dart';
-import '../../../shared/widgets/custom_text_field.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../shared/widgets/diagonal_lines_painter.dart';
+import 'controllers/login_controller.dart';
+import 'widgets/action_buttons.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -107,7 +107,6 @@ class _LoginPageState extends State<LoginPage> {
             child: CustomPaint(
               painter: DiagonalLinesPainter(
                 color: theme.colorScheme.onSecondary.withOpacity(0.030),
-              
               ),
             ),
           ),
@@ -147,7 +146,8 @@ class _LoginPageState extends State<LoginPage> {
                                 child: SvgPicture.asset(
                                   "assets/images/logo_sgpi.svg",
                                   height: 340,
-                                  fit: BoxFit.contain, // Isso força o SVG a respeitar o tamanho de 60x65
+                                  fit: BoxFit
+                                      .contain, // Isso força o SVG a respeitar o tamanho de 60x65
                                   alignment: Alignment.bottomCenter,
                                 ),
                               ),
@@ -235,8 +235,9 @@ class _LoginPageState extends State<LoginPage> {
                               Obx(() {
                                 final error =
                                     loginController.errorMessage.value;
-                                if (error.isEmpty)
+                                if (error.isEmpty) {
                                   return const SizedBox(height: 0);
+                                }
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 10),
                                   child: Align(
@@ -299,80 +300,7 @@ class _LoginPageState extends State<LoginPage> {
 
                               const SizedBox(height: 30),
 
-                              // Ações inferiores (igual da imagem: 2 botões lado a lado)
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: () => Get.toNamed("/register"),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: colors.primary,
-                                        side: BorderSide(
-                                          color: colors.primary.withOpacity(
-                                            0.55,
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        backgroundColor: Colors.white,
-                                      ),
-                                      icon: const Icon(
-                                        Icons.person_add_alt_1_outlined,
-                                        size: 20,
-                                      ),
-                                      label: const Text(
-                                        "Cadastre-se",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: () {
-                                        Get.toNamed("/forgot-password");
-                                      },
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: const Color(
-                                          0xFFFF6D00,
-                                        ),
-                                        side: const BorderSide(
-                                          color: Color(0xFFFF6D00),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 12,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        backgroundColor: Colors.white,
-                                      ),
-                                      icon: const Icon(
-                                        Icons.key_outlined,
-                                        size: 20,
-                                      ),
-                                      label: const Text(
-                                        "Recuperar Senha",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              ActionButtons(),
                             ],
                           ),
                         ),
@@ -388,4 +316,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
