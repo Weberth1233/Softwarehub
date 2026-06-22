@@ -14,29 +14,55 @@ class ProcessCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const contentColor = Colors.white;
-
-    final String color = "0XFF${item.ipType.color}";
+    final colorTheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     final date = item.createdAt.toLocal();
     final dateFormatted =
         "${date.day.toString().padLeft(2, '0')}/"
         "${date.month.toString().padLeft(2, '0')}/"
         "${date.year}";
-      
-     
 
     final int justificationCount = item.justifications.length;
-    final bool hasJustifications = justificationCount > 0 && item.statusLabel == "Em correção";
+    final bool hasJustifications =
+        justificationCount > 0 && item.statusLabel == "Em correção";
+
+    String getFirstTwoNames(String? fullName) {
+      if (fullName == null || fullName.trim().isEmpty) {
+        return "Usuário";
+      }
+
+      final names = fullName.trim().split(RegExp(r'\s+'));
+
+      if (names.length >= 2) {
+        return "${names[0]} ${names[1]}";
+      }
+
+      return names.first;
+    }
 
     return SizedBox(
       width: 400,
-      height: 190,
-      child: Card(
-        elevation: 8,
-        shadowColor: Colors.black26,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        clipBehavior: Clip.antiAlias,
+      height: 220,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.20),
+              blurRadius: 18,
+              spreadRadius: 1,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 4,
+              spreadRadius: 0,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+
         child: InkWell(
           onTap: () {
             Get.toNamed(
@@ -46,35 +72,27 @@ class ProcessCard extends StatelessWidget {
           },
           child: Stack(
             children: [
-              /// BACKGROUND GRADIENT
               Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0XFF004093), Color(0XFF0A5BD8)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+                decoration: BoxDecoration(color: colorTheme.onSecondary),
               ),
 
-              /// WATERMARK ICON
               Positioned(
                 right: -10,
                 bottom: -10,
                 child: Icon(
                   Icons.folder_copy_rounded,
                   size: 120,
-                  color: Colors.white.withOpacity(0.05),
+                  color: colorTheme.onSurface.withValues(alpha: 0.3),
                 ),
               ),
 
-              /// DELETE BUTTON
               Positioned(
-                top: 10,
+                bottom: 20,
                 right: 10,
                 child: _actionButton(
+                  context: context,
                   icon: Icons.delete_outline,
-                  color: Colors.red,
+                  color: colorTheme.onSurface,
                   tooltip: "Excluir processo",
                   onTap: () {
                     _showDeleteDialog(context);
@@ -84,24 +102,25 @@ class ProcessCard extends StatelessWidget {
 
               /// EDIT BUTTON
               Positioned(
-                top: 10,
+                bottom: 20,
                 right: 50,
                 child: _actionButton(
+                  context: context,
                   icon: Icons.edit_outlined,
-                  color: Colors.blue,
+                  color: colorTheme.onSurface,
                   tooltip: "Editar processo",
                   onTap: () {
-                    Get.toNamed(AppRoutes.process, arguments: item,);
+                    Get.toNamed(AppRoutes.process, arguments: item);
                   },
                 ),
               ),
 
-              /// JUSTIFICATION NOTIFICATION
               if (hasJustifications)
                 Positioned(
-                  top: 10,
+                  bottom: 20,
                   right: 90,
                   child: _actionButton(
+                    context: context,
                     icon: Icons.notifications_active_outlined,
                     color: Colors.orange,
                     tooltip:
@@ -117,60 +136,99 @@ class ProcessCard extends StatelessWidget {
                   ),
                 ),
 
-              /// CONTENT
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// TYPE BADGE
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: Color(int.parse(color)).withOpacity(0.2),
+                        color: colorTheme.onSurface,
                         borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.20),
+                            blurRadius: 18,
+                            spreadRadius: 1,
+                            offset: const Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Text(
                         item.ipType.name.toUpperCase(),
-                        style: TextStyle(
-                          color: Color(int.parse(color)),
+                        style: textTheme.bodySmall!.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          letterSpacing: 0.8,
                         ),
                       ),
                     ),
 
                     const SizedBox(height: 14),
 
-                    /// TITLE
                     Text(
                       item.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: context.textTheme.titleLarge!.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: contentColor,
-                        fontSize: 20,
-                        height: 1.3,
-                        letterSpacing: 0.3,
+                      style: textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
 
                     const Spacer(),
 
+                    Row(
+                      spacing: 20,
+                      children: [
+                        Text(
+                          "#${item.id.toString()}",
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          getFirstTwoNames(item.creator.fullName),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 14,
+                              color: colorTheme.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              dateFormatted,
+                              style: textTheme.bodyMedium!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
                     Divider(color: Colors.white.withOpacity(0.15)),
 
                     const SizedBox(height: 6),
-
-                    /// STATUS + DATE
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        /// STATUS
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -182,31 +240,12 @@ class ProcessCard extends StatelessWidget {
                           ),
                           child: Text(
                             item.statusLabel,
-                            style: context.textTheme.bodySmall!.copyWith(
+                            style: context.textTheme.bodyMedium!.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
                             ),
                           ),
-                        ),
-
-                        /// DATE
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              size: 14,
-                              color: Colors.white.withOpacity(0.8),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              dateFormatted,
-                              style: context.textTheme.bodySmall!.copyWith(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),
@@ -221,6 +260,7 @@ class ProcessCard extends StatelessWidget {
   }
 
   Widget _actionButton({
+    required BuildContext context,
     required IconData icon,
     required Color color,
     required String tooltip,
@@ -228,6 +268,7 @@ class ProcessCard extends StatelessWidget {
     int? badgeCount,
   }) {
     final bool hasBadge = badgeCount != null && badgeCount > 0;
+    final colorTheme = Theme.of(context).colorScheme;
 
     return Tooltip(
       message: tooltip,
@@ -240,10 +281,10 @@ class ProcessCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: Colors.white, size: 20),
+              child: Icon(icon, color: colorTheme.tertiary, size: 20),
             ),
 
             if (hasBadge)
@@ -302,18 +343,18 @@ class ProcessCard extends StatelessWidget {
     switch (status.toUpperCase()) {
       case "FINALIZADO":
       case "APROVADO":
-        return Colors.green.withOpacity(0.25);
+        return Colors.green;
 
       case "EM_ANDAMENTO":
       case "PENDENTE":
-        return Colors.orange.withOpacity(0.25);
+        return Colors.orange;
 
       case "CORRECAO":
       case "REJEITADO":
-        return Colors.red.withOpacity(0.25);
+        return Colors.red;
 
       default:
-        return Colors.white.withOpacity(0.15);
+        return Colors.white;
     }
   }
 }
