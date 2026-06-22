@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../shared/theme/theme_color.dart';
 import '../controllers/home_controller.dart';
 
 class StatusLabel extends StatelessWidget {
   final ProcessController processController;
 
   const StatusLabel({super.key, required this.processController});
-  
+
   Color getStatusColor(String status) {
     switch (status) {
       case "PENDENTE_DISTRIBUICAO_COTAS":
@@ -27,7 +25,7 @@ class StatusLabel extends StatelessWidget {
         return Colors.purple;
 
       case "FINALIZADO":
-        return Colors.green;
+        return const Color.fromARGB(255, 54, 149, 57);
 
       case "INATIVO":
         return Colors.grey;
@@ -40,8 +38,42 @@ class StatusLabel extends StatelessWidget {
     }
   }
 
+  IconData getStatusIcon(String status) {
+    switch (status) {
+      case "PENDENTE_DISTRIBUICAO_COTAS":
+        return Icons.pending;
+
+      case "COTAS_DISTRIBUIDAS":
+        return Icons.pie_chart_outline;
+
+      case "CORRECAO":
+        return Icons.approval;
+
+      case "CORRIGIDO":
+        return Icons.task_alt_rounded;
+
+      case "CLASSIFICADO":
+        return Icons.category_outlined;
+
+      case "FINALIZADO":
+        return Icons.check_circle_outline;
+
+      case "INATIVO":
+        return Icons.pie_chart_outline;
+
+      case "PENDENTE_DOCUMENTACAO":
+        return Icons.document_scanner;
+
+      default:
+        return Icons.g_mobiledata;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorTheme = Theme.of(context).colorScheme;
+
     return Align(
       alignment: Alignment.topLeft,
       child: Obx(() {
@@ -58,12 +90,12 @@ class StatusLabel extends StatelessWidget {
             final color = getStatusColor(item.status);
 
             return Container(
-              height: 55,
+              height: 70,
               width: 260,
               padding: const EdgeInsets.only(left: 20, right: 6),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
+                color: color,
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: color, width: 1.5),
                 boxShadow: [
                   BoxShadow(
@@ -74,36 +106,42 @@ class StatusLabel extends StatelessWidget {
                 ],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      item.statusLabel,
-                      style: const TextStyle(
-                        decorationColor: ThemeColor.greyColor,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
                   Container(
-                    width: 42,
-                    height: 42,
                     decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
+                      color: color.withValues(alpha: 0.02),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      item.amount.toString().padLeft(2, '0'),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(getStatusIcon(item.status), size: 30,),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.statusLabel,
+                          style: textTheme.bodyMedium!.copyWith(
+                            color: colorTheme.surface,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                        item.amount.toString().padLeft(2, '0'),
+                        style: textTheme.bodyMedium!.copyWith(
+                            color: colorTheme.surface,
+                          ),
+                          
+                      ),
+                      ],
+                    ),
+                  ),
+                 
                 ],
               ),
             );
