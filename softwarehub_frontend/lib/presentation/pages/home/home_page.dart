@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../infra/datasources/auth_local_datasource.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/widgets/shared_background.dart';
+import '../users/controllers/user_logged_controller.dart';
 import 'controllers/home_controller.dart';
 import 'widgets/custom_menu.dart';
 import 'widgets/filter_card.dart';
@@ -15,6 +16,7 @@ class HomePage extends StatelessWidget {
   HomePage({super.key});
 
   final processController = Get.find<ProcessController>();
+
   final authLocalDataSource = Get.find<AuthLocalDataSource>();
   final ScrollController _scrollController = ScrollController();
 

@@ -8,6 +8,7 @@ ALTER TABLE public.royalty_shares
 ADD CONSTRAINT royalty_shares_type_check
 CHECK (type IN ('UNIVERSITY', 'CREATOR', 'MEMBER', 'MEMBER_EXTERNAL'));
 */
+
 public enum RoyaltyShareType {
     UNIVERSITY,
     CREATOR,

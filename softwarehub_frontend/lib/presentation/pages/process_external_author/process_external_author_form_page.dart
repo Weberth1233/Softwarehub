@@ -5,6 +5,7 @@ import '../../shared/utils/app_toast.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/utils/validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
+import '../../shared/widgets/diagonal_lines_painter.dart';
 import 'controllers/process_external_author_controller.dart';
 
 class ProcessExternalAuthorFormPage extends StatefulWidget {
@@ -30,13 +31,11 @@ class _ProcessExternalAuthorFormPageState
   @override
   void initState() {
     super.initState();
-    // Se editingEntity não for nulo, estamos em modo de EDIÇÃO
     fullNameController = TextEditingController(text: editingEntity?.fullName);
     emailController = TextEditingController(text: editingEntity?.email);
     cpfController = TextEditingController(text: editingEntity?.cpf);
   }
 
-  // Atalho para saber se é edição
   bool get isEditing => editingEntity != null;
 
   @override
@@ -50,7 +49,7 @@ class _ProcessExternalAuthorFormPageState
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final entity = ExternalAuthorEntity(
-        id: editingEntity?.id, // Importante: mantém o ID na edição
+        id: editingEntity?.id, 
         fullName: fullNameController.text.trim(),
         email: emailController.text.trim(),
         cpf: cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
@@ -147,13 +146,12 @@ class _ProcessExternalAuthorFormPageState
   }
 
   Widget _buildBackground(ColorScheme colors) {
-    // ✅ CustomPaint implementado ocupando a tela toda (Positioned.fill)
     return Positioned.fill(
       child: CustomPaint(
-        painter: _DiagonalLinesPainter(
+        painter: DiagonalLinesPainter(
           color: colors.primary.withOpacity(
             0.05,
-          ), // Uma opacidade bem suave para não atrapalhar a leitura
+          ), 
         ),
       ),
     );
@@ -300,28 +298,4 @@ class _ProcessExternalAuthorFormPageState
       ),
     );
   }
-}
-
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-
-  _DiagonalLinesPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-    const spacing = 80.0;
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
