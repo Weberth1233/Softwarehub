@@ -7,12 +7,14 @@ import '../../../../infra/core/network/api_client.dart';
 import '../../../../infra/datasources/process_remote_datasource.dart';
 import '../../../../infra/repositories/process_repository_impl.dart';
 import '../../../core/bindigs/core_bindings.dart';
+import '../../users/bindings/user_logged_dependencies_binding.dart';
 import '../controllers/home_controller.dart';
 
 class HomeBindings extends Bindings {
   @override
   void dependencies() {
     CoreBinding.dependencies();
+    UserLoggedDependenciesBinding.dependencies();
 
     Get.lazyPut<IProcessRemoteDataSource>(
       () => ProcessRemoteDataSourceImpl(Get.find<ApiClient>()),

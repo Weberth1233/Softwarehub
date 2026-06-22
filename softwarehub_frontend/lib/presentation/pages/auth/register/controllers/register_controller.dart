@@ -137,15 +137,12 @@ class RegisterController extends GetxController {
     await Future.wait([fetchEducationalInstitutions(), fetchTypesLinks()]);
   }
 
-  /// Limpa o erro de um campo específico (chamado ao usuário editar o campo).
   void clearFieldError(String key) {
     if (fieldErrors[key] != null) {
       fieldErrors[key] = null;
     }
   }
 
-  /// Mapeia a mensagem de erro retornada pelo backend para o campo
-  /// correspondente, usando palavras-chave presentes na mensagem.
   void _mapFailureToField(Failure failure) {
     fieldErrors.clear();
 

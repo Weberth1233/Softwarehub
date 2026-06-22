@@ -5,8 +5,7 @@ import '../../../../domain/entities/user/user_entity.dart';
 
 class UserLoggedController extends GetxController {
   final GetUserLogged _getUserLogged;
- 
-
+  
   UserLoggedController(this._getUserLogged);
 
   var user = Rxn<UserEntity>();

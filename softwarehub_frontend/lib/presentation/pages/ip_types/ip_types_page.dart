@@ -1,31 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/ip_type_entity.dart';
-import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/ip_types/controllers/ip_types_controller.dart';
-import 'package:nit_sgpi_frontend/presentation/shared/utils/responsive.dart';
-
+import '../../../domain/entities/ip_type_entity.dart';
+import '../../core/routes/app_routes.dart';
+import '../../shared/utils/responsive.dart';
 import '../../shared/widgets/diagonal_lines_painter.dart';
 import '../process/models/first_stage_process.dart';
+import 'controllers/ip_types_controller.dart';
+import 'models/second_stage_process.dart';
+import 'widgets/empty_state.dart';
 import 'widgets/ip_type_card.dart';
+import 'widgets/loading_state.dart';
 import 'widgets/responsive_grid.dart';
-
-class SecondStageProcess {
-  final FirstStageProcess firstStageProcess;
-  final IpTypeEntity item;
-  final bool isEdit;
-  final String? originalIpTypeId;
-  final Map<String, dynamic>? originalFormData;
-
-  SecondStageProcess({
-    required this.firstStageProcess,
-    required this.item,
-    this.isEdit = false,
-    this.originalIpTypeId,
-    this.originalFormData,
-  });
-}
-
 
 class IpTypesPage extends StatelessWidget {
   const IpTypesPage({super.key});
@@ -106,12 +91,12 @@ class IpTypesPage extends StatelessWidget {
               padding: Responsive.getPadding(context),
               child: Obx(() {
                 if (ipTypesController.isLoading.value) {
-                  return const _LoadingState();
+                  return const LoadingState();
                 }
 
                 final list = ipTypesController.ipTypes.toList();
                 if (list.isEmpty) {
-                  return const _EmptyState(
+                  return const EmptyState(
                     title: "Sem resultados",
                     message: "Nenhuma categoria disponível no momento.",
                   );
@@ -231,95 +216,6 @@ class IpTypesPage extends StatelessWidget {
   }
 }
 
-class _LoadingState extends StatelessWidget {
-  const _LoadingState();
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              color: IpTypesPage._backgroundColor,
-              strokeWidth: 3,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            "Carregando categorias...",
-            style: TextStyle(
-              color: IpTypesPage._backgroundColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
-class _EmptyState extends StatelessWidget {
-  final String title;
-  final String message;
-  final VoidCallback? onRetry;
 
-  const _EmptyState({required this.title, required this.message, this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.saved_search_rounded,
-            size: 64,
-            color: IpTypesPage._backgroundColor.withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: IpTypesPage._backgroundColor,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: textTheme.bodyMedium?.copyWith(
-              color: IpTypesPage._backgroundColor.withOpacity(0.7),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          if (onRetry != null) ...[
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: IpTypesPage._backgroundColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text("Tentar novamente"),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}

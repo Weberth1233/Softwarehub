@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:nit_sgpi_frontend/domain/usecases/process/post_process.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/process/put_process.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/ip_types/ip_types_page.dart';
 import '../../../../domain/repositories/iprocess_repository.dart';
 import '../../../../infra/core/network/api_client.dart';
 import '../../../../infra/datasources/auth_local_datasource.dart';
@@ -10,6 +9,7 @@ import '../../../../infra/datasources/process_remote_datasource.dart';
 import '../../../../infra/repositories/process_repository_impl.dart';
 import '../../process/controllers/process_post_controller.dart';
 import '../controllers/ip_types_form_controller.dart';
+import '../models/second_stage_process.dart';
 
 class IpTypesFormBinding extends Bindings {
   @override

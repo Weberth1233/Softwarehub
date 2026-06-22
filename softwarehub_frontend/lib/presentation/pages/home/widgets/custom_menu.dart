@@ -1,22 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-
 import '../../../../infra/datasources/auth_local_datasource.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../users/controllers/user_logged_controller.dart';
 
-class CustomMenu extends StatefulWidget {
+class CustomMenu extends StatelessWidget implements PreferredSizeWidget {
   const CustomMenu({super.key});
 
   @override
-  State<CustomMenu> createState() => _CustomMenuState();
-}
+  Size get preferredSize => const Size.fromHeight(90);
 
-class _CustomMenuState extends State<CustomMenu> {
-  final authLocalDataSource = Get.find<AuthLocalDataSource>();
+  String _getFirstTwoNames(String? fullName) {
+    if (fullName == null || fullName.trim().isEmpty) {
+      return "Usuário";
+    }
+
+    final names = fullName.trim().split(RegExp(r'\s+'));
+
+    if (names.length >= 2) {
+      return "${names[0]} ${names[1]}";
+    }
+
+    return names.first;
+  }
+
+  String _getInitial(String? fullName) {
+    final firstName = _getFirstTwoNames(fullName);
+
+    if (firstName.isEmpty || firstName == "Usuário") {
+      return "U";
+    }
+
+    return firstName[0].toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userController = Get.find<UserLoggedController>();
     final theme = Theme.of(context);
 
     return AppBar(
@@ -37,135 +58,146 @@ class _CustomMenuState extends State<CustomMenu> {
           ),
           const SizedBox(width: 4),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Bem-Vindo ",
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w300,
-                          color: theme.colorScheme.primary.withOpacity(0.6),
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "Software",
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w900,
-                          color: theme.colorScheme.primary.withOpacity(0.9),
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "Hub",
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w300,
-                          fontSize: 30,
-                          color: const Color(0xFFFDAA51),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Bem-Vindo ",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontSize: 35,
+                      fontWeight: FontWeight.w300,
+                      color: theme.colorScheme.primary.withOpacity(0.6),
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                ),
-              ],
+                  TextSpan(
+                    text: "Software",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontSize: 35,
+                      fontWeight: FontWeight.w900,
+                      color: theme.colorScheme.primary.withOpacity(0.9),
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  TextSpan(
+                    text: "Hub",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 30,
+                      color: const Color(0xFFFDAA51),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
       actions: [
-        FutureBuilder<String?>(
-          future: authLocalDataSource.getRole(),
-          builder: (context, snapshot) {
-            final isAdmin = snapshot.data == 'ADMIN';
-            return Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: theme.colorScheme.primary.withOpacity(0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      isAdmin ? "ADMIN" : "USUÁRIO",
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+        Padding(
+          padding: const EdgeInsets.only(right: 12, left: 20),
+          child: Obx(() {
+            final user = userController.user.value;
+
+            final firstName = _getFirstTwoNames(user?.fullName);
+            final initial = _getInitial(user?.fullName);
+
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(50),
                   ),
-                  const SizedBox(width: 12),
-                  IconButton(
+                  child: IconButton(
                     onPressed: () {
                       Get.toNamed(AppRoutes.userLogged);
                     },
-                    style: IconButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(40, 40),
-                    ),
-                    icon: const Icon(Icons.person, size: 45),
-                  ),
-                  const SizedBox(width: 18.5),
-                  Container(
-                    height: 70,
-                    width: 1.6,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 13),
-                  TextButton.icon(
-                    onPressed: () {
-                      authLocalDataSource.clear();
-                      Get.offAllNamed("/login");
-                    },
-                    icon: Icon(
-                      Icons.logout_rounded,
-                      color: theme.colorScheme.primary,
-                      size: 36,
-                    ),
-                    label: Text(
-                      "Sair",
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 19,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        initial,
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          color: theme.colorScheme.onSecondary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  firstName,
+                  style: theme.textTheme.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const CustomPopMenuButton(),
+              ],
             );
-          },
+          }),
+        ),
+      ],
+    );
+  }
+}
+
+class CustomPopMenuButton extends StatelessWidget {
+  const CustomPopMenuButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authLocalDataSource = Get.find<AuthLocalDataSource>();
+
+    final theme = Theme.of(context);
+
+    return PopupMenuButton<String>(
+      position: PopupMenuPosition.under,
+      tooltip: 'Mais opções',
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        child: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: theme.colorScheme.primary,
+        ),
+      ),
+      onSelected: (value) {
+        if (value == 'profile') {
+          Get.toNamed(AppRoutes.userLogged);
+        } else if (value == 'logout') {
+          authLocalDataSource.clear();
+          Get.offAllNamed("/login");
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'profile',
+          child: Row(
+            children: [
+              Icon(
+                Icons.person_outline,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
+              SizedBox(width: 10),
+              Text('Perfil', style: theme.textTheme.bodyMedium),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'logout',
+          child: Row(
+            children: [
+              Icon(Icons.logout, size: 20, color: theme.colorScheme.primary),
+              SizedBox(width: 10),
+              Text('Sair', style: theme.textTheme.bodyMedium),
+            ],
+          ),
         ),
       ],
     );
