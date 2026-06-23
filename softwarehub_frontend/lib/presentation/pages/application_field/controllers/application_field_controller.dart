@@ -25,11 +25,6 @@ class ApplicationFieldController extends GetxController {
 
   final RxSet<int> selectedFieldIds = <int>{}.obs;
 
-  /// Guarda qual bloco/área foi selecionado durante uma busca.
-  ///
-  /// Essa trava só será usada quando:
-  /// - existir texto pesquisado;
-  /// - a pesquisa retornar mais de um bloco/área.
   final RxString selectedApplicationAreaName = ''.obs;
 
   final RxBool isEditMode = false.obs;
@@ -49,11 +44,6 @@ class ApplicationFieldController extends GetxController {
     return grouped;
   }
 
-  /// Regra principal do bloqueio.
-  ///
-  /// Só bloqueia seleção entre blocos diferentes quando:
-  /// - o usuário digitou algo na busca;
-  /// - a busca retornou mais de um bloco/área.
   bool get shouldApplySearchAreaLock {
     return search.value.trim().isNotEmpty &&
         groupedByApplicationArea.length > 1;
@@ -95,11 +85,6 @@ class ApplicationFieldController extends GetxController {
     selectedApplicationAreaName.value = '';
   }
 
-  /// Depois de carregar uma página, tenta sincronizar a trava com os campos
-  /// já selecionados que aparecem no resultado atual.
-  ///
-  /// Isso é importante no modo edição ou quando o usuário já tinha campos
-  /// selecionados antes de pesquisar.
   void _syncSearchAreaLockWithCurrentResult() {
     if (!shouldApplySearchAreaLock) {
       _clearSearchAreaLock();
@@ -115,14 +100,11 @@ class ApplicationFieldController extends GetxController {
       return;
     }
 
-    selectedApplicationAreaName.value =
-        _getAreaName(selectedFieldsInCurrentResult.first);
+    selectedApplicationAreaName.value = _getAreaName(
+      selectedFieldsInCurrentResult.first,
+    );
   }
 
-  /// Após remover uma seleção, verifica se ainda existe algum campo selecionado
-  /// no resultado atual da busca.
-  ///
-  /// Se não existir, libera a trava para o usuário poder escolher outro bloco.
   void _clearSearchAreaLockIfNeeded() {
     if (!shouldApplySearchAreaLock) {
       _clearSearchAreaLock();
@@ -256,9 +238,7 @@ class ApplicationFieldController extends GetxController {
   bool isAreaFullySelected(List<ApplicationFieldEntity> fields) {
     if (fields.isEmpty) return false;
 
-    return fields.every(
-      (field) => selectedFieldIds.contains(field.id),
-    );
+    return fields.every((field) => selectedFieldIds.contains(field.id));
   }
 
   bool isAreaPartiallySelected(List<ApplicationFieldEntity> fields) {
@@ -308,9 +288,7 @@ class ApplicationFieldController extends GetxController {
   }
 
   void confirmSelection() {
-    Get.back(
-      result: selectedFieldIds.toList(),
-    );
+    Get.back(result: selectedFieldIds.toList());
   }
 
   void nextPage() {

@@ -13,7 +13,6 @@ class ApplicationFieldRemoteDatasource
     extends IApplicationFieldRemoteDataSource {
   final RemoteDatasourceHelper helper;
 
- 
   ApplicationFieldRemoteDatasource(ApiClient apiClient)
       : helper = RemoteDatasourceHelper(apiClient);
 

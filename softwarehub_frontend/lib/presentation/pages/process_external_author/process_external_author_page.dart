@@ -600,12 +600,12 @@ class _MembersList extends StatelessWidget {
       itemCount: externalAuthors.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final u = externalAuthors[index];
-        final id = u.id;
+        final externalAuthor = externalAuthors[index];
+        final id = externalAuthor.id;
         final selected = id != null && selectedMap.containsKey(id);
 
-        final fullName = _safeString(() => u.fullName, fallback: "Nome");
-        final email = _safeString(() => u.email, fallback: "Email");
+        final fullName = _safeString(() =>externalAuthor.fullName, fallback: "Nome");
+        final email = _safeString(() => externalAuthor.email, fallback: "Email");
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -623,7 +623,7 @@ class _MembersList extends StatelessWidget {
             child: InkWell(
               key: ValueKey(id ?? index),
               borderRadius: BorderRadius.circular(12),
-              onTap: id == null ? null : () => onToggle(u),
+              onTap: id == null ? null : () => onToggle(externalAuthor),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
@@ -665,7 +665,7 @@ class _MembersList extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () async {
-                            await Get.toNamed("/process/process-external-author/forms", arguments: u);
+                            await Get.toNamed(AppRoutes.processExternalAuthorForm, arguments: externalAuthor);
                             controller.fetchExternalAuthors(loadMore: false);
                           },
                           icon: const Icon(Icons.edit_outlined),
