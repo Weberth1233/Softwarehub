@@ -176,7 +176,7 @@ class ProcessCard extends StatelessWidget {
 
                     Text(
                       item.title,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodyLarge!.copyWith(
                         fontWeight: FontWeight.bold,
@@ -340,21 +340,33 @@ class ProcessCard extends StatelessWidget {
   }
 
   Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case "FINALIZADO":
-      case "APROVADO":
-        return Colors.green;
+    switch (status) {
+      case "PENDENTE_DISTRIBUICAO_COTAS":
+        return const Color.fromARGB(255, 228, 206, 11);
 
-      case "EM_ANDAMENTO":
-      case "PENDENTE":
-        return Colors.orange;
+      case "COTAS_DISTRIBUIDAS":
+        return Colors.blue;
 
       case "CORRECAO":
-      case "REJEITADO":
         return Colors.red;
 
+      case "CORRIGIDO":
+        return Colors.orange;
+
+      case "CLASSIFICADO":
+        return Colors.purple;
+
+      case "FINALIZADO":
+        return const Color.fromARGB(255, 54, 149, 57);
+
+      case "INATIVO":
+        return Colors.grey;
+
+      case "PENDENTE_DOCUMENTACAO":
+        return Colors.black;
+
       default:
-        return Colors.white;
+        return Colors.grey;
     }
   }
 }
