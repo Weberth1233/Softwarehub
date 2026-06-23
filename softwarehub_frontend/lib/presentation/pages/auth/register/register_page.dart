@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/formatters/mask_text_input_formatter.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import '../../../../domain/entities/educational_institution_entity.dart';
 import '../../../../domain/entities/types_link_entity.dart';
@@ -70,11 +71,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (user != null) {
       registerController.nameController.text = user.fullName;
-      
+
       registerController.emailController.text = user.email;
-      registerController.cpfController.text = user.cpf;
+      registerController.cpfController.text = InputMasks.cpf.maskText(user.cpf);
       registerController.professionController.text = user.profession;
-      registerController.phoneController.text = user.phoneNumber;
+      registerController.phoneController.text = InputMasks.phone.maskText(
+        user.phoneNumber,
+      );
 
       if (user.birthDate.isNotEmpty) {
         final parts = user.birthDate.split('-');
@@ -86,7 +89,9 @@ class _RegisterPageState extends State<RegisterPage> {
         }
       }
 
-      registerController.cepController.text = user.address.zipCode;
+      registerController.cepController.text = InputMasks.cep.maskText(
+        user.address.zipCode,
+      );
       registerController.streetController.text = user.address.street;
       registerController.complementController.text =
           user.address.complement ?? '';
@@ -256,7 +261,7 @@ class _RegisterPageState extends State<RegisterPage> {
           const SizedBox(height: 14),
 
           if ((registerController.isLoadingEducationalInstitutions.value ||
-              registerController.isLoadingTypesLinks.value) &&
+                  registerController.isLoadingTypesLinks.value) &&
               (registerController.educationalInstitutions.isEmpty ||
                   registerController.typesLinks.isEmpty))
             const Center(
@@ -533,18 +538,16 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Expanded(
                                       child: Obx(
-                                            () => CustomTextField(
-                                          controller: registerController
-                                              .nameController,
+                                        () => CustomTextField(
+                                          controller:
+                                              registerController.nameController,
                                           label: "Nome completo",
                                           hintText: "Seu nome aqui",
                                           size: 724,
-                                          validator: (v) =>
-                                              Validators.required(
-                                                v,
-                                                message:
-                                                "Informe o nome completo",
-                                              ),
+                                          validator: (v) => Validators.required(
+                                            v,
+                                            message: "Informe o nome completo",
+                                          ),
                                           errorText: registerController
                                               .fieldErrors['fullName'],
                                           onChanged: (_) => registerController
@@ -557,43 +560,40 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ),
 
                                     const SizedBox(width: 10),
-
-                                    
                                   ],
                                 ),
 
                                 _gap(),
 
                                 Obx(
-                                      () => CustomTextField(
+                                  () => CustomTextField(
                                     controller:
-                                    registerController.emailController,
+                                        registerController.emailController,
                                     label: "E-mail",
                                     hintText: "exemplo@outlook.com",
                                     size: 724,
                                     keyboardType: TextInputType.emailAddress,
                                     validator: Validators.email,
-                                    errorText: registerController
-                                        .fieldErrors['email'],
+                                    errorText:
+                                        registerController.fieldErrors['email'],
                                     onChanged: (_) => registerController
                                         .clearFieldError('email'),
-                                    prefixIcon: const Icon(
-                                      Icons.mail_outline,
-                                    ),
+                                    prefixIcon: const Icon(Icons.mail_outline),
                                   ),
                                 ),
 
                                 Obx(
-                                      () => CustomTextField(
+                                  () => CustomTextField(
                                     controller:
-                                    registerController.cpfController,
+                                        registerController.cpfController,
                                     label: "CPF",
-                                    hintText: "00000000000",
+                                    hintText: "000.000.000-00",
+                                    inputFormatters: [InputMasks.cpf],
                                     size: 724,
                                     keyboardType: TextInputType.number,
                                     validator: Validators.cpf,
                                     errorText:
-                                    registerController.fieldErrors['cpf'],
+                                        registerController.fieldErrors['cpf'],
                                     onChanged: (_) => registerController
                                         .clearFieldError('cpf'),
                                     prefixIcon: const Icon(Icons.person),
@@ -606,7 +606,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Expanded(
                                       child: Obx(
-                                            () => CustomTextField(
+                                        () => CustomTextField(
                                           controller: registerController
                                               .professionController,
                                           label: "Profissão",
@@ -627,7 +627,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                     Expanded(
                                       child: Obx(
-                                            () => CustomTextField(
+                                        () => CustomTextField(
                                           controller: registerController
                                               .phoneController,
                                           label: "Telefone",
@@ -635,6 +635,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                           hintText: "(dd) 0 0000 0000",
                                           keyboardType: TextInputType.phone,
                                           validator: Validators.phone,
+                                          inputFormatters: [InputMasks.phone],
+
                                           errorText: registerController
                                               .fieldErrors['phone'],
                                           onChanged: (_) => registerController
@@ -654,9 +656,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                   "Data de nascimento :",
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: theme.colorScheme.tertiary,
-                                  ),
+                                        fontWeight: FontWeight.w600,
+                                        color: theme.colorScheme.tertiary,
+                                      ),
                                 ),
 
                                 Row(
@@ -751,9 +753,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 const SizedBox(height: 14),
 
                                 Obx(
-                                      () => CustomTextField(
+                                  () => CustomTextField(
                                     controller:
-                                    registerController.passwordController,
+                                        registerController.passwordController,
                                     label: widget.isEditMode
                                         ? "Nova Senha (deixe em branco para manter)"
                                         : "Senha",
@@ -770,7 +772,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                         v,
                                         6,
                                         message:
-                                        "Senha deve ter no mínimo 6 caracteres",
+                                            "Senha deve ter no mínimo 6 caracteres",
                                       );
                                     },
                                     errorText: registerController
@@ -818,16 +820,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                 const SizedBox(height: 14),
 
                                 Obx(
-                                      () => CustomTextField(
+                                  () => CustomTextField(
                                     controller:
-                                    registerController.cepController,
+                                        registerController.cepController,
                                     label: "CEP",
                                     hintText: "00000-000",
                                     size: 500,
                                     keyboardType: TextInputType.number,
                                     validator: Validators.cep,
+                                    inputFormatters: [InputMasks.cep],
                                     errorText:
-                                    registerController.fieldErrors['cep'],
+                                        registerController.fieldErrors['cep'],
                                     onChanged: (_) => registerController
                                         .clearFieldError('cep'),
                                     prefixIcon: const Icon(
@@ -838,29 +841,29 @@ class _RegisterPageState extends State<RegisterPage> {
                                       child: ElevatedButton(
                                         onPressed: () async {
                                           final address =
-                                          await registerController
-                                              .getByZipCode(
-                                            registerController
-                                                .cepController
-                                                .text,
-                                          );
+                                              await registerController
+                                                  .getByZipCode(
+                                                    registerController
+                                                        .cepController
+                                                        .text,
+                                                  );
 
                                           if (address != null) {
                                             registerController
-                                                .streetController
-                                                .text =
+                                                    .streetController
+                                                    .text =
                                                 address.street;
                                             registerController
-                                                .neighborhoodController
-                                                .text =
+                                                    .neighborhoodController
+                                                    .text =
                                                 address.neighborhood;
                                             registerController
-                                                .cityController
-                                                .text =
+                                                    .cityController
+                                                    .text =
                                                 address.city;
                                             registerController
-                                                .stateController
-                                                .text =
+                                                    .stateController
+                                                    .text =
                                                 address.state;
                                           }
                                         },
@@ -886,10 +889,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                               "Buscar CEP",
                                               style: textTheme.bodySmall
                                                   ?.copyWith(
-                                                fontWeight:
-                                                FontWeight.w700,
-                                                color: Colors.white,
-                                              ),
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.white,
+                                                  ),
                                             ),
                                           ],
                                         ),
@@ -901,9 +903,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 Obx(
-                                      () => CustomTextField(
+                                  () => CustomTextField(
                                     controller:
-                                    registerController.streetController,
+                                        registerController.streetController,
                                     label: "Rua",
                                     size: 500,
                                     validator: Validators.required,
@@ -920,7 +922,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 _gap(),
 
                                 Obx(
-                                      () => CustomTextField(
+                                  () => CustomTextField(
                                     controller: registerController
                                         .neighborhoodController,
                                     label: "Bairro / Setor",
@@ -938,7 +940,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                 CustomTextField(
                                   controller:
-                                  registerController.complementController,
+                                      registerController.complementController,
                                   label: "Complemento",
                                   hintText: "Opcional",
                                   size: 500,
@@ -954,9 +956,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                   children: [
                                     Expanded(
                                       child: Obx(
-                                            () => CustomTextField(
-                                          controller: registerController
-                                              .cityController,
+                                        () => CustomTextField(
+                                          controller:
+                                              registerController.cityController,
                                           label: "Município",
                                           size: 500,
                                           validator: Validators.required,
@@ -975,7 +977,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                                     Expanded(
                                       child: Obx(
-                                            () => CustomTextField(
+                                        () => CustomTextField(
                                           controller: registerController
                                               .stateController,
                                           label: "Estado (UF)",
@@ -1019,100 +1021,121 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 icon: registerController.isLoadingSubmit.value
                                     ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: theme.colorScheme.secondary,
-                                  ),
-                                )
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: theme.colorScheme.secondary,
+                                        ),
+                                      )
                                     : const Icon(Icons.save_outlined),
                                 onPressed:
-                                registerController.isLoadingSubmit.value
+                                    registerController.isLoadingSubmit.value
                                     ? null
                                     : () async {
-                                  if (_formKey.currentState!.validate()) {
-                                    if (!registerController
-                                        .hasEducationalInstitutionLinks) {
-                                      AppToast.warning(
-                                        "Atenção - Adicione pelo menos um vínculo institucional.",
-                                      );
+                                        if (_formKey.currentState!.validate()) {
+                                          if (!registerController
+                                              .hasEducationalInstitutionLinks) {
+                                            AppToast.warning(
+                                              "Atenção - Adicione pelo menos um vínculo institucional.",
+                                            );
 
-                                      return;
-                                    }
+                                            return;
+                                          }
 
-                                    final userEntityToSave = UserEntity(
-                                     
-                                      email: registerController
-                                          .emailController
-                                          .text,
-                                      cpf: registerController
-                                          .cpfController
-                                          .text,
-                                      password: registerController
-                                          .passwordController
-                                          .text,
-                                      phoneNumber: registerController
-                                          .phoneController
-                                          .text,
-                                      birthDate:
-                                      "${registerController.birthYearController.text}-"
-                                          "${registerController.birthMonthController.text.padLeft(2, '0')}-"
-                                          "${registerController.birthDayController.text.padLeft(2, '0')}",
-                                      profession: registerController
-                                          .professionController
-                                          .text,
-                                      fullName: registerController
-                                          .nameController
-                                          .text,
-                                      
-                                      isEnabled: true,
-                                      userEducationalInstitutionLinks:
-                                      registerController
-                                          .getSelectedEducationalInstitutionLinks(),
-                                      address: AddressEntity(
-                                        zipCode: registerController
-                                            .cepController
-                                            .text,
-                                        street: registerController
-                                            .streetController
-                                            .text,
-                                        complement: registerController
-                                            .complementController
-                                            .text,
-                                        neighborhood: registerController
-                                            .neighborhoodController
-                                            .text,
-                                        city: registerController
-                                            .cityController
-                                            .text,
-                                        state: registerController
-                                            .stateController
-                                            .text,
-                                      ),
-                                    );
+                                          final userEntityToSave = UserEntity(
+                                            email: registerController
+                                                .emailController
+                                                .text
+                                                .trim(),
 
-                                    if (widget.isEditMode) {
-                                      await registerController
-                                          .updateUserLogged(
-                                        userControllerGet
-                                            .user
-                                            .value!
-                                            .id!,
-                                        userEntityToSave,
-                                      );
-                                    } else {
-                                      await registerController.post(
-                                        userEntityToSave,
-                                      );
-                                    }
-                                  }
-                                },
+                                            cpf: InputMasks.onlyNumbers(
+                                              registerController
+                                                  .cpfController
+                                                  .text,
+                                            ),
+
+                                            password: registerController
+                                                .passwordController
+                                                .text,
+
+                                            phoneNumber: InputMasks.onlyNumbers(
+                                              registerController
+                                                  .phoneController
+                                                  .text,
+                                            ),
+
+                                            birthDate:
+                                                "${registerController.birthYearController.text}-"
+                                                "${registerController.birthMonthController.text.padLeft(2, '0')}-"
+                                                "${registerController.birthDayController.text.padLeft(2, '0')}",
+
+                                            profession: registerController
+                                                .professionController
+                                                .text
+                                                .trim(),
+
+                                            fullName: registerController
+                                                .nameController
+                                                .text
+                                                .trim(),
+
+                                            isEnabled: true,
+
+                                            userEducationalInstitutionLinks:
+                                                registerController
+                                                    .getSelectedEducationalInstitutionLinks(),
+
+                                            address: AddressEntity(
+                                              zipCode: InputMasks.onlyNumbers(
+                                                registerController
+                                                    .cepController
+                                                    .text,
+                                              ),
+                                              street: registerController
+                                                  .streetController
+                                                  .text
+                                                  .trim(),
+                                              complement: registerController
+                                                  .complementController
+                                                  .text
+                                                  .trim(),
+                                              neighborhood: registerController
+                                                  .neighborhoodController
+                                                  .text
+                                                  .trim(),
+                                              city: registerController
+                                                  .cityController
+                                                  .text
+                                                  .trim(),
+                                              state: registerController
+                                                  .stateController
+                                                  .text
+                                                  .trim(),
+                                            ),
+                                          );
+
+                                          if (widget.isEditMode) {
+                                            await registerController
+                                                .updateUserLogged(
+                                                  userControllerGet
+                                                      .user
+                                                      .value!
+                                                      .id!,
+                                                  userEntityToSave,
+                                                );
+                                          } else {
+                                            await registerController.post(
+                                              userEntityToSave,
+                                            );
+                                          }
+                                        }
+                                      },
                                 label: Text(
                                   registerController.isLoadingSubmit.value
                                       ? widget.isEditMode
-                                      ? "Atualizando..."
-                                      : "Salvando..."
+                                            ? "Atualizando..."
+                                            : "Salvando..."
                                       : widget.isEditMode
                                       ? "Atualizar Perfil"
                                       : "Salvar cadastro",
@@ -1138,4 +1161,3 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 }
-

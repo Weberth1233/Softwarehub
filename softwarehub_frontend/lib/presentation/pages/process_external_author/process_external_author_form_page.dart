@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../domain/entities/external_author/external_author_entity.dart';
+import '../../shared/formatters/mask_text_input_formatter.dart';
 import '../../shared/utils/app_toast.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/utils/validators.dart';
@@ -31,9 +32,14 @@ class _ProcessExternalAuthorFormPageState
   @override
   void initState() {
     super.initState();
+
     fullNameController = TextEditingController(text: editingEntity?.fullName);
     emailController = TextEditingController(text: editingEntity?.email);
-    cpfController = TextEditingController(text: editingEntity?.cpf);
+    cpfController = TextEditingController(
+      text: editingEntity?.cpf == null
+          ? null
+          : InputMasks.cpf.maskText(editingEntity!.cpf),
+    );
   }
 
   bool get isEditing => editingEntity != null;
@@ -49,11 +55,12 @@ class _ProcessExternalAuthorFormPageState
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final entity = ExternalAuthorEntity(
-        id: editingEntity?.id, 
+        id: editingEntity?.id,
         fullName: fullNameController.text.trim(),
         email: emailController.text.trim(),
-        cpf: cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+        cpf: InputMasks.onlyNumbers(cpfController.text),
       );
+
       final bool isSuccess = isEditing
           ? await controller.updateExternalAuthor(entity.id!, entity)
           : await controller.postExternalAuthor(entity);
@@ -62,6 +69,7 @@ class _ProcessExternalAuthorFormPageState
         AppToast.success(
           isEditing ? "Cadastro atualizado!" : "Cadastro realizado!",
         );
+
         if (!isEditing) {
           clear();
         }
@@ -148,11 +156,7 @@ class _ProcessExternalAuthorFormPageState
   Widget _buildBackground(ColorScheme colors) {
     return Positioned.fill(
       child: CustomPaint(
-        painter: DiagonalLinesPainter(
-          color: colors.primary.withOpacity(
-            0.05,
-          ), 
-        ),
+        painter: DiagonalLinesPainter(color: colors.primary.withOpacity(0.05)),
       ),
     );
   }
@@ -250,6 +254,8 @@ class _ProcessExternalAuthorFormPageState
                     label: "CPF",
                     hintText: "000.000.000-00",
                     keyboardType: TextInputType.number,
+                    inputFormatters: [InputMasks.cpf],
+
                     validator: Validators.cpf,
                     prefixIcon: const Icon(Icons.badge_outlined),
                   ),
