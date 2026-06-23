@@ -1,37 +1,29 @@
-import 'dart:convert';
-import 'package:nit_sgpi_frontend/domain/entities/consent_term_entity.dart';
-import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
-import 'package:nit_sgpi_frontend/infra/models/consent_term_model.dart';
-import '../../domain/core/errors/exceptions.dart';
+import '../../domain/entities/consent_term_entity.dart';
+import '../core/datasources/igeneric_remote_datasource.dart';
 import '../core/network/api_client.dart';
+import '../core/network/base_url.dart';
+import '../core/network/remote_datasource_helper.dart';
+import '../models/consent_term_model.dart';
 
-abstract class IConsentTermRemoteDataSource{
-  Future<ConsentTermEntity> getConsentTermByIpTypes(int id);
+abstract class IConsentTermRemoteDataSource
+    implements IGenericGetByIdRemoteDatasource<ConsentTermEntity> {
 }
 
-class ConsentTermRemoteDatasourceImpl implements IConsentTermRemoteDataSource{
-  final ApiClient apiClient;
+class ConsentTermRemoteDatasourceImpl extends IConsentTermRemoteDataSource {
+  final RemoteDatasourceHelper helper;
 
-  ConsentTermRemoteDatasourceImpl(this.apiClient);
-  
+  ConsentTermRemoteDatasourceImpl(ApiClient apiClient)
+    : helper = RemoteDatasourceHelper(apiClient);
+
   @override
-  Future<ConsentTermEntity> getConsentTermByIpTypes(int id) async{
-    try{
-       final response = await apiClient.get(
-        "${BaseUrl.urlWithHttp}/consent-term/ip-types/$id",
-      );
-      if(response.statusCode == 200){
-        return ConsentTermModel.fromJson(json.decode(response.body)).toEntity();  
-      }else {
-        throw ServerException(
-          'Erro ${response.statusCode} ao buscar! - Detalhes: ${response.body}',
-        );
-      }
-    } on ServerException {
-      rethrow; // 👈 mantém a exception original
-    }
-    catch (e) {
-      throw NetworkException('Erro de conexão com o servidor!');
-    }
+  Future<ConsentTermEntity> getById(int id) async {
+    final uri = Uri.http(BaseUrl.url,'/consent-term/ip-types/$id');
+    return helper.getById<ConsentTermEntity, ConsentTermModel>(
+      url: uri.toString(),
+      fromJson: ConsentTermModel.fromJson,
+      toEntity: (model) => model.toEntity(),
+    );
   }
+
+  
 }

@@ -23,7 +23,6 @@ class PagedResultModel<T> {
     required this.empty,
   });
 
-  /// 🔽 Factory genérico para converter JSON em Model
   factory PagedResultModel.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJsonT,
@@ -43,7 +42,6 @@ class PagedResultModel<T> {
     );
   }
 
-  /// 🔽 Converte Model genérico para Entity genérica
   PagedResultEntity<R> toEntity<R>(
     R Function(T model) toEntityT,
   ) {

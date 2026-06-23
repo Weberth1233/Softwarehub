@@ -93,9 +93,10 @@ class RemoteDatasourceHelper {
     }
   }
 
-  Future<T> getById<T>({
+  Future<TEntity> getById<TEntity, TModel>({
     required String url,
-    required T Function(Map<String, dynamic> json) fromJson,
+    required TModel Function(Map<String, dynamic> json) fromJson,
+    required TEntity Function(TModel model) toEntity,
     String? errorMessage,
     bool authenticated = true,
     List<int> successStatusCodes = const [200],
@@ -105,8 +106,10 @@ class RemoteDatasourceHelper {
 
       if (_isSuccessStatus(response.statusCode, successStatusCodes)) {
         final decoded = _decodeBody(response.body) as Map<String, dynamic>;
+        
+        TModel model = fromJson.call(decoded);
 
-        return fromJson(decoded);
+        return toEntity(model);
       }
 
       throw _buildServerException(
