@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
+import '../../core/routes/app_routes.dart';
 import '../../shared/utils/app_toast.dart';
 import '../../shared/widgets/diagonal_lines_painter.dart';
 import 'controllers/process_detail_controller.dart';

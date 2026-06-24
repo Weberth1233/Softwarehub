@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/users/get_users.dart';
-
 import '../../../../domain/entities/process/process_user_entity.dart';
 import '../models/selected_user_entity.dart';
 
@@ -61,12 +60,15 @@ class ProcessUserController extends GetxController {
       users.clear();
       hasMore.value = true;
     }
+    final values = <String, String>{
+      'page': page.toString(),
+      'page-size': size.toString(),
+    };
 
-    final result = await getUsers(
-      search: searchFilter.value,
-      page: page.value,
-      size: size,
-    );
+    if (searchFilter.value.trim().isNotEmpty) {
+      values['search'] = searchFilter.value.trim();
+    }
+    final result = await getUsers(values);
 
     result.fold(
       (failure) {
@@ -90,11 +92,15 @@ class ProcessUserController extends GetxController {
 
     page.value--;
 
-    final result = await getUsers(
-      search: searchFilter.value,
-      page: page.value,
-      size: size,
-    );
+    final values = <String, String>{
+      'page': page.toString(),
+      'page-size': size.toString(),
+    };
+
+    if (searchFilter.value.trim().isNotEmpty) {
+      values['search'] = searchFilter.value.trim();
+    }
+    final result = await getUsers(values);
 
     result.fold(
       (failure) {

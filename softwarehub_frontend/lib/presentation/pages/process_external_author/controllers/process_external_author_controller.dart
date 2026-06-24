@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/external_author_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/external_author/delete_external_author.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/external_author/get_external_authors.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/external_author/put_external_author.dart';
-import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
+import '../../../../domain/entities/external_author_entity.dart';
+import '../../../../domain/usecases/external_author/delete_external_author.dart';
+import '../../../../domain/usecases/external_author/get_external_authors.dart';
 import '../../../../domain/usecases/external_author/post_external_author.dart';
+import '../../../../domain/usecases/external_author/put_external_author.dart';
+import '../../../shared/utils/app_toast.dart';
 
 class ProcessExternalAuthorController extends GetxController {
   final GetExternalAuthors _getExternalAuthors;
@@ -167,7 +167,6 @@ class ProcessExternalAuthorController extends GetxController {
         },
       );
     } catch (e) {
-      // Trata erros de rede ou exceções
     } finally {
       isLoading.value = false;
     }

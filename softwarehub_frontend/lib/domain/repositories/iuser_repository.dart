@@ -1,12 +1,11 @@
 import 'package:dartz/dartz.dart';
-
 import '../core/errors/failures.dart';
-import '../entities/paged_result_entity.dart';
+import '../core/repository/generic_repository.dart';
 import '../entities/user/user_entity.dart';
 
-abstract class IUserRepository {
-   Future<Either<Failure, PagedResultEntity<UserEntity>>> getUsers({String search, int page = 0, int size = 10});
+abstract class IUserRepository implements
+        IGenericPaginatedListRepository<UserEntity>,
+        IGenericPutRepository<UserEntity, String>
+         {
    Future<Either<Failure, UserEntity>> getUserLogged();
-   Future<Either<Failure, String>> updateUser(int idUser, UserEntity user);
-   
 }
