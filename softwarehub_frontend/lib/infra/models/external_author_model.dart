@@ -1,4 +1,4 @@
-import 'package:nit_sgpi_frontend/domain/entities/external_author/external_author_entity.dart';
+import 'package:nit_sgpi_frontend/domain/entities/external_author_entity.dart';
 
 class ExternalAuthorModel {
   final int? id;

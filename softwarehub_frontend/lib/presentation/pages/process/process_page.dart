@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../domain/entities/external_author/external_author_entity.dart';
+import '../../../domain/entities/external_author_entity.dart';
 import '../../../domain/entities/process/process_response_entity.dart';
 import '../../core/routes/app_routes.dart';
 import '../../shared/theme/theme_color.dart';

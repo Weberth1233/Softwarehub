@@ -1,4 +1,4 @@
-import '../../domain/entities/external_author/external_author_entity.dart';
+import '../../domain/entities/external_author_entity.dart';
 import '../../domain/entities/paged_result_entity.dart';
 import '../core/datasources/igeneric_remote_datasource.dart';
 import '../core/network/api_client.dart';
@@ -12,14 +12,6 @@ abstract class IExternalAuthorRemoteDataSource
         IGenericPostRemoteDatasource<ExternalAuthorEntity>,
         IGenericPutRemoteDatasource<ExternalAuthorEntity>,
         IGenericDeleteRemoteDatasource {
-  // Future<PagedResultEntity<ExternalAuthorEntity>> getExternalAuthors({
-  //   String search = '',
-  //   int page = 0,
-  //   int size = 10,
-  // });
-  // Future<String> postExternalAuthor(ExternalAuthorEntity entity);
-  // Future<String> deleteExternalAuthor(int id);
-  // Future<String> putExternalAuthor(int id, ExternalAuthorEntity entity);
 }
 
 class ExternalAuthorDataSource implements IExternalAuthorRemoteDataSource {

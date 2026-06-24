@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/external_author/external_author_entity.dart';
+import 'package:nit_sgpi_frontend/domain/entities/external_author_entity.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/delete_external_author.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/get_external_authors.dart';
 import 'package:nit_sgpi_frontend/domain/usecases/external_author/put_external_author.dart';
@@ -17,7 +16,7 @@ class ProcessExternalAuthorController extends GetxController {
     this._getExternalAuthors,
     this._postExternalAuthor,
     this._deleteExternalAuthor,
-    this._putExternalAuthor
+    this._putExternalAuthor,
   );
 
   final RxMap<int, ExternalAuthorEntity> selectedExternalAuthor =
@@ -29,9 +28,6 @@ class ProcessExternalAuthorController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxString message = "".obs;
   final RxString searchFilter = ''.obs;
-  // final RxString fullNameFilter = ''.obs;
-  // final RxString emailFilter = ''.obs;
-  // final RxString cpfFilter = ''.obs;
 
   final RxInt page = 0.obs;
   final int size = 9;
@@ -62,16 +58,6 @@ class ProcessExternalAuthorController extends GetxController {
     fetchExternalAuthors(loadMore: false);
   }
 
-  // void searchByEmail(String query) {
-  //   emailFilter.value = query;
-  //   fetchExternalAuthors(loadMore: false);
-  // }
-
-  // void searchByCPF(String query) {
-  //   cpfFilter.value = query;
-  //   fetchExternalAuthors(loadMore: false);
-  // }
-
   Future<void> fetchExternalAuthors({bool loadMore = false}) async {
     if (isLoading.value || (loadMore && !hasMore.value)) return;
 
@@ -86,11 +72,16 @@ class ProcessExternalAuthorController extends GetxController {
       hasMore.value = true;
     }
 
-    final result = await _getExternalAuthors(
-      search: searchFilter.value,
-      page: page.value,
-      size: size,
-    );
+    final values = <String, String>{
+      'page': page.toString(),
+      'page-size': size.toString(),
+    };
+
+    if (searchFilter.value.trim().isNotEmpty) {
+      values['search'] = searchFilter.value.trim();
+    }
+
+    final result = await _getExternalAuthors(values);
 
     result.fold(
       (failure) {
@@ -114,12 +105,16 @@ class ProcessExternalAuthorController extends GetxController {
 
     page.value--;
 
-    final result = await _getExternalAuthors(
-      search: searchFilter.value,
-      page: page.value,
-      size: size,
-    );
+    final values = <String, String>{
+      'page': page.toString(),
+      'page-size': size.toString(),
+    };
 
+    if (searchFilter.value.trim().isNotEmpty) {
+      values['search'] = searchFilter.value.trim();
+    }
+
+    final result = await _getExternalAuthors(values);
     result.fold(
       (failure) {
         errorMessage.value = failure.message;
@@ -164,7 +159,6 @@ class ProcessExternalAuthorController extends GetxController {
       result.fold(
         (failure) {
           AppToast.error("Erro - ${failure.message}");
-          
         },
         (successMessage) {
           externalAuthors.removeWhere((element) => element.id == id);
@@ -198,6 +192,5 @@ class ProcessExternalAuthorController extends GetxController {
         return true; // SUCESSO!
       },
     );
-   
   }
 }

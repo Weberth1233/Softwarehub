@@ -46,19 +46,20 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!widget.isEditMode) {
       registerController.clearForm();
       registerController.clearEducationalInstitutionLinks();
+      return;
     }
 
-    if (widget.isEditMode) {
-      if (userControllerGet.user.value != null) {
+    _userWorker = ever(userControllerGet.user, (user) {
+      if (user != null) {
         _loadUserData();
       }
+    });
 
-      _userWorker = ever(userControllerGet.user, (user) {
-        if (user != null) {
-          _loadUserData();
-        }
-      });
+    if (userControllerGet.user.value != null) {
+      _loadUserData();
     }
+
+    userControllerGet.fetchLoggedUser();
   }
 
   TextStyle textThemeSafe(BuildContext context) {
@@ -429,6 +430,13 @@ class _RegisterPageState extends State<RegisterPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _userWorker?.dispose();
+    super.dispose();
   }
 
   @override
@@ -843,9 +851,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                           final address =
                                               await registerController
                                                   .getByZipCode(
-                                                    registerController
-                                                        .cepController
-                                                        .text,
+                                                    InputMasks.onlyNumbers(
+                                                      registerController
+                                                          .cepController
+                                                          .text,
+                                                    ),
                                                   );
 
                                           if (address != null) {
@@ -1124,6 +1134,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                                       .id!,
                                                   userEntityToSave,
                                                 );
+
+                                            await userControllerGet
+                                                .fetchLoggedUser();
+
+                                            _loadUserData();
                                           } else {
                                             await registerController.post(
                                               userEntityToSave,

@@ -1,6 +1,6 @@
 import '../application_field_entity.dart';
 import '../attachment_entity.dart';
-import '../external_author/external_author_entity.dart';
+import '../external_author_entity.dart';
 import '../ip_type_entity.dart';
 import '../justification/justification_response_entity.dart';
 import 'process_royalty_distribution_response_entity.dart';

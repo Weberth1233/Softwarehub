@@ -1,15 +1,8 @@
-import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../../entities/external_author/external_author_entity.dart';
+import 'package:nit_sgpi_frontend/domain/usecases/generic/generic_usecases.dart';
+import '../../entities/external_author_entity.dart';
 import '../../repositories/iexternal_author_repository.dart';
 
-class PostExternalAuthor {
-  final IExternalAuthorRepository repository;
-
-  PostExternalAuthor({required this.repository});
-
-  Future<Either<Failure, String>> call(ExternalAuthorEntity entity) async{
-    final result = await repository.postExternalAuthor(entity);
-    return result;
-  }
+class PostExternalAuthor extends PostUsecase<ExternalAuthorEntity, String, IExternalAuthorRepository>{
+  PostExternalAuthor({required super.repository});
+ 
 }

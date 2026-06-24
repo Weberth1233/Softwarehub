@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
-import '../../../../domain/entities/external_author/external_author_entity.dart';
+import '../../../../domain/entities/external_author_entity.dart';
 import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../domain/entities/process/process_royalty_distribution_request_entity.dart';
 import '../../../../domain/entities/process/process_user_entity.dart';

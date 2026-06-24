@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/external_author/external_author_entity.dart';
+import 'package:nit_sgpi_frontend/domain/entities/external_author_entity.dart';
 import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/process_external_author/controllers/process_external_author_controller.dart';
 import 'dart:math' as math;

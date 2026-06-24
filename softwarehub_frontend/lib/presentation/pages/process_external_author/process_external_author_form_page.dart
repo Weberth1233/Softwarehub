@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../domain/entities/external_author/external_author_entity.dart';
+import '../../../domain/entities/external_author_entity.dart';
 import '../../shared/formatters/mask_text_input_formatter.dart';
 import '../../shared/utils/app_toast.dart';
 import '../../shared/utils/responsive.dart';

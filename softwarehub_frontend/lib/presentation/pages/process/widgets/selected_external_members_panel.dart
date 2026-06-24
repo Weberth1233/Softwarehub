@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../domain/entities/external_author/external_author_entity.dart';
+import '../../../../domain/entities/external_author_entity.dart';
 import '../../../shared/theme/theme_color.dart';
 import '../utils/safe_string.dart';
 
