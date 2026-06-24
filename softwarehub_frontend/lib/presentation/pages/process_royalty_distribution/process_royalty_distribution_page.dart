@@ -708,6 +708,7 @@ class _CollaboratorRow extends StatelessWidget {
   final ShareFormModel share;
   final ValueChanged<double> onSliderChanged;
   final ValueChanged<double> onTextChanged;
+  final double maxLimit = 30.0;
 
   const _CollaboratorRow({
     super.key,
@@ -768,7 +769,7 @@ class _CollaboratorRow extends StatelessWidget {
                           share.displayName,
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
-                            fontSize: 24,
+                            fontSize: 16.9,
                             color: textDark,
                           ),
                           maxLines: 1,
@@ -787,7 +788,7 @@ class _CollaboratorRow extends StatelessWidget {
                             isCreator ? "CRIADOR" : "MEMBRO",
                             style: const TextStyle(
                               color: brandBlue,
-                              fontSize: 15,
+                              fontSize: 13,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -810,51 +811,74 @@ class _CollaboratorRow extends StatelessWidget {
                 children: [
                   const Text(
                     "Cota atribuída",
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20, color: textDark),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textDark),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 8),
 
-                  // Slider Customizado com Tooltip
-                  Obx(
-                        () => SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: brandBlue,
-                        inactiveTrackColor: dividerColor,
-                        thumbColor: brandBlue,
-                        trackHeight: 3,
-                        valueIndicatorColor: brandBlue, // Cor do tooltip flutuante
-                        valueIndicatorTextStyle: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12
+                  Obx(() {
+                    return Column(
+                      children: [
+
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            activeTrackColor: brandBlue,
+                            inactiveTrackColor: dividerColor,
+                            thumbColor: brandBlue,
+                            trackHeight: 13,
+                            valueIndicatorColor: brandBlue,
+                            valueIndicatorTextStyle: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                            showValueIndicator: ShowValueIndicator.always,
+                            tickMarkShape: SliderTickMarkShape.noTickMark,
+                          ),
+                          child: Slider(
+                            value: share.percentage.value.clamp(share.minPercentage, 30.0),
+                            min: 0.0,
+                            max: 30.0,
+                            divisions: 30,
+                            label: "${share.percentage.value.toStringAsFixed(0)}%",
+
+                            //  Se tentar arrastar para baixo de 5%, ele trava.
+                            onChanged: (newValue) {
+                              if (newValue < share.minPercentage) {
+                                onSliderChanged(share.minPercentage);
+                              } else {
+                                onSliderChanged(newValue);
+                              }
+                            },
+                          ),
                         ),
-                        showValueIndicator: ShowValueIndicator.always,
-                      ),
-                      child: Slider(
-                        value: share.percentage.value.clamp(0, 100),
-                        min: 0,
-                        max: 100,
-                        divisions: 100,
-                        label: "${share.percentage.value.toStringAsFixed(0)}%",
-                        onChanged: onSliderChanged,
-                      ),
-                    ),
-                  ),
 
-                  // Eixo visual estático (Baseado no Figma)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text("5%", style: TextStyle(fontSize: 10, color: textLight)),
-                        Text("10%", style: TextStyle(fontSize: 10, color: textLight)),
-                        Text("15%", style: TextStyle(fontSize: 10, color: textLight)),
-                        Text("25%", style: TextStyle(fontSize: 10, color: textLight)),
-                        Text("30%", style: TextStyle(fontSize: 10, color: textLight)),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "0%",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  // Truque do rabisco: Oculta o 0% se for o Criador,
+                                  color: isCreator ? Colors.transparent : textLight,
+                                ),
+                              ),
+                              const Text("5%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 25, color: textLight)),
+                              const Text("10%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
+                              const Text("15%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
+                              const Text("20%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
+                              const Text("25%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
+                              const Text("30%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
+                            ],
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
+                    );
+                  }),
 
                   // Badge do Criador
                   if (isCreator)
@@ -867,20 +891,24 @@ class _CollaboratorRow extends StatelessWidget {
                       ),
                       child: const Text(
                         "Mínimo obrigatório criador",
-                        style: TextStyle(fontSize: 13, color: textLight, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: brandBlue,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                 ],
               ),
             ),
 
-            const VerticalDivider(color: dividerColor, width: 32, thickness: 1),
+            const VerticalDivider(color: dividerColor, width: 32, thickness: 2),
 
-            // --- 3. SEÇÃO DE INPUT (Flex 3) ---
+            // --- 3. SEÇÃO DE INPUT  ---
             Expanded(
               flex: 3,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center, // Centraliza o badge com os botões
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
@@ -902,7 +930,7 @@ class _CollaboratorRow extends StatelessWidget {
                         icon: Icons.remove,
                         onPressed: () => onSliderChanged(share.percentage.value - 1),
                       ),
-                      // Caixa de texto central
+
                       Container(
                         width: 90,
                         height: 38,
