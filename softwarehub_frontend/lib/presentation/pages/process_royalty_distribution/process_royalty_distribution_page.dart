@@ -4,6 +4,7 @@ import 'package:nit_sgpi_frontend/presentation/shared/theme/theme_color.dart';
 import 'controllers/process_royalty_distribution_controller.dart';
 import 'widgets/share_form_model.dart';
 import '../../shared/widgets/shared_background.dart';
+import 'package:flutter/services.dart';
 
 class ProcessRoyaltyDistributionPage
     extends GetView<ProcessRoyaltyDistributionController> {
@@ -346,7 +347,7 @@ class _TopDashboard extends StatelessWidget {
                           color: lightBlueBg,
                           strokeWidth: 8,
                         ),
-                        // Progresso real
+
                         CircularProgressIndicator(
                           value: totalPercentage / 100,
                           backgroundColor: Colors.transparent,
@@ -390,7 +391,7 @@ class _TopDashboard extends StatelessWidget {
               thickness: 1.5,
             ),
 
-            // --- BLOCO 3: Legendas e Resumo (Direita) ---
+            // --- BLOCO 3: Legendas e Resumo  ---
             Expanded(
               flex: 3,
               child: Column(
@@ -426,7 +427,7 @@ class _TopDashboard extends StatelessWidget {
     );
   }
 
-  /// Método auxiliar para construir as linhas da legenda no bloco da direita
+
   Widget _buildLegendRow(
     IconData icon,
     String label,
@@ -476,16 +477,16 @@ class _InfoBanners extends StatelessWidget {
     const Color leftBgColor = Color(0xFFF4F8FE);
     const Color leftBorderColor = Color(
       0xFFB6D1FE,
-    ); // Borda um pouco mais sutil
+    );
     const Color iconBgColor = Color(0xFFDBEAFE);
-    const Color brandBlue = Color(0xFF2563EB); // Azul mais vibrante
+    const Color brandBlue = Color(0xFF2563EB);
 
     const Color rightBgColor = Color(0xFFFFEBEB);
     const Color rightBorderColor = Color(0xFFFFC5C5);
 
     const Color primaryText = Color(
       0xFF0F172A,
-    ); // Quase preto, mais forte que o anterior
+    );
     const Color secondaryText = Color(0xFF64748B);
 
     return IntrinsicHeight(
@@ -497,7 +498,7 @@ class _InfoBanners extends StatelessWidget {
             flex: 6,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              // Mais respiro interno
+
               decoration: BoxDecoration(
                 color: leftBgColor,
                 border: Border.all(color: ThemeColor.primaryColor, width: 1.0),
@@ -570,7 +571,7 @@ class _InfoBanners extends StatelessWidget {
                     ],
                   ),
 
-                  // Altere o valor do 'width' (ex: 40, 60, 100) para fixar a distância exata entre os dois blocos.
+
                   const SizedBox(width: 100),
                   // 3. Ícone Escudo (Stack)
                   Container(
@@ -645,7 +646,7 @@ class _InfoBanners extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFFCA5A5), width: 1),
               ),
               child: Container(
-                // MÁGICA 2: O filho não tem borderRadius, apenas a faixa lateral grossa.
+
                 decoration: const BoxDecoration(
                   border: Border(
                     left: BorderSide(color: Color(0xFFEF4444), width: 5),
@@ -720,8 +721,9 @@ class _CollaboratorRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCreator = share.type == ShareType.creator;
+    final double maxLogicalLimit = isCreator ? 30.0 : 25.0;
 
-    // Cores extraídas do Figma
+
     const Color brandBlue = Color(0xFF2563EB); // Azul principal dos botões
     const Color lightBlueBg = Color(0xFFEFF6FF); // Fundo claro dos badges
     const Color borderBlue = Color(0xFFBFDBFE); // Borda clara dos badges
@@ -747,7 +749,7 @@ class _CollaboratorRow extends StatelessWidget {
               flex: 2,
               child: Row(
                 children: [
-                  // Avatar com dois tons de azul
+
                   Container(
                     width: 80,
                     height: 80,
@@ -776,7 +778,7 @@ class _CollaboratorRow extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 6),
-                        // Badge com borda
+
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
@@ -816,7 +818,6 @@ class _CollaboratorRow extends StatelessWidget {
                   const SizedBox(height: 5),
 
                   Obx(() {
-                    final double maxLogicalLimit = isCreator ? 30.0 : 25.0;
                     return Column(
                       children: [
 
@@ -837,20 +838,11 @@ class _CollaboratorRow extends StatelessWidget {
                           ),
 
                           child: Slider(
-                            // Trava de segurança visual para a bolinha não passar do limite
                             value: share.percentage.value.clamp(share.minPercentage, maxLogicalLimit),
-
-                            // A escala física universal da barra (sempre de 0 a 30)
                             min: 0.0,
                             max: 30.0,
-
-                            // 300 divisões para permitir pulos suaves de 0.1%
                             divisions: 300,
-
-                            // Balão flutuante inteligente (limpa o ".0" de números inteiros)
                             label: "${share.percentage.value.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}%",
-
-                            // O "Guarda de Trânsito" das Regras de Negócio
                             onChanged: (newValue) {
                               if (newValue < share.minPercentage) {
                                 onSliderChanged(share.minPercentage);
@@ -863,7 +855,7 @@ class _CollaboratorRow extends StatelessWidget {
                           ),
                         ),
                         Padding(
-                          // 14 é o valor mágico que compensa exatamente a margem interna do Slider nativo
+
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -942,22 +934,22 @@ class _CollaboratorRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Stack para permitir que o Badge azul flutue ligeiramente por cima da borda
+
                   Stack(
                     clipBehavior: Clip.none,
                     alignment: Alignment.topCenter,
                     children: [
-                      // Caixa Principal Integrada (Input + Botões Laterais)
+                      // Caixa Principal Integrada
                       Container(
-                        width: 300, // Largura ideal para acomodar os botões e o texto confortavelmente
-                        height: 50,  // Altura ligeiramente maior para melhor área de toque
-                        margin: const EdgeInsets.only(top: 10), // Espaço para o badge flutuar em cima
+                        width: 300,
+                        height: 50,
+                        margin: const EdgeInsets.only(top: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: dividerColor, width: 1.2),
                         ),
-                        // ClipAntiAlias corta as quinas dos botões azuis para que obedeçam o borderRadius do Container pai
+
                         clipBehavior: Clip.antiAlias,
                         child: Row(
                           children: [
@@ -974,51 +966,55 @@ class _CollaboratorRow extends StatelessWidget {
 
                             // Campo de Texto de Entrada Integrado
                             Expanded(
-                              child: Container(
-                                color: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        // Vincula o controller reativo nativo do seu ShareFormModel
-                                        controller: share.percentageController,
-                                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 18,
-                                          color: textDark,
-                                        ),
-                                        decoration: const InputDecoration(
-                                          isDense: true,
-                                          border: InputBorder.none,
-                                          hintText: "Digite um valor",
-                                          hintStyle: TextStyle(
-                                            color: Color(0xFF94A3B8), // Tom cinza de placeholder do Figma
-                                            fontWeight: FontWeight.w400,
-                                            fontSize: 17,
-                                          ),
-                                          contentPadding: EdgeInsets.zero,
-                                        ),
-                                        onChanged: (text) {
-                                          final percentage = double.tryParse(text.replaceAll(",", "."));
-                                          if (percentage != null && percentage <= 30.0 && percentage >= share.minPercentage) {
-                                            onTextChanged(percentage);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    const Text(
-                                      "%",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                        color: textLight,
-                                      ),
-                                    ),
-                                  ],
+                              child: TextFormField(
+                                controller: share.percentageController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: false),
+
+
+                                inputFormatters: [
+
+                                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+
+
+                                  TextInputFormatter.withFunction((oldValue, newValue) {
+
+                                    if (newValue.text.isEmpty) return newValue;
+
+                                    final parsed = double.tryParse(newValue.text);
+
+
+                                    if (parsed != null && parsed > maxLogicalLimit) {
+                                      return oldValue;
+                                    }
+
+                                    return newValue;
+                                  }),
+                                ],
+
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 18,
+                                  color: textDark,
                                 ),
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: InputBorder.none,
+                                  hintText: "Digite um valor",
+                                  hintStyle: TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 17,
+                                  ),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                onChanged: (text) {
+                                  final percentage = double.tryParse(text);
+
+                                  if (percentage != null && percentage >= share.minPercentage) {
+                                    onTextChanged(percentage);
+                                  }
+                                },
                               ),
                             ),
 
@@ -1087,8 +1083,8 @@ class _SquareBtn extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         width: 40,
-        height: double.infinity, // Preenche toda a altura interna do container pai automaticamente
-        color: const Color(0xFF1565C0), // Tom azul escuro idêntico aos botões do protótipo
+        height: double.infinity,
+        color: const Color(0xFF1565C0),
         child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
