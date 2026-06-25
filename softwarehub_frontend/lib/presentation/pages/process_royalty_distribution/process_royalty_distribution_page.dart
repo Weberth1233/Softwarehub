@@ -811,11 +811,12 @@ class _CollaboratorRow extends StatelessWidget {
                 children: [
                   const Text(
                     "Cota atribuída",
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textDark),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: textDark),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 5),
 
                   Obx(() {
+                    final double maxLogicalLimit = isCreator ? 30.0 : 25.0;
                     return Column(
                       children: [
 
@@ -824,7 +825,7 @@ class _CollaboratorRow extends StatelessWidget {
                             activeTrackColor: brandBlue,
                             inactiveTrackColor: dividerColor,
                             thumbColor: brandBlue,
-                            trackHeight: 13,
+                            trackHeight: 10,
                             valueIndicatorColor: brandBlue,
                             valueIndicatorTextStyle: const TextStyle(
                               color: Colors.white,
@@ -834,45 +835,75 @@ class _CollaboratorRow extends StatelessWidget {
                             showValueIndicator: ShowValueIndicator.always,
                             tickMarkShape: SliderTickMarkShape.noTickMark,
                           ),
+
                           child: Slider(
-                            value: share.percentage.value.clamp(share.minPercentage, 30.0),
+                            // Trava de segurança visual para a bolinha não passar do limite
+                            value: share.percentage.value.clamp(share.minPercentage, maxLogicalLimit),
+
+                            // A escala física universal da barra (sempre de 0 a 30)
                             min: 0.0,
                             max: 30.0,
-                            divisions: 30,
-                            label: "${share.percentage.value.toStringAsFixed(0)}%",
 
-                            //  Se tentar arrastar para baixo de 5%, ele trava.
+                            // 300 divisões para permitir pulos suaves de 0.1%
+                            divisions: 300,
+
+                            // Balão flutuante inteligente (limpa o ".0" de números inteiros)
+                            label: "${share.percentage.value.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')}%",
+
+                            // O "Guarda de Trânsito" das Regras de Negócio
                             onChanged: (newValue) {
                               if (newValue < share.minPercentage) {
                                 onSliderChanged(share.minPercentage);
+                              } else if (newValue > maxLogicalLimit) {
+                                onSliderChanged(maxLogicalLimit);
                               } else {
                                 onSliderChanged(newValue);
                               }
                             },
                           ),
                         ),
-
-
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          // 14 é o valor mágico que compensa exatamente a margem interna do Slider nativo
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                "0%",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13,
-                                  // Truque do rabisco: Oculta o 0% se for o Criador,
-                                  color: isCreator ? Colors.transparent : textLight,
+                              SizedBox(
+                                width: 32,
+                                child: Text(
+                                  "0%",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: isCreator ? Colors.transparent : textLight,
+                                  ),
                                 ),
                               ),
-                              const Text("5%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 25, color: textLight)),
-                              const Text("10%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
-                              const Text("15%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
-                              const Text("20%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
-                              const Text("25%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
-                              const Text("30%", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textLight)),
+                              SizedBox(
+                                width: 32,
+                                child: const Text("5%", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textLight)),
+                              ),
+                              SizedBox(
+                                width: 32,
+                                child: const Text("10%", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textLight)),
+                              ),
+                              SizedBox(
+                                width: 32,
+                                child: const Text("15%", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textLight)),
+                              ),
+                              SizedBox(
+                                width: 32,
+                                child: const Text("20%", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textLight)),
+                              ),
+                              SizedBox(
+                                width: 32,
+                                child: const Text("25%", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textLight)),
+                              ),
+                              SizedBox(
+                                width: 32,
+                                child: const Text("30%", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: textLight)),
+                              ),
                             ],
                           ),
                         ),
@@ -892,7 +923,7 @@ class _CollaboratorRow extends StatelessWidget {
                       child: const Text(
                         "Mínimo obrigatório criador",
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: 10,
                           color: brandBlue,
                           fontWeight: FontWeight.w600,
                         ),
@@ -904,65 +935,138 @@ class _CollaboratorRow extends StatelessWidget {
 
             const VerticalDivider(color: dividerColor, width: 32, thickness: 2),
 
-            // --- 3. SEÇÃO DE INPUT  ---
+            // --- 3. SEÇÃO DE INPUT (Flex 3) ---
             Expanded(
               flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: brandBlue,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      "Maximo: 30%",
-                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  // Stack para permitir que o Badge azul flutue ligeiramente por cima da borda
+                  Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.topCenter,
                     children: [
-                      _SquareBtn(
-                        icon: Icons.remove,
-                        onPressed: () => onSliderChanged(share.percentage.value - 1),
-                      ),
-
+                      // Caixa Principal Integrada (Input + Botões Laterais)
                       Container(
-                        width: 90,
-                        height: 38,
+                        width: 300, // Largura ideal para acomodar os botões e o texto confortavelmente
+                        height: 50,  // Altura ligeiramente maior para melhor área de toque
+                        margin: const EdgeInsets.only(top: 10), // Espaço para o badge flutuar em cima
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: const Border.symmetric(
-                            horizontal: BorderSide(color: dividerColor, width: 1.5),
-                          ),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: dividerColor, width: 1.2),
                         ),
-                        child: Center(
-                          child: Obx(
-                                () => Text(
-                              "${share.percentage.value.toStringAsFixed(0)} %",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: textDark
+                        // ClipAntiAlias corta as quinas dos botões azuis para que obedeçam o borderRadius do Container pai
+                        clipBehavior: Clip.antiAlias,
+                        child: Row(
+                          children: [
+                            // Botão de Menos (-)
+                            _SquareBtn(
+                              icon: Icons.remove,
+                              onPressed: () {
+                                final newValue = share.percentage.value - 1;
+                                if (newValue >= share.minPercentage) {
+                                  onSliderChanged(newValue);
+                                }
+                              },
+                            ),
+
+                            // Campo de Texto de Entrada Integrado
+                            Expanded(
+                              child: Container(
+                                color: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        // Vincula o controller reativo nativo do seu ShareFormModel
+                                        controller: share.percentageController,
+                                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 18,
+                                          color: textDark,
+                                        ),
+                                        decoration: const InputDecoration(
+                                          isDense: true,
+                                          border: InputBorder.none,
+                                          hintText: "Digite um valor",
+                                          hintStyle: TextStyle(
+                                            color: Color(0xFF94A3B8), // Tom cinza de placeholder do Figma
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 17,
+                                          ),
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                        onChanged: (text) {
+                                          final percentage = double.tryParse(text.replaceAll(",", "."));
+                                          if (percentage != null && percentage <= 30.0 && percentage >= share.minPercentage) {
+                                            onTextChanged(percentage);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    const Text(
+                                      "%",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: textLight,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
+                            ),
+
+                            // Botão de Mais (+)
+                            _SquareBtn(
+                              icon: Icons.add,
+                              onPressed: () {
+                                final newValue = share.percentage.value + 1;
+                                if (newValue <= 30.0) {
+                                  onSliderChanged(newValue);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Badge Flutuante "Máximo: 30%" posicionado no topo
+                      Positioned(
+                        top: -35,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: brandBlue,
+                            borderRadius: BorderRadius.circular(4),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              )
+                            ],
+                          ),
+                          child: Text(
+                            isCreator ? "Maximo: 30%" : "Maximo: 25%",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ),
-                      _SquareBtn(
-                        icon: Icons.add,
-                        onPressed: () => onSliderChanged(share.percentage.value + 1),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-
           ],
         ),
       ),
@@ -970,7 +1074,7 @@ class _CollaboratorRow extends StatelessWidget {
   }
 }
 
-// Botão Quadrado Ajustado
+// Botão Quadrado
 class _SquareBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -982,10 +1086,10 @@ class _SquareBtn extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        width: 38,
-        height: 38,
-        color: const Color(0xFF1565C0), // Cor exata dos botões
-        child: Icon(icon, color: Colors.white, size: 22),
+        width: 40,
+        height: double.infinity, // Preenche toda a altura interna do container pai automaticamente
+        color: const Color(0xFF1565C0), // Tom azul escuro idêntico aos botões do protótipo
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
