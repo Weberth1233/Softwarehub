@@ -12,8 +12,15 @@ class RemoteDatasourceHelper {
   RemoteDatasourceHelper(this.apiClient);
 
   dynamic _decodeBody(String body) {
-    if (body.isEmpty) return null;
-    return json.decode(body);
+    final trimmedBody = body.trim();
+
+    if (trimmedBody.isEmpty) return null;
+
+    try {
+      return json.decode(trimmedBody);
+    } catch (_) {
+      return trimmedBody;
+    }
   }
 
   bool _isSuccessStatus(int statusCode, List<int> successStatusCodes) {
@@ -106,7 +113,7 @@ class RemoteDatasourceHelper {
 
       if (_isSuccessStatus(response.statusCode, successStatusCodes)) {
         final decoded = _decodeBody(response.body) as Map<String, dynamic>;
-        
+
         TModel model = fromJson.call(decoded);
 
         return toEntity(model);

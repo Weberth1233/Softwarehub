@@ -252,30 +252,29 @@ class IpTypesFormController extends GetxController {
 
       if (secondStageProcess.isEdit &&
           secondStageProcess.firstStageProcess.idProcess != null) {
-        await processController.put(
-          secondStageProcess.firstStageProcess.idProcess!,
-          request,
-        );
+        final processId = secondStageProcess.firstStageProcess.idProcess!;
 
-        Get.toNamed(
-          AppRoutes.processRoyaltyDistributionById(
-            secondStageProcess.firstStageProcess.idProcess!,
-          ),
+        final distributionId =
+            secondStageProcess.firstStageProcess.activeRoyaltyDistribution!.id;
+
+        await processController.put(processId, request);
+
+        AppToast.success("Processo atualizado com sucesso!");
+
+        Get.offNamed(
+          AppRoutes.processRoyaltyDistributionById(processId),
           arguments: {
-            if (secondStageProcess
-                    .firstStageProcess
-                    .activeRoyaltyDistribution !=
-                null)
-              "distributionId": secondStageProcess
-                  .firstStageProcess
-                  .activeRoyaltyDistribution!
-                  .id,
+            "distributionId": distributionId,
             'openedFromProcessFlow': true,
-            "editProcess": true,
+            'editProcess': true,
           },
         );
+
+        return;
       } else {
         await processController.post(request);
+
+        AppToast.success("Sucesso ao cadastrar processo!");
       }
 
       AppToast.success(

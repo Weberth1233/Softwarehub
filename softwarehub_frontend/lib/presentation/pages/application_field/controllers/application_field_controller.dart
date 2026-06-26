@@ -25,8 +25,6 @@ class ApplicationFieldController extends GetxController {
 
   final RxSet<int> selectedFieldIds = <int>{}.obs;
 
-  final RxString selectedApplicationAreaName = ''.obs;
-
   final RxBool isEditMode = false.obs;
 
   final int size = 10;
@@ -42,11 +40,6 @@ class ApplicationFieldController extends GetxController {
     }
 
     return grouped;
-  }
-
-  bool get shouldApplySearchAreaLock {
-    return search.value.trim().isNotEmpty &&
-        groupedByApplicationArea.length > 1;
   }
 
   String get screenTitle {
@@ -73,56 +66,8 @@ class ApplicationFieldController extends GetxController {
         : 'Área não informada';
   }
 
-  void _showDifferentAreaBlockedMessage() {
-    Get.snackbar(
-      'Seleção bloqueada',
-      'Essa pesquisa retornou campos em blocos diferentes. Selecione apenas um bloco.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
-
-  void _clearSearchAreaLock() {
-    selectedApplicationAreaName.value = '';
-  }
-
-  void _syncSearchAreaLockWithCurrentResult() {
-    if (!shouldApplySearchAreaLock) {
-      _clearSearchAreaLock();
-      return;
-    }
-
-    final selectedFieldsInCurrentResult = applicationFields.where(
-      (field) => selectedFieldIds.contains(field.id),
-    );
-
-    if (selectedFieldsInCurrentResult.isEmpty) {
-      _clearSearchAreaLock();
-      return;
-    }
-
-    selectedApplicationAreaName.value = _getAreaName(
-      selectedFieldsInCurrentResult.first,
-    );
-  }
-
-  void _clearSearchAreaLockIfNeeded() {
-    if (!shouldApplySearchAreaLock) {
-      _clearSearchAreaLock();
-      return;
-    }
-
-    final hasSelectedFieldInCurrentResult = applicationFields.any(
-      (field) => selectedFieldIds.contains(field.id),
-    );
-
-    if (!hasSelectedFieldInCurrentResult) {
-      _clearSearchAreaLock();
-    }
-  }
-
   void _loadArguments() {
     selectedFieldIds.clear();
-    _clearSearchAreaLock();
     isEditMode.value = false;
 
     final args = Get.arguments;
@@ -172,8 +117,6 @@ class ApplicationFieldController extends GetxController {
         applicationFields.assignAll(pagedResult.content);
         currentPage.value = pagedResult.number;
         totalPages.value = pagedResult.totalPages;
-
-        _syncSearchAreaLockWithCurrentResult();
       },
     );
 
@@ -184,54 +127,15 @@ class ApplicationFieldController extends GetxController {
     return selectedFieldIds.contains(fieldId);
   }
 
-  bool isFieldBlocked(ApplicationFieldEntity field) {
-    if (!shouldApplySearchAreaLock) return false;
-    if (selectedApplicationAreaName.value.isEmpty) return false;
-
-    final areaName = _getAreaName(field);
-
-    return selectedApplicationAreaName.value != areaName &&
-        !selectedFieldIds.contains(field.id);
-  }
-
-  bool isAreaBlocked(List<ApplicationFieldEntity> fields) {
-    if (!shouldApplySearchAreaLock) return false;
-    if (fields.isEmpty) return false;
-    if (selectedApplicationAreaName.value.isEmpty) return false;
-
-    final areaName = _getAreaName(fields.first);
-
-    final hasSelectedFieldInThisArea = fields.any(
-      (field) => selectedFieldIds.contains(field.id),
-    );
-
-    return selectedApplicationAreaName.value != areaName &&
-        !hasSelectedFieldInThisArea;
-  }
-
   void toggleFieldSelection(ApplicationFieldEntity field) {
     final fieldId = field.id;
-    final areaName = _getAreaName(field);
 
     if (selectedFieldIds.contains(fieldId)) {
       selectedFieldIds.remove(fieldId);
-      _clearSearchAreaLockIfNeeded();
-      selectedFieldIds.refresh();
-      return;
+    } else {
+      selectedFieldIds.add(fieldId);
     }
 
-    if (shouldApplySearchAreaLock &&
-        selectedApplicationAreaName.value.isNotEmpty &&
-        selectedApplicationAreaName.value != areaName) {
-      _showDifferentAreaBlockedMessage();
-      return;
-    }
-
-    if (shouldApplySearchAreaLock) {
-      selectedApplicationAreaName.value = areaName;
-    }
-
-    selectedFieldIds.add(fieldId);
     selectedFieldIds.refresh();
   }
 
@@ -256,32 +160,16 @@ class ApplicationFieldController extends GetxController {
   void toggleAreaSelection(List<ApplicationFieldEntity> fields) {
     if (fields.isEmpty) return;
 
-    final areaName = _getAreaName(fields.first);
     final allSelected = isAreaFullySelected(fields);
 
     if (allSelected) {
       for (final field in fields) {
         selectedFieldIds.remove(field.id);
       }
-
-      _clearSearchAreaLockIfNeeded();
-      selectedFieldIds.refresh();
-      return;
-    }
-
-    if (shouldApplySearchAreaLock &&
-        selectedApplicationAreaName.value.isNotEmpty &&
-        selectedApplicationAreaName.value != areaName) {
-      _showDifferentAreaBlockedMessage();
-      return;
-    }
-
-    if (shouldApplySearchAreaLock) {
-      selectedApplicationAreaName.value = areaName;
-    }
-
-    for (final field in fields) {
-      selectedFieldIds.add(field.id);
+    } else {
+      for (final field in fields) {
+        selectedFieldIds.add(field.id);
+      }
     }
 
     selectedFieldIds.refresh();
@@ -309,21 +197,12 @@ class ApplicationFieldController extends GetxController {
 
   void searchByName(String value) {
     search.value = value;
-
-    /// Nova busca, nova regra de trava.
-    /// A trava será recalculada depois que os resultados carregarem.
-    _clearSearchAreaLock();
-
     fetchApplicationFields(page: 0);
   }
 
   void clearSearch() {
     searchController.clear();
     search.value = '';
-
-    /// Sem busca, não existe bloqueio entre blocos.
-    _clearSearchAreaLock();
-
     fetchApplicationFields(page: 0);
   }
 

@@ -44,19 +44,29 @@ extension _ProcessDetailPageNice on _ProcessDetailPageState {
 
                     if (result != null && result is List) {
                       final selectedIds = result
-                          .map((item) => int.parse(item.toString()))
+                          .map((item) => int.tryParse(item.toString()))
+                          .whereType<int>()
                           .toList();
 
                       print("Campos selecionados na edição: $selectedIds");
 
-                      if (result is List<int>) {
-                        await this._runAction(
-                          setLoading: (value) => _isClassifying = value,
-                          action: () async {
-                            await controller.classifyProcess(entity.id, result, isEdit: true);
-                          },
+                      if (selectedIds.isEmpty) {
+                        AppToast.error(
+                          "Selecione pelo menos um campo de aplicação.",
                         );
+                        return;
                       }
+
+                      await this._runAction(
+                        setLoading: (value) => _isClassifying = value,
+                        action: () async {
+                          await controller.classifyProcess(
+                            entity.id,
+                            selectedIds,
+                            isEdit: true,
+                          );
+                        },
+                      );
                     }
                   },
                   icon: Icon(

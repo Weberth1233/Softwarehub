@@ -7,12 +7,12 @@ import '../../../../domain/usecases/process/get_process.dart';
 import '../../../../domain/usecases/process/get_process_status_count.dart';
 import '../../../shared/utils/app_toast.dart';
 
-class ProcessController extends GetxController {
+class HomeController extends GetxController {
   final GetProcesses _getProcesses;
   final GetProcessStatusCount _getProcessStatusCount;
   final DeleteProcess _deleteProcess;
 
-  ProcessController(
+  HomeController(
     this._getProcesses,
     this._getProcessStatusCount,
     this._deleteProcess,
@@ -47,13 +47,13 @@ class ProcessController extends GetxController {
     if (isLoadingList.value) return;
 
     isLoadingList.value = true;
-
-    final result = await _getProcesses(
-      title: title.value,
-      statusGenero: status.value,
-      page: page,
-      size: size,
-    );
+    final values = <String, String>{
+      'title': title.value,
+      'status-process': status.value,
+      'page': page.toString(),
+      'page-size': size.toString(),
+    };
+    final result = await _getProcesses(values);
 
     result.fold(
       (Failure failure) {
@@ -69,7 +69,6 @@ class ProcessController extends GetxController {
 
     isLoadingList.value = false;
   }
-
 
   void nextPage() {
     if (currentPage.value < totalPages.value - 1) {
@@ -126,7 +125,6 @@ class ProcessController extends GetxController {
     await result.fold(
       (Failure failure) async {
         AppToast.error(failure.message);
-      
       },
       (message) async {
         await fetchProcesses(page: 0);

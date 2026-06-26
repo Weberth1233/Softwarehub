@@ -1,17 +1,27 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/users/get_users.dart';
+
+import '../../../../domain/entities/process/process_response_entity.dart';
 import '../../../../domain/entities/process/process_user_entity.dart';
+import '../../../../domain/entities/user/user_entity.dart';
+import '../../../../domain/usecases/process/get_process_by_id.dart';
+import '../../../../domain/usecases/users/get_users.dart';
+import '../../../shared/utils/app_toast.dart';
 import '../models/selected_user_entity.dart';
 
-class ProcessUserController extends GetxController {
-  final GetUsers getUsers;
-  ProcessUserController(this.getUsers);
+class ProcessController extends GetxController {
+  final GetUsers _getUsers;
+  final GetProcessById _getProcessById;
+
+  ProcessController(this._getUsers, this._getProcessById);
 
   final RxMap<int, SelectedUserEntity> selectedUsers =
       <int, SelectedUserEntity>{}.obs;
 
   final RxBool isLoading = false.obs;
+  final RxBool isLoadingProcess = false.obs;
+
+  final Rxn<ProcessResponseEntity> process = Rxn<ProcessResponseEntity>();
+
   final RxList<UserEntity> users = <UserEntity>[].obs;
   final RxString errorMessage = ''.obs;
 
@@ -25,6 +35,64 @@ class ProcessUserController extends GetxController {
   void onInit() {
     super.onInit();
     fetchUsers();
+  }
+
+  Future<ProcessResponseEntity?> fetchProcessById(int id) async {
+    isLoadingProcess.value = true;
+    errorMessage.value = '';
+
+    final result = await _getProcessById(id);
+
+    ProcessResponseEntity? loadedProcess;
+
+    result.fold(
+      (failure) {
+        errorMessage.value = failure.message;
+        process.value = null;
+
+        AppToast.error("Erro ao carregar processo: ${failure.message}");
+      },
+      (success) {
+        loadedProcess = success;
+        process.value = success;
+
+        setInitialSelectedProcessAuthors(success.authors);
+      },
+    );
+
+    isLoadingProcess.value = false;
+
+    return loadedProcess;
+  }
+
+  int? getProcessIdFromArguments() {
+    final args = Get.arguments;
+
+    if (args is Map) {
+      final value = args['processId'];
+
+      if (value is int) return value;
+
+      if (value is String) {
+        return int.tryParse(value);
+      }
+    }
+
+    if (args is int) {
+      return args;
+    }
+
+    return null;
+  }
+
+  bool getIsEditModeFromArguments() {
+    final args = Get.arguments;
+
+    if (args is Map) {
+      return args['isEditMode'] == true;
+    }
+
+    return false;
   }
 
   void toggleUser(UserEntity user) {
@@ -60,6 +128,7 @@ class ProcessUserController extends GetxController {
       users.clear();
       hasMore.value = true;
     }
+
     final values = <String, String>{
       'page': page.toString(),
       'page-size': size.toString(),
@@ -68,7 +137,8 @@ class ProcessUserController extends GetxController {
     if (searchFilter.value.trim().isNotEmpty) {
       values['search'] = searchFilter.value.trim();
     }
-    final result = await getUsers(values);
+
+    final result = await _getUsers(values);
 
     result.fold(
       (failure) {
@@ -100,7 +170,8 @@ class ProcessUserController extends GetxController {
     if (searchFilter.value.trim().isNotEmpty) {
       values['search'] = searchFilter.value.trim();
     }
-    final result = await getUsers(values);
+
+    final result = await _getUsers(values);
 
     result.fold(
       (failure) {
@@ -121,12 +192,17 @@ class ProcessUserController extends GetxController {
 
     for (final author in authors) {
       final id = author.id;
-
       selectedUsers[id] = SelectedUserEntity.fromProcessUserEntity(author);
     }
   }
 
   void clearSelectedUsers() {
     selectedUsers.clear();
+  }
+
+  void clearProcessState() {
+    process.value = null;
+    selectedUsers.clear();
+    errorMessage.value = '';
   }
 }

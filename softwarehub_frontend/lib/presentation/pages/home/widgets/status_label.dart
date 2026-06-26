@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 
 class StatusLabel extends StatelessWidget {
-  final ProcessController processController;
+  final HomeController processController;
 
   const StatusLabel({super.key, required this.processController});
 

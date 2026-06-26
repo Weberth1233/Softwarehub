@@ -33,8 +33,8 @@ class HomeBindings extends Bindings {
     Get.lazyPut<DeleteProcess>(
       () => DeleteProcess(repository: Get.find<IProcessRepository>()),
     );
-    Get.lazyPut<ProcessController>(
-      () => ProcessController(
+    Get.lazyPut<HomeController>(
+      () => HomeController(
         Get.find<GetProcesses>(),
         Get.find<GetProcessStatusCount>(),
         Get.find<DeleteProcess>(),

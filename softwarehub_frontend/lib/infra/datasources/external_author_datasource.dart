@@ -9,7 +9,7 @@ import '../models/external_author_model.dart';
 abstract class IExternalAuthorRemoteDataSource
     implements
         IGenericPaginatedList<ExternalAuthorEntity>,
-        IGenericPostRemoteDatasource<ExternalAuthorEntity>,
+        IGenericPostRemoteDatasource<ExternalAuthorEntity, String>,
         IGenericPutRemoteDatasource<ExternalAuthorEntity>,
         IGenericDeleteRemoteDatasource {
 }
@@ -87,11 +87,11 @@ class ExternalAuthorDataSource implements IExternalAuthorRemoteDataSource {
       body: model.toJson(),
       onSuccess: (responseBody, statusCode) {
         if (statusCode == 204 || responseBody == null) {
-          return 'Atualizado com sucesso!';
+          return 'Usuário externo atualizado com sucesso!';
         }
         if (responseBody is Map<String, dynamic>) {
           return responseBody['message']?.toString() ??
-              'Atualizado com sucesso!';
+              'Usuário externo atualizado com sucesso!';
         }
         return responseBody.toString();
       },

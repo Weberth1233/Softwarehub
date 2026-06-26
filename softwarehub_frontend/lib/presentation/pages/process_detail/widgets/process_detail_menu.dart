@@ -170,13 +170,30 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
                             AppRoutes.processApplicationFieldById(entity.id),
                           );
 
-                          if (result is List<int>) {
+                          if (result != null && result is List) {
+                            final selectedIds = result
+                                .map((item) => int.tryParse(item.toString()))
+                                .whereType<int>()
+                                .toList();
+
+                            print(
+                              "Campos selecionados na edição: $selectedIds",
+                            );
+
+                            if (selectedIds.isEmpty) {
+                              AppToast.error(
+                                "Selecione pelo menos um campo de aplicação.",
+                              );
+                              return;
+                            }
+
                             await this._runAction(
                               setLoading: (value) => _isClassifying = value,
                               action: () async {
                                 await controller.classifyProcess(
                                   entity.id,
-                                  result,
+                                  selectedIds,
+                                  isEdit: true,
                                 );
                               },
                             );

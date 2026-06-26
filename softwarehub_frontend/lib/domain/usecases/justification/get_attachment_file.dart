@@ -1,15 +1,13 @@
-import 'package:dartz/dartz.dart';
-import '../../core/errors/failures.dart';
-import '../../entities/justification/justification_attachment_file_entity.dart' show JustificationAttachmentFileEntity;
+import '../../entities/justification/justification_attachment_file_entity.dart'
+    show JustificationAttachmentFileEntity;
 import '../../repositories/ijustification_repository.dart';
+import '../generic/generic_usecases.dart';
 
-class GetAttachmentFile {
-  final IJustificationRepository repository;
-
-  GetAttachmentFile({required this.repository});
-
-  Future<Either<Failure, JustificationAttachmentFileEntity>> call(int attachmentId) async{
-    final result = await repository.getAttachmentFile(attachmentId);
-    return result;
-  }
+class GetAttachmentFile
+    extends
+        GetByIdUsecase<
+          JustificationAttachmentFileEntity,
+          IJustificationRepository
+        > {
+  GetAttachmentFile({required super.repository});
 }

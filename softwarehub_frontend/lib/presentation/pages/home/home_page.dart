@@ -15,7 +15,7 @@ import 'widgets/status_label.dart';
 class HomePage extends StatelessWidget {
   HomePage({super.key});
 
-  final processController = Get.find<ProcessController>();
+  final processController = Get.find<HomeController>();
 
   final authLocalDataSource = Get.find<AuthLocalDataSource>();
   final ScrollController _scrollController = ScrollController();

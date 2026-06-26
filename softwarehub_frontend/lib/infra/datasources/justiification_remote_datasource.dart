@@ -1,38 +1,38 @@
-import 'package:nit_sgpi_frontend/domain/core/errors/exceptions.dart';
-import 'package:nit_sgpi_frontend/domain/entities/justification/justification_request_entity.dart';
-import 'package:nit_sgpi_frontend/infra/core/network/base_url.dart';
-import 'package:nit_sgpi_frontend/infra/models/justification/justification_request_model.dart';
+import 'dart:convert';
+import '../../domain/core/errors/exceptions.dart';
 import '../../domain/entities/justification/justification_attachment_file_entity.dart';
+import '../../domain/entities/justification/justification_request_entity.dart';
+import '../core/datasources/igeneric_remote_datasource.dart';
 import '../core/network/api_client.dart';
+import '../core/network/base_url.dart';
+import '../core/network/remote_datasource_helper.dart';
+import '../models/justification/justification_attachment_file_model.dart';
+import '../models/justification/justification_request_model.dart';
 import '../utils/error_formatter.dart';
 
-abstract class IJustificationRemoteDataSource {
-  Future<String> postJustification(JustificationRequestEntity justification);
-  Future<JustificationAttachmentFileEntity> getAttachmentFile(int attachmentId);
-
-  Future<String> deleteJustification(int idJustification);
-  Future<String> putJustificattion(
-    int idJustification,
-    JustificationRequestEntity justification,
-  );
-}
+abstract class IJustificationRemoteDataSource
+    implements
+        IGenericPostRemoteDatasource<JustificationRequestEntity, String>,
+        IGenericPutRemoteDatasource<JustificationRequestEntity>,
+        IGenericGetByIdRemoteDatasource<JustificationAttachmentFileEntity>,
+        IGenericDeleteRemoteDatasource {}
 
 class JustificationRemoteDatasourceImpl
     implements IJustificationRemoteDataSource {
   final ApiClient apiClient;
+  final RemoteDatasourceHelper helper;
 
-  JustificationRemoteDatasourceImpl(this.apiClient);
+  JustificationRemoteDatasourceImpl(this.apiClient)
+      : helper = RemoteDatasourceHelper(apiClient);
 
   @override
-  @override
-  Future<String> postJustification(
-    JustificationRequestEntity justification,
-  ) async {
+  Future<String> post(JustificationRequestEntity entity) async {
+    final uri = Uri.http(BaseUrl.url, "/justification");
+    final model = JustificationRequestModel.fromEntity(entity);
+    
     try {
-      final model = JustificationRequestModel.fromEntity(justification);
-
       final response = await apiClient.multipartRequest(
-        "${BaseUrl.urlWithHttp}/justification",
+        uri.toString(),
         method: "POST",
         fields: {
           "processId": model.processId.toString(),
@@ -44,34 +44,27 @@ class JustificationRemoteDatasourceImpl
         fieldName: "file",
       );
 
-      print('STATUS: ${response.statusCode}');
-      print('BODY: ${response.body}');
-
-      if (response.statusCode == 201) {
-        return "Cadastrado com sucesso!";
-      } else if (response.statusCode == 422) {
-        return response.body;
-      } else {
-        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
-      }
+      return _handleSuccessMessage(
+        statusCode: response.statusCode,
+        body: response.body,
+        successStatusCodes: const [200, 201, 204],
+        defaultMessage: "Justificativa cadastrada com sucesso!",
+      );
     } on ServerException {
       rethrow;
     } catch (e) {
-      print(e);
       throw NetworkException("Erro de conexão com o servidor!");
     }
   }
 
   @override
-  Future<String> putJustificattion(
-    int justificationId,
-    JustificationRequestEntity justification,
-  ) async {
+  Future<String> put(int id, JustificationRequestEntity entity) async {
+    final uri = Uri.http(BaseUrl.url, "/justification/$id");
+    final model = JustificationRequestModel.fromEntity(entity);
+
     try {
-      final model = JustificationRequestModel.fromEntity(justification);
- 
       final response = await apiClient.multipartRequest(
-        "${BaseUrl.urlWithHttp}/justification/$justificationId",
+        uri.toString(),
         method: "PUT",
         fields: {
           "processId": model.processId.toString(),
@@ -83,75 +76,118 @@ class JustificationRemoteDatasourceImpl
         fieldName: "file",
       );
 
-      if (response.statusCode == 204) {
-        return "Atualizado com sucesso!";
-      } else if (response.statusCode == 422) {
-        return response.body;
-      } else {
-        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
-      }
+      return _handleSuccessMessage(
+        statusCode: response.statusCode,
+        body: response.body,
+        successStatusCodes: const [200, 201, 204],
+        defaultMessage: "Justificativa atualizada com sucesso!",
+      );
     } on ServerException {
-      rethrow; // 👈 mantém a exception original
+      rethrow;
     } catch (e) {
-      print(e);
       throw NetworkException("Erro de conexão com o servidor!");
     }
   }
 
   @override
-  Future<String> deleteJustification(int idJustification) async {
-    try {
-      final response = await apiClient.delete(
-        "${BaseUrl.urlWithHttp}/justification/$idJustification",
-      );
-      if (response.statusCode == 204) {
-        return "Removido com sucesso!";
-      } else if (response.statusCode == 404) {
-        return "Não encontrou justificativa na base de dados!";
-      } else {
-        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
-      }
-    } on ServerException {
-      rethrow; // 👈 mantém a exception original
-    } catch (e) {
-      print(e);
-      throw NetworkException("Erro de conexão com o servidor!");
-    }
+  Future<String> delete(int id) {
+    final uri = Uri.http(BaseUrl.url, "/justification/$id");
+
+    return helper.delete(
+      url: uri.toString(),
+      onSuccess: (responseBody, statusCode) {
+        if (statusCode == 204 || responseBody == null) {
+          return "Registro excluído com sucesso!";
+        }
+
+        if (responseBody is Map<String, dynamic>) {
+          return responseBody["message"]?.toString() ??
+              "Registro excluído com sucesso!";
+        }
+
+        return responseBody.toString();
+      },
+    );
   }
 
   @override
-  Future<JustificationAttachmentFileEntity> getAttachmentFile(
-    int attachmentId,
-  ) async {
-    try {
-      final response = await apiClient.get(
-        "${BaseUrl.urlWithHttp}/justification/attachments/$attachmentId/file",
-      );
+  Future<JustificationAttachmentFileEntity> getById(int id) async {
+    final uri = Uri.http(
+      BaseUrl.url,
+      "/justification/attachments/$id/file",
+    );
 
-      print('STATUS: ${response.statusCode}');
-      print('CONTENT-TYPE: ${response.headers['content-type']}');
+    try {
+      final response = await apiClient.get(uri.toString());
 
       if (response.statusCode == 200) {
-        final contentType =
-            response.headers['content-type'] ?? 'application/octet-stream';
+        final contentType = _normalizeContentType(
+          response.headers["content-type"],
+        );
 
-        final contentDisposition = response.headers['content-disposition'];
+        final contentDisposition = response.headers["content-disposition"];
         final fileName = _extractFileName(contentDisposition);
 
-        return JustificationAttachmentFileEntity(
+        final model = JustificationAttachmentFileModel(
           bytes: response.bodyBytes,
           contentType: contentType,
           fileName: fileName,
         );
-      } else {
-        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
+
+        return model.toEntity();
       }
+
+      throw ServerException(
+        ApiErrorFormatter.formatFromBody(response.body),
+      );
     } on ServerException {
       rethrow;
     } catch (e) {
-      print(e);
       throw NetworkException("Erro de conexão com o servidor!");
     }
+  }
+
+  String _handleSuccessMessage({
+    required int statusCode,
+    required String body,
+    required List<int> successStatusCodes,
+    required String defaultMessage,
+  }) {
+    if (!successStatusCodes.contains(statusCode)) {
+      throw ServerException(ApiErrorFormatter.formatFromBody(body));
+    }
+
+    if (statusCode == 204 || body.trim().isEmpty) {
+      return defaultMessage;
+    }
+
+    try {
+      final decodedBody = json.decode(body);
+
+      if (decodedBody is Map<String, dynamic>) {
+        return decodedBody["message"]?.toString() ?? defaultMessage;
+      }
+
+      if (decodedBody is String && decodedBody.trim().isNotEmpty) {
+        return decodedBody;
+      }
+    } catch (_) {
+      final message = body.trim();
+
+      if (message.isNotEmpty) {
+        return message;
+      }
+    }
+
+    return defaultMessage;
+  }
+
+  String _normalizeContentType(String? contentType) {
+    if (contentType == null || contentType.trim().isEmpty) {
+      return "application/octet-stream";
+    }
+
+    return contentType.split(";").first.trim();
   }
 
   String? _extractFileName(String? contentDisposition) {

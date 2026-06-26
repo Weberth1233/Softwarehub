@@ -1,16 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
-import 'package:nit_sgpi_frontend/domain/repositories/iprocess_repository.dart';
+import '../../entities/process/process_request_entity.dart';
+import '../../repositories/iprocess_repository.dart';
+import '../generic/generic_usecases.dart';
 
-import '../../core/errors/failures.dart';
-
-class PostProcess {
-  final IProcessRepository repository;
-
-  PostProcess({required this.repository});
-
-  Future<Either<Failure, int>> call(ProcessRequestEntity entity) async{
-    final result = await repository.postProcess(entity);
-    return result;
-  }
+class PostProcess
+    extends PostUsecase<ProcessRequestEntity, int, IProcessRepository> {
+  PostProcess({required super.repository});
 }

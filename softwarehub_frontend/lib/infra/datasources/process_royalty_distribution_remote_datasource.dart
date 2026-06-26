@@ -7,7 +7,7 @@ import '../models/process/process_royalty_distribution_request_model.dart';
 
 abstract class IProcessRoyaltyDistributionRemoteDatasource
     implements
-        IGenericPostRemoteDatasource<ProcessRoyaltyDistributionRequestEntity> , IGenericPutRemoteDatasource<ProcessRoyaltyDistributionRequestEntity>{}
+        IGenericPostRemoteDatasource<ProcessRoyaltyDistributionRequestEntity, String> , IGenericPutRemoteDatasource<ProcessRoyaltyDistributionRequestEntity>{}
 
 class ProcessRoyaltyDistributionRemoteDatasource
     implements IProcessRoyaltyDistributionRemoteDatasource {

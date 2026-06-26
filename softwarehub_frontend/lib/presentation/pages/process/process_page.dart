@@ -7,7 +7,7 @@ import '../../shared/theme/theme_color.dart';
 import '../../shared/utils/app_toast.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/widgets/diagonal_lines_painter.dart';
-import 'controllers/process_user_controller.dart';
+import 'controllers/process_controller.dart';
 import 'models/first_stage_process.dart';
 import 'widgets/collaborators_section.dart';
 import 'widgets/process_app_bar.dart';
@@ -22,11 +22,10 @@ class ProcessPage extends StatefulWidget {
 }
 
 class _ProcessPageState extends State<ProcessPage> {
-  final ProcessResponseEntity? process = Get.arguments is ProcessResponseEntity
-      ? Get.arguments
-      : null;
-
+  ProcessResponseEntity? process;
   bool isEditMode = false;
+  int? processId;
+  bool isLoadingProcess = false;
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController searchController = TextEditingController();
@@ -36,7 +35,7 @@ class _ProcessPageState extends State<ProcessPage> {
   List<int> idsExternalAuthors = [];
   List<ExternalAuthorEntity> listExternalAuthor = [];
 
-  final userController = Get.find<ProcessUserController>();
+  final userController = Get.find<ProcessController>();
   Worker? _usersWorker;
 
   bool _showValidationErrors = false;
@@ -58,39 +57,24 @@ class _ProcessPageState extends State<ProcessPage> {
   void initState() {
     super.initState();
 
-    isEditMode = process != null;
+    isEditMode = userController.getIsEditModeFromArguments();
+    processId = userController.getProcessIdFromArguments();
 
     titleController.addListener(() {
       if (_showValidationErrors) setState(() {});
     });
 
-    if (process != null) {
-      titleController.text = process!.title;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      userController.clearSelectedUsers();
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        userController.setInitialSelectedProcessAuthors(process!.authors);
+      if (userController.users.isEmpty) {
+        await userController.fetchUsers();
+      }
 
-        setState(() {
-          listExternalAuthor = process!.externalAuthors;
-          idsExternalAuthors = process!.externalAuthors
-              .map((author) => author.id)
-              .whereType<int>()
-              .toList();
-        });
-
-        if (userController.users.isEmpty) {
-          userController.fetchUsers();
-        }
-      });
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        userController.clearSelectedUsers();
-
-        if (userController.users.isEmpty) {
-          userController.fetchUsers();
-        }
-      });
-    }
+      if (isEditMode && processId != null) {
+        await _loadProcessForEdit(processId!);
+      }
+    });
   }
 
   @override
@@ -102,6 +86,40 @@ class _ProcessPageState extends State<ProcessPage> {
     _usersWorker?.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _loadProcessForEdit(int id) async {
+    setState(() {
+      isLoadingProcess = true;
+    });
+
+    final loadedProcess = await userController.fetchProcessById(id);
+
+    if (loadedProcess == null) {
+      if (mounted) {
+        setState(() {
+          isLoadingProcess = false;
+        });
+      }
+      return;
+    }
+
+    process = loadedProcess;
+
+    titleController.text = loadedProcess.title;
+
+    setState(() {
+      listExternalAuthor = List<ExternalAuthorEntity>.from(
+        loadedProcess.externalAuthors,
+      );
+
+      idsExternalAuthors = loadedProcess.externalAuthors
+          .map((author) => author.id)
+          .whereType<int>()
+          .toList();
+
+      isLoadingProcess = false;
+    });
   }
 
   Future<void> _handleNext() async {
@@ -131,7 +149,7 @@ class _ProcessPageState extends State<ProcessPage> {
         : null;
 
     final auxProcess = FirstStageProcess(
-      idProcess: process?.id,
+      idProcess: process?.id ?? processId,
       title: titleController.text.trim(),
       idsUser: userController.selectedUsers.keys.toList(),
       idsExternalAuthors: idsExternalAuthors,
@@ -168,6 +186,12 @@ class _ProcessPageState extends State<ProcessPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoadingProcess) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFCBD5E1),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: ProcessAppBar(isEditMode: isEditMode),
       backgroundColor: const Color(0xFFCBD5E1),
@@ -250,9 +274,7 @@ class _ProcessPageState extends State<ProcessPage> {
                                 ),
                                 child: Text(
                                   "Próximo",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
+                                  style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w800,

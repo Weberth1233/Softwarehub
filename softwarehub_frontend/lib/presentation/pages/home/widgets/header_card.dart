@@ -5,7 +5,7 @@ import '../../../core/routes/app_routes.dart';
 import '../controllers/home_controller.dart';
 
 class HeaderCard extends StatelessWidget {
-  final ProcessController processController;
+  final HomeController processController;
   
   const HeaderCard({super.key, required this.processController});
 

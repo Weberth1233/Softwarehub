@@ -10,7 +10,7 @@ class ProcessCard extends StatelessWidget {
 
   ProcessCard({super.key, required this.item});
 
-  final ProcessController processController = Get.find<ProcessController>();
+  final HomeController processController = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -110,11 +110,13 @@ class ProcessCard extends StatelessWidget {
                   color: colorTheme.onSurface,
                   tooltip: "Editar processo",
                   onTap: () {
-                    Get.toNamed(AppRoutes.process, arguments: item);
+                    Get.toNamed(
+                      AppRoutes.process,
+                      arguments: {'isEditMode': true, 'processId': item.id},
+                    );
                   },
                 ),
               ),
-
               if (hasJustifications)
                 Positioned(
                   bottom: 20,

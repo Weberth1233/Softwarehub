@@ -38,7 +38,7 @@ class _FilterCardState extends State<FilterCard> {
   final int visibleFiltersCount = 4;
 
   final TextEditingController controller = TextEditingController();
-  final ProcessController processController = Get.find<ProcessController>();
+  final HomeController processController = Get.find<HomeController>();
 
   @override
   void dispose() {

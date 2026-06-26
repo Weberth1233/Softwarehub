@@ -95,7 +95,6 @@ class ProcessDetailController extends GetxController {
       AppToast.error("Erro - Não foi possível identificar o ID do processo.");
     }
   }
-  
 
   Future<void> fetchProcess(int id) async {
     isLoading.value = true;
@@ -172,7 +171,9 @@ class ProcessDetailController extends GetxController {
     attachmentFileName.value = null;
   }
 
-  Future<void> classifyProcess(int processId, List<int> niceClassCode, {
+  Future<void> classifyProcess(
+    int processId,
+    List<int> applicationFieldIds, {
     bool isEdit = false,
   }) async {
     try {
@@ -180,11 +181,25 @@ class ProcessDetailController extends GetxController {
       errorMessage.value = '';
       message.value = '';
 
-      final result = await _processClassification(processId, niceClassCode, isEdit: isEdit);
+      print("Processo: $processId");
+      print("Campos enviados: $applicationFieldIds");
+      print("Modo edição: $isEdit");
+
+      final result = await _processClassification(
+        processId,
+        applicationFieldIds,
+        isEdit: isEdit,
+      );
 
       await result.fold(
         (Failure failure) async {
           errorMessage.value = failure.message;
+
+          print("Falha retornada ao classificar: ${failure.message}");
+
+        
+          await fetchProcess(processId);
+
           AppToast.error(failure.message);
         },
         (String success) async {
@@ -195,6 +210,11 @@ class ProcessDetailController extends GetxController {
         },
       );
     } catch (e) {
+      print("Erro inesperado ao classificar processo: $e");
+
+      // Também tenta recarregar, porque a operação pode ter sido salva.
+      await fetchProcess(processId);
+
       AppToast.error("Ocorreu um erro ao tentar classificar o processo.");
     } finally {
       isLoading.value = false;

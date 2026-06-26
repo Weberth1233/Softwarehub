@@ -1,13 +1,11 @@
 import 'package:get/get.dart';
 
-import '../../../domain/entities/process/process_response_entity.dart';
+import '../../middlewares/auth_middleware.dart';
+import '../../pages/application_field/application_field_page.dart';
+import '../../pages/application_field/bindings/application_field_bindings.dart';
+import '../../pages/process_royalty_distribution/bindings/process_royalty_distribution_binding.dart' show ProcessRoyaltyDistributionBindings;
 import 'app_routes.dart';
 
-import 'package:nit_sgpi_frontend/presentation/pages/application_field/application_field_page.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/application_field/bindings/application_field_bindings.dart';
-import 'package:nit_sgpi_frontend/presentation/pages/process_royalty_distribution/bindings/process_royalty_distribution_binding.dart';
-
-import '../../middlewares/auth_middleware.dart';
 import '../../pages/attachments/attachments_page.dart';
 import '../../pages/attachments/bindings/attachments_bindigs.dart';
 import '../../pages/auth/login/bindings/login_bindings.dart';
@@ -30,7 +28,7 @@ import '../../pages/ip_types/ip_types_page.dart';
 import '../../pages/justifications/bindings/justification_bindings.dart';
 import '../../pages/justifications/justification_page.dart';
 
-import '../../pages/process/bindings/user_bindings.dart';
+import '../../pages/process/bindings/process_bindings.dart';
 import '../../pages/process/process_page.dart';
 import '../../pages/process_detail/bindings/process_detail_bindings.dart';
 import '../../pages/process_detail/process_detail_page.dart';
@@ -87,7 +85,7 @@ class MyRoutes {
     GetPage(
       name: AppRoutes.process,
       page: () => ProcessPage(),
-      binding: UserBindings(),
+      binding: ProcessBindings(),
       middlewares: [AuthMiddleware()],
     ),
 

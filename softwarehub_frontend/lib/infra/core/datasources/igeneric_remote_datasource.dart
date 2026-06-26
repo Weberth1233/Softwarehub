@@ -4,8 +4,8 @@ abstract class IGenericListRemoteDatasource<T> {
   Future<List<T>> getList();
 }
 
-abstract class IGenericPostRemoteDatasource<T> {
-  Future<String> post(T entity);
+abstract class IGenericPostRemoteDatasource<TRequest, TResponse> {
+  Future<TResponse> post(TRequest entity);
 }
 
 abstract class IGenericPutRemoteDatasource<T> {

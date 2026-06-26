@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../domain/entities/external_author_entity.dart';
 import '../../../shared/theme/theme_color.dart';
 import '../../../shared/widgets/custom_text_field.dart';
-import '../controllers/process_user_controller.dart';
+import '../controllers/process_controller.dart';
 import 'members_list.dart';
 import 'search_field_high_light.dart';
 import 'selected_external_members_panel.dart';
@@ -12,7 +12,7 @@ import 'selected_members_panel.dart';
 
 class CollaboratorsSection extends StatelessWidget {
   final bool isDesktop;
-  final ProcessUserController userController;
+  final ProcessController userController;
   final TextEditingController searchController;
   final List<ExternalAuthorEntity> externalAuthors;
   final bool hasCollaboratorError;

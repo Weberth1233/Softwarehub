@@ -22,13 +22,21 @@ public interface ProcessRepository extends JpaRepository<Process, Long>, JpaSpec
     void updateStatus(Long id, StatusProcess status);*/
 
     @Query("""
-            SELECT p.status AS status,
-            COUNT(p) AS amount
-            FROM Process p
-            WHERE p.creator.id = :creatorId
-            GROUP BY p.status
-           """)
-    List<ProcessStatusCountDTO> countProcessStatus(@Param("creatorId") Long id);
+        SELECT p.status AS status,
+               COUNT(p) AS amount
+        FROM Process p
+        WHERE p.status <> 'INATIVO'
+          AND (
+              p.creator.id = :userId
+              OR EXISTS (
+                  SELECT 1
+                  FROM p.authors author
+                  WHERE author.id = :userId
+              )
+          )
+        GROUP BY p.status
+       """)
+    List<ProcessStatusCountDTO> countProcessStatus(@Param("userId") Long userId);
 
     @Query("""
             SELECT p.status AS status,

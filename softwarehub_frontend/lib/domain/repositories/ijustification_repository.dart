@@ -1,15 +1,12 @@
-import 'package:dartz/dartz.dart';
-import 'package:nit_sgpi_frontend/domain/entities/justification/justification_request_entity.dart';
-import '../core/errors/failures.dart';
+import '../core/repository/generic_repository.dart';
 import '../entities/justification/justification_attachment_file_entity.dart';
+import '../entities/justification/justification_request_entity.dart';
 
-abstract class IJustificationRepository {
-  Future<Either<Failure, String>> postJustification(
-    JustificationRequestEntity entity,
-  );
-  Future<Either<Failure, String>> deleteJustification(int justificationId);
-  Future<Either<Failure, JustificationAttachmentFileEntity>> getAttachmentFile(
-    int attachmentId,
-  );
-   Future<Either<Failure, String>> putJustification(int justificationId, JustificationRequestEntity justification);
+abstract class IJustificationRepository
+    implements
+        IGenericPostRepository<JustificationRequestEntity, String>,
+        IGenericPutRepository<JustificationRequestEntity, String>,
+        IGenericGetByIdRepository<JustificationAttachmentFileEntity>,
+        IGenericDeleteRepository<String> {
+ 
 }

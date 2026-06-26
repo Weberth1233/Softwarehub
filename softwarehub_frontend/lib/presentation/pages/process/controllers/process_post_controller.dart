@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/entities/process/process_request_entity.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process/post_process.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/process/put_process.dart';
-import 'package:nit_sgpi_frontend/presentation/core/routes/app_routes.dart';
-import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
+
 
 import '../../../../domain/core/errors/failures.dart';
+import '../../../../domain/entities/process/process_request_entity.dart';
+import '../../../../domain/usecases/process/post_process.dart';
+import '../../../../domain/usecases/process/put_process.dart';
+import '../../../core/routes/app_routes.dart';
+import '../../../shared/utils/app_toast.dart';
 
 class ProcessPostController extends GetxController{
   final PostProcess _postProcess;
