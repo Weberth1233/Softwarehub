@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../shared/widgets/diagonal_lines_painter.dart';
+import '../../shared/widgets/shared_background.dart';
 import 'controllers/application_field_controller.dart';
 import 'widgets/application_field_area_tile.dart';
 import 'widgets/application_field_empty_state.dart';
@@ -57,17 +57,15 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
           );
         }),
       ),
-      backgroundColor: colors.primary,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: DiagonalLinesPainter(
-                color: colors.onSecondary.withOpacity(0.04),
-              ),
-            ),
+      backgroundColor: const Color(0xFFCBD5E1),
+      body: Theme(
+        data: theme.copyWith(
+          colorScheme: colors.copyWith(
+            primary: colors.onSecondary,
           ),
-          Obx(() {
+        ),
+        child: SharedBackground(
+          child: Obx(() {
             if (controller.isLoadingList.value &&
                 controller.applicationFields.isEmpty) {
               return Center(
@@ -119,7 +117,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: areas.length,
                               separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 12),
+                              const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final areaName = areas[index];
                                 final fields = grouped[areaName] ?? [];
@@ -143,7 +141,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
               },
             );
           }),
-        ],
+        ),
       ),
     );
   }
