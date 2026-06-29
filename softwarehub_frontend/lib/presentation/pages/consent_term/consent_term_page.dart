@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nit_sgpi_frontend/domain/entities/consent_term_acceptance_entity.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
 import 'controllers/consent_term_controller.dart';
 import '../../../../domain/entities/consent_term_entity.dart';
@@ -40,10 +41,7 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: Colors.grey.shade900,
-                  ),
+                  icon: Icon(Icons.arrow_back, color: Colors.grey.shade900),
                   onPressed: () => Get.back(),
                   tooltip: "Voltar",
                 ),
@@ -175,16 +173,25 @@ class ConsentTermPage extends GetView<ConsentTermController> {
                             width: double.infinity,
                             height: 48,
                             child: ElevatedButton(
-                              onPressed: controller.accepted.value &&
+                              onPressed:
+                                  controller.accepted.value &&
                                       !controller.isPosting.value
                                   ? () async {
+                                      ConsentTermAcceptanceEntity
+                                      consentTermAcceptanceEntity =
+                                          ConsentTermAcceptanceEntity(
+                                            consentTermId: consentTerm.id,
+                                          );
+
                                       final success = await controller
                                           .postConsentTermAcceptance(
-                                        consentTerm.id,
-                                      );
+                                            consentTermAcceptanceEntity,
+                                          );
 
                                       if (success) {
-                                       AppToast.success("Termo aceito - Você aceitou o termo de consentimento.");
+                                        AppToast.success(
+                                          "Termo aceito - Você aceitou o termo de consentimento.",
+                                        );
                                         Get.offNamed(
                                           nextRoute,
                                           arguments: nextArguments,

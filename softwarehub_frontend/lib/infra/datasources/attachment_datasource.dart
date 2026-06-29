@@ -1,22 +1,25 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart'; 
-import 'package:web/web.dart' as web; 
-import 'dart:js_interop'; 
-import 'package:nit_sgpi_frontend/domain/entities/attachment_entity.dart';
-import 'package:nit_sgpi_frontend/infra/models/attachment_model.dart';
+import 'package:flutter/foundation.dart';
+import 'package:web/web.dart' as web;
+import 'dart:js_interop';
+
 import '../../domain/core/errors/exceptions.dart';
+import '../../domain/entities/attachment_entity.dart';
 import '../core/network/api_client.dart';
 import '../core/network/base_url.dart';
+import '../models/attachment_model.dart';
+import '../utils/error_formatter.dart';
 
 abstract class IAttachmentDatasource {
   Future<void> openDocument(int id, {bool signed = false});
+
   Future<List<AttachmentEntity>> getAttachments(int idProcess);
 
   Future<String> uploadDocument({
-    required int id, 
-    String? filePath,       // Para Mobile
-    Uint8List? fileBytes,   // Para Web
-    required String fileName // Obrigatório para Web
+    required int id,
+    String? filePath,
+    Uint8List? fileBytes,
+    required String fileName,
   });
 }
 
@@ -27,10 +30,10 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
 
   @override
   Future<void> openDocument(int id, {bool signed = false}) async {
-  String url = "";
-    if(signed){
-     url = "${BaseUrl.urlWithHttp}/attachments/download/signed/$id";
-    } else{
+    String url = "";
+    if (signed) {
+      url = "${BaseUrl.urlWithHttp}/attachments/download/signed/$id";
+    } else {
       url = "${BaseUrl.urlWithHttp}/attachments/download/template/$id";
     }
     final response = await apiClient.get(url);
@@ -38,16 +41,14 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
     if (response.statusCode != 200) {
       throw ServerException("Erro ao baixar documento: ${response.statusCode}");
     }
-
     if (kIsWeb) {
       try {
         final arrayBuffer = response.bodyBytes.toJS;
-        
-        final blob = web.Blob(
-          [arrayBuffer].toJS, 
-          web.BlobPropertyBag(type: 'application/pdf')
-        );
 
+        final blob = web.Blob(
+          [arrayBuffer].toJS,
+          web.BlobPropertyBag(type: 'application/pdf'),
+        );
         final blobUrl = web.URL.createObjectURL(blob);
 
         final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
@@ -62,12 +63,13 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
         Future.delayed(const Duration(seconds: 2), () {
           web.URL.revokeObjectURL(blobUrl);
         });
-
       } catch (e) {
         throw Exception("Erro ao processar download na Web: $e");
       }
     } else {
-      throw UnimplementedError("Visualização direta no Mobile ainda não implementada neste trecho.");
+      throw UnimplementedError(
+        "Visualização direta no Mobile ainda não implementada neste trecho.",
+      );
     }
   }
 
@@ -82,18 +84,18 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
         final List decoded = json.decode(response.body) as List;
 
         return decoded
-            .map((e) => AttachmentModel.fromJson(e as Map<String, dynamic>).toEntity())
+            .map(
+              (e) => AttachmentModel.fromJson(
+                e as Map<String, dynamic>,
+              ).toEntity(),
+            )
             .toList();
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} ao buscar anexos! - Detalhes: ${response.body}',
-        );
+        throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
-    }on ServerException {
-      rethrow; // 👈 mantém a exception original
-    }
-     catch (e) {
-      // Se não for ServerException, assume erro de rede
+    } on ServerException {
+      rethrow;
+    } catch (e) {
       if (e is ServerException) rethrow;
       throw NetworkException('Erro de conexão com o servidor!');
     }
@@ -101,10 +103,10 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
 
   @override
   Future<String> uploadDocument({
-    required int id, 
-    String? filePath, 
-    Uint8List? fileBytes, 
-    required String fileName
+    required int id,
+    String? filePath,
+    Uint8List? fileBytes,
+    required String fileName,
   }) async {
     try {
       final response = await apiClient.upload(
@@ -118,11 +120,9 @@ class AttachmentDataSourceImpl implements IAttachmentDatasource {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response.body;
       } else {
-        throw ServerException(
-          'Erro ${response.statusCode} ao enviar arquivo! - Detalhes: ${response.body}',
-        );
+        throw  throw ServerException(ApiErrorFormatter.formatFromBody(response.body));
       }
-    }on ServerException {
+    } on ServerException {
       rethrow;
     } catch (e) {
       if (e is ServerException) rethrow;

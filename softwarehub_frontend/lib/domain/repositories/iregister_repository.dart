@@ -1,8 +1,6 @@
-import 'package:dartz/dartz.dart';
-import 'package:nit_sgpi_frontend/domain/entities/user/user_entity.dart';
 
-import '../core/errors/failures.dart';
+import '../core/repository/generic_repository.dart';
+import '../entities/user/user_entity.dart';
 
-abstract class IRegisterRepository {
-    Future<Either<Failure, String>> postUser(UserEntity userEntity);
+abstract class IRegisterRepository extends IGenericPostRepository<UserEntity, String>{
 }

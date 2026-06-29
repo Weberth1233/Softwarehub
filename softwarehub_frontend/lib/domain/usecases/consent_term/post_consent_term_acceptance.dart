@@ -1,15 +1,21 @@
-import 'package:dartz/dartz.dart';
-import 'package:nit_sgpi_frontend/domain/repositories/iconsent_term_acceptance_repository.dart';
+import '../../entities/consent_term_acceptance_entity.dart';
+import '../../repositories/iconsent_term_acceptance_repository.dart';
+import '../generic/generic_usecases.dart';
 
-import '../../core/errors/failures.dart';
+class PostConsentTermAcceptance
+    extends
+        PostUsecase<
+          ConsentTermAcceptanceEntity,
+          bool,
+          IConsentTermAcceptanceRepository
+        > {
+  PostConsentTermAcceptance({required super.repository});
+  // final IConsentTermAcceptanceRepository repository;
 
-class PostConsentTermAcceptance {
-  final IConsentTermAcceptanceRepository repository;
+  // PostConsentTermAcceptance({required this.repository});
 
-  PostConsentTermAcceptance({required this.repository});
-
-   Future<Either<Failure, bool>> call(int consentTermId) async{
-    final result = await repository.postConsentTermAcceptance(consentTermId);
-    return result;
-  }
+  //  Future<Either<Failure, bool>> call(int consentTermId) async{
+  //   final result = await repository.postConsentTermAcceptance(consentTermId);
+  //   return result;
+  // }
 }

@@ -1,9 +1,10 @@
 import 'package:get/get.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/consent_term/get_consent_term_was_accepted.dart';
-import 'package:nit_sgpi_frontend/domain/usecases/consent_term/post_consent_term_acceptance.dart';
-import 'package:nit_sgpi_frontend/presentation/shared/utils/app_toast.dart';
+import '../../../../domain/entities/consent_term_acceptance_entity.dart';
 import '../../../../domain/entities/consent_term_entity.dart';
 import '../../../../domain/usecases/consent_term/get_consent_term_by_iptypes.dart';
+import '../../../../domain/usecases/consent_term/get_consent_term_was_accepted.dart';
+import '../../../../domain/usecases/consent_term/post_consent_term_acceptance.dart';
+import '../../../shared/utils/app_toast.dart';
 
 class ConsentTermController extends GetxController {
   final GetConsentTermByIpTypes _getConsentTermByIpTypes;
@@ -108,12 +109,12 @@ class ConsentTermController extends GetxController {
     return alreadyAccepted;
   }
 
-  Future<bool> postConsentTermAcceptance(int consentTermId) async {
+  Future<bool> postConsentTermAcceptance(ConsentTermAcceptanceEntity consentTermAcceptanceEntity) async {
     isPosting.value = true;
     errorMessage.value = '';
     message.value = '';
 
-    final result = await _postConsentTermAcceptance(consentTermId);
+    final result = await _postConsentTermAcceptance(consentTermAcceptanceEntity);
 
     bool success = false;
 
