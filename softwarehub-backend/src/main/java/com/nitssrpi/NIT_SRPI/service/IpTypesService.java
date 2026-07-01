@@ -1,43 +1,45 @@
 package com.nitssrpi.NIT_SRPI.service;
 
+import com.nitssrpi.NIT_SRPI.generic.service.GenericServiceImpl;
 import com.nitssrpi.NIT_SRPI.model.IpTypes;
 import com.nitssrpi.NIT_SRPI.repository.IpTypesRepository;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 @Service
-@RequiredArgsConstructor
-public class IpTypesService {
-    private final IpTypesRepository repository;
+public class IpTypesService extends GenericServiceImpl<
+        IpTypes,
+        Long,
+        IpTypesRepository> {
 
-    public IpTypes save(IpTypes ipTypes){
+    public IpTypesService(IpTypesRepository repository) {
+        super(repository);
+    }
+
+    @Override
+    public IpTypes save(IpTypes ipTypes) {
+        return super.save(ipTypes);
+    }
+
+    @Override
+    public IpTypes update(IpTypes ipTypes) {
+        if (ipTypes.getId() == null) {
+            throw new EntityNotFoundException(
+                    "Para atualizar é necessário que a propriedade intelectual esteja cadastrada!"
+            );
+        }
+
+        if (!repository.existsById(ipTypes.getId())) {
+            throw new EntityNotFoundException(
+                    "Tipo de propriedade intelectual não encontrado!"
+            );
+        }
+
         return repository.save(ipTypes);
     }
 
-    public void update(IpTypes ipTypes){
-        if(ipTypes.getId() == null){
-            throw new EntityNotFoundException("Para atualizar é necessário que a propriedade intelectual esteja cadastrado!");
-        }
-        repository.save(ipTypes);
+    @Override
+    public Long getEntityId(IpTypes ipTypes) {
+        return ipTypes.getId();
     }
-
-
-    //ALL TYPES OF PROPERTY
-     public List<IpTypes> allTypesOfProperty(){
-        return repository.findAll();
-     }
-
-    public Optional<IpTypes> getById(Long id){
-        return repository.findById(id);
-    }
-
-    public void delete(IpTypes ipTypes){
-        repository.delete(ipTypes);
-    }
-
 }
