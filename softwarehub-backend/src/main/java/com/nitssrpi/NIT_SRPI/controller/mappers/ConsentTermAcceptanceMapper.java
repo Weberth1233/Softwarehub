@@ -1,23 +1,52 @@
 package com.nitssrpi.NIT_SRPI.controller.mappers;
+
 import com.nitssrpi.NIT_SRPI.controller.dto.ConsentTermAcceptanceRequestDTO;
 import com.nitssrpi.NIT_SRPI.controller.dto.ConsentTermAcceptanceResponseDTO;
+import com.nitssrpi.NIT_SRPI.generic.mapper.GenericMapper;
+import com.nitssrpi.NIT_SRPI.model.ConsentTerm;
 import com.nitssrpi.NIT_SRPI.model.ConsentTermAcceptance;
-import com.nitssrpi.NIT_SRPI.repository.ConsentTermRepository;
-import com.nitssrpi.NIT_SRPI.repository.UserRepository;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring", uses = {ConsentTermMapper.class, UserMapper.class})
-public abstract class ConsentTermAcceptanceMapper {
-    @Autowired
-    ConsentTermRepository consentTermRepository;
-//    @Autowired
-//    UserRepository userRepository;
+@Mapper(
+        componentModel = "spring",
+        uses = {
+                ConsentTermMapper.class,
+                UserMapper.class
+        }
+)
+public interface ConsentTermAcceptanceMapper extends GenericMapper<
+        ConsentTermAcceptance,
+        ConsentTermAcceptanceRequestDTO,
+        ConsentTermAcceptanceResponseDTO> {
 
-//    @Mapping(target = "user", expression = "java( userRepository.findById(dto.userId()).orElse(null))")
-    @Mapping(target = "consentTerm", expression = "java( consentTermRepository.findById(dto.consentTermId()).orElse(null))")
+    @Override
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "consentTerm", source = "consentTermId")
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "acceptedAt", ignore = true)
+    ConsentTermAcceptance toEntity(ConsentTermAcceptanceRequestDTO dto);
 
-    public abstract ConsentTermAcceptance toEntity(ConsentTermAcceptanceRequestDTO dto);
-    public abstract ConsentTermAcceptanceResponseDTO toDTO(ConsentTermAcceptance consentTermAcceptance);
+    @Override
+    ConsentTermAcceptanceResponseDTO toDTO(ConsentTermAcceptance entity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "consentTerm", source = "consentTermId")
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "acceptedAt", ignore = true)
+    void updateEntity(
+            ConsentTermAcceptanceRequestDTO dto,
+            @MappingTarget ConsentTermAcceptance entity
+    );
+
+    default ConsentTerm mapConsentTerm(Long id) {
+        if (id == null) {
+            return null;
+        }
+
+        ConsentTerm consentTerm = new ConsentTerm();
+        consentTerm.setId(id);
+        return consentTerm;
+    }
 }
