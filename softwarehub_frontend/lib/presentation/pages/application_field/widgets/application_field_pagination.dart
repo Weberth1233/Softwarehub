@@ -19,74 +19,106 @@ class ApplicationFieldPagination extends StatelessWidget {
       final currentPage = controller.currentPage.value;
       final totalPages = controller.totalPages.value;
 
+      // Se houver apenas 1 página (ou nenhuma), ocultamos a paginação
       if (totalPages <= 1) {
         return const SizedBox.shrink();
       }
 
-      return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          color: colors.onSecondary,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: currentPage > 0
-                  ? controller.previousPage
-                  : null,
-              icon: Icon(
-                Icons.chevron_left,
-                color: currentPage > 0
-                    ? colors.primary
-                    : colors.secondary.withOpacity(0.4),
-              ),
-            ),
+      // --- LÓGICA DA JANELA DE PAGINAÇÃO ---
+      // Garante que só vamos exibir no máximo 5 botões numéricos na tela para não quebrar o layout.
+      // O método .clamp() do Dart trava o valor para que ele nunca seja menor que 0 ou maior que o total.
+      final int startPage = (currentPage - 2).clamp(0, (totalPages - 5).clamp(0, totalPages));
+      final int endPage = (startPage + 5).clamp(0, totalPages);
 
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: colors.primary.withOpacity(0.10),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                'Página ${currentPage + 1} de $totalPages',
-                style: TextStyle(
-                  color: colors.primary,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13,
-                ),
-              ),
-            ),
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Botão Anterior (Arrow Left)
+          _buildNavButton(
+            icon: Icons.keyboard_double_arrow_left,
+            onPressed: currentPage > 0 ? controller.previousPage : null,
+          ),
 
-            IconButton(
-              onPressed: currentPage < totalPages - 1
-                  ? controller.nextPage
-                  : null,
-              icon: Icon(
-                Icons.chevron_right,
-                color: currentPage < totalPages - 1
-                    ? colors.primary
-                    : colors.secondary.withOpacity(0.4),
+          const SizedBox(width: 12),
+
+          // Renderização dinâmica dos botões numéricos
+          ...List.generate(endPage - startPage, (index) {
+            final pageIndex = startPage + index;
+            final isActive = pageIndex == currentPage;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: _buildPageButton(
+                pageNumber: pageIndex + 1, // +1 porque as páginas no controller começam em 0
+                isActive: isActive,
+                colors: colors,
               ),
-            ),
-          ],
-        ),
+            );
+          }),
+
+          const SizedBox(width: 12),
+
+          // Botão Próximo (Arrow Right)
+          _buildNavButton(
+            icon: Icons.keyboard_arrow_right,
+            onPressed: currentPage < totalPages - 1 ? controller.nextPage : null,
+          ),
+        ],
       );
     });
+  }
+
+  /// Constrói os botões de navegação (Setas)
+  Widget _buildNavButton({required IconData icon, required VoidCallback? onPressed}) {
+    final bool isDisabled = onPressed == null;
+
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: isDisabled ? Colors.grey.shade300 : const Color(0xFF334155),
+        ),
+      ),
+    );
+  }
+
+  /// Constrói os quadrados numéricos (Ex: 1, 2, 3)
+  Widget _buildPageButton({
+    required int pageNumber,
+    required bool isActive,
+    required ColorScheme colors,
+  }) {
+    return Container(
+      width: 36,
+      height: 36,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        // Fundo azul se estiver ativo, branco se inativo
+        color: isActive ? colors.primary : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          // Borda azul se ativo, cinza se inativo
+          color: isActive ? colors.primary : Colors.grey.shade300,
+        ),
+      ),
+      child: Text(
+        pageNumber.toString(),
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+          color: isActive ? Colors.white : const Color(0xFF334155),
+        ),
+      ),
+    );
   }
 }
