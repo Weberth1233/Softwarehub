@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class ApplicationFieldHeaderCard extends StatelessWidget {
   final int totalAreas;
   final int totalFields;
-  final int totalSelected; // Novo parâmetro para o 3º card (Selecionados)
+  final int totalSelected;
   final bool isDesktop;
 
   const ApplicationFieldHeaderCard({
     super.key,
     required this.totalAreas,
     required this.totalFields,
-    this.totalSelected = 0, // Adicionado um padrão 0 para não quebrar a tela atual
+    this.totalSelected = 0,
     required this.isDesktop,
   });
 
@@ -25,7 +25,7 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200), // Borda bem suave
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +55,7 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
                       "Campos de Aplicação",
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF1E293B), // Cinza chumbo escuro
+                        color: const Color(0xFF1E293B),
                         fontSize: 20,
                         letterSpacing: -0.5,
                       ),
@@ -76,8 +76,7 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // --- PARTE INFERIOR: Cards de Estatísticas ---
-          // A estrutura se adapta automaticamente se estiver no mobile ou web/desktop
+          //  Cards de Estatísticas
           isDesktop
               ? Row(
             children: [
@@ -150,7 +149,7 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
     );
   }
 
-  /// Método encapsulado para montar a interface dos sub-cards repetitivos.
+  // Método encapsulado para montar a interface dos sub-cards repetitivos.
   Widget _buildStatCard({
     required IconData icon,
     required Color iconColor,
@@ -196,7 +195,7 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF334155), // Cinza intermediário
+                    color: Color(0xFF334155),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -208,7 +207,7 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 2,
-                  overflow: TextOverflow.ellipsis, // Evita quebrar o layout se o texto for grande
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

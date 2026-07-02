@@ -25,8 +25,6 @@ class ApplicationFieldPagination extends StatelessWidget {
       }
 
       // --- LÓGICA DA JANELA DE PAGINAÇÃO ---
-      // Garante que só vamos exibir no máximo 5 botões numéricos na tela para não quebrar o layout.
-      // O método .clamp() do Dart trava o valor para que ele nunca seja menor que 0 ou maior que o total.
       final int startPage = (currentPage - 2).clamp(0, (totalPages - 5).clamp(0, totalPages));
       final int endPage = (startPage + 5).clamp(0, totalPages);
 
@@ -49,16 +47,19 @@ class ApplicationFieldPagination extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: _buildPageButton(
-                pageNumber: pageIndex + 1, // +1 porque as páginas no controller começam em 0
+                pageNumber: pageIndex + 1,
                 isActive: isActive,
                 colors: colors,
+                onTap: () {
+                  controller.goToPage(pageIndex);
+                },
               ),
             );
           }),
 
           const SizedBox(width: 12),
 
-          // Botão Próximo (Arrow Right)
+
           _buildNavButton(
             icon: Icons.keyboard_arrow_right,
             onPressed: currentPage < totalPages - 1 ? controller.nextPage : null,
@@ -92,31 +93,34 @@ class ApplicationFieldPagination extends StatelessWidget {
     );
   }
 
-  /// Constrói os quadrados numéricos (Ex: 1, 2, 3)
+  /// Constrói os quadrados numéricos
   Widget _buildPageButton({
     required int pageNumber,
     required bool isActive,
     required ColorScheme colors,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      width: 36,
-      height: 36,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        // Fundo azul se estiver ativo, branco se inativo
-        color: isActive ? colors.primary : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          // Borda azul se ativo, cinza se inativo
-          color: isActive ? colors.primary : Colors.grey.shade300,
+    return InkWell(
+      onTap: isActive ? null : onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isActive ? colors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isActive ? colors.primary : Colors.grey.shade300,
+          ),
         ),
-      ),
-      child: Text(
-        pageNumber.toString(),
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-          color: isActive ? Colors.white : const Color(0xFF334155),
+        child: Text(
+          pageNumber.toString(),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+            color: isActive ? Colors.white : const Color(0xFF334155),
+          ),
         ),
       ),
     );

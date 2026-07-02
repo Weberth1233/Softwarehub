@@ -46,11 +46,10 @@ class ApplicationFieldTreeItem extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Falso Checkbox Customizado
                   Container(
                     width: 22,
                     height: 22,
-                    margin: const EdgeInsets.only(top: 2), // Leve ajuste para alinhar com o texto
+                    margin: const EdgeInsets.only(top: 2),
                     decoration: BoxDecoration(
                       color: isSelected ? colors.primary : Colors.transparent,
                       borderRadius: BorderRadius.circular(6),
@@ -81,28 +80,63 @@ class ApplicationFieldTreeItem extends StatelessWidget {
                 ],
               ),
 
-              // --- LINHA 2: Descrição (Se existir) ---
+              // --- LINHA 2: Descrição
               if (field.description.trim().isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Padding(
-                  padding: const EdgeInsets.only(left: 34), // 22 (checkbox) + 12 (espaço)
-                  child: Text(
-                    field.description,
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
+                  padding: const EdgeInsets.only(left: 34),
+                  child: Tooltip(
+                    message: field.description,
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B).withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    textStyle: const TextStyle(
+                      color: Colors.white,
                       fontSize: 13,
+                      fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                    waitDuration: const Duration(milliseconds: 300),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            field.description,
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: Colors.red.withOpacity(0.6),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
-
               // --- LINHA 3: Tags / Chips ---
               const SizedBox(height: 12),
               Padding(
-                padding: const EdgeInsets.only(left: 34), // Mantém o alinhamento
+                padding: const EdgeInsets.only(left: 34),
                 child: Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -126,7 +160,6 @@ class ApplicationFieldTreeItem extends StatelessWidget {
   }
 }
 
-// Sub-componente para manter o código limpo
 class _FieldChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -146,7 +179,7 @@ class _FieldChip extends StatelessWidget {
         vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: colors.primary.withOpacity(0.08), // Fundo azul bem suave
+        color: colors.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: colors.primary.withOpacity(0.15)),
       ),

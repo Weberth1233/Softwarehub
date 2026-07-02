@@ -79,13 +79,11 @@ class ApplicationFieldSelectionBar extends StatelessWidget {
               runSpacing: 12,
               children: [
 
-                // 1. Botão de Limpar (Resolvido diretamente na View)
+                // 1. Botão de Limpar
                 OutlinedButton(
                   onPressed: selectedCount == 0
                       ? null
                       : () {
-                    // Como não podemos mexer no Controller, esvaziamos
-                    // a lista reativa do GetX diretamente por aqui!
                     controller.selectedFieldIds.clear();
                   },
                   style: OutlinedButton.styleFrom(

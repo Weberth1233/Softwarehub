@@ -62,7 +62,6 @@ class ApplicationFieldSearchCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Ocupa o espaço restante da tela
               Expanded(
                 child: TextField(
                   controller: controller.searchController,
@@ -79,7 +78,6 @@ class ApplicationFieldSearchCard extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                     ),
                     filled: true,
-                    // Fundo levemente acinzentado melhora a percepção de interatividade
                     fillColor: const Color(0xFFF8FAFC),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -105,7 +103,6 @@ class ApplicationFieldSearchCard extends StatelessWidget {
                         width: 1.5,
                       ),
                     ),
-                    // O ícone da direita (suffix) agora serve EXCLUSIVAMENTE para limpar
                     suffixIcon: Obx(() {
                       final hasSearch = controller.search.value.isNotEmpty;
 
@@ -122,8 +119,6 @@ class ApplicationFieldSearchCard extends StatelessWidget {
                           },
                         );
                       }
-
-                      // Retorna um espaço vazio se não houver texto
                       return const SizedBox.shrink();
                     }),
                   ),

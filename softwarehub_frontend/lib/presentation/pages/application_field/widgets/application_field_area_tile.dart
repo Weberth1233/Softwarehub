@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../domain/entities/application_field_entity.dart';
 import '../controllers/application_field_controller.dart';
 import 'application_field_tree_item.dart';
@@ -23,7 +22,6 @@ class ApplicationFieldAreaTile extends StatefulWidget {
 }
 
 class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
-  // Variável para controlar dinamicamente a rotação do botão de expandir
   bool _isExpanded = false;
 
   @override
@@ -36,13 +34,13 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.grey.shade200, // Borda sutil como no Figma
+          color: Colors.grey.shade200,
           width: 1,
         ),
       ),
       child: Theme(
         data: theme.copyWith(
-          dividerColor: Colors.transparent, // Remove a linha feia padrão do ExpansionTile
+          dividerColor: Colors.transparent,
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
         ),
@@ -74,7 +72,7 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
             widget.areaName,
             style: const TextStyle(
               fontWeight: FontWeight.w800,
-              color: Color(0xFF1E293B), // Cinza escuro elegante
+              color: Color(0xFF1E293B),
               fontSize: 16,
             ),
           ),
@@ -89,17 +87,15 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
               ),
             ),
           ),
-          // 2. Trailing Customizado: Checkbox + Badge + Botão de Expandir
+          // 2. Trailing Customizado:
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Mantemos o Checkbox aqui para preservar a lógica de selecionar toda a área
               Obx(() {
                 final isFullySelected =
                 widget.controller.isAreaFullySelected(widget.fields);
                 final isPartiallySelected =
                 widget.controller.isAreaPartiallySelected(widget.fields);
-
                 return Checkbox(
                   tristate: true,
                   value: isFullySelected
@@ -115,7 +111,6 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
               }),
               const SizedBox(width: 8),
 
-              // Badge "15 campos"
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
@@ -133,7 +128,7 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
               ),
               const SizedBox(width: 12),
 
-              // Botão de expandir animado
+              // Botão de expandir
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -141,7 +136,7 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: AnimatedRotation(
-                  turns: _isExpanded ? 0.5 : 0.0, // Gira 180 graus (0.5 de uma volta)
+                  turns: _isExpanded ? 0.5 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: Icon(
                     Icons.keyboard_arrow_down_rounded,
@@ -152,7 +147,7 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
               ),
             ],
           ),
-          // 3. Distribuição dos filhos em formato de Grade (Wrap + LayoutBuilder)
+          // 3. Distribuição dos filhos em formato de Grade
           children: [
             LayoutBuilder(
               builder: (context, constraints) {
@@ -162,7 +157,6 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
                     ? (constraints.maxWidth - 24) / 3
                     : constraints.maxWidth;
 
-                // 👇 A CORREÇÃO ENTRA AQUI: SizedBox forçando a largura e WrapAlignment.start
                 return SizedBox(
                   width: double.infinity,
                   child: Wrap(

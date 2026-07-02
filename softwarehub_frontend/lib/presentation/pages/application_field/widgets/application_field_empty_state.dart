@@ -9,7 +9,6 @@ class ApplicationFieldEmptyState extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      // Padding generoso para criar um respiro visual no centro da tela
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -21,7 +20,6 @@ class ApplicationFieldEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Ícone em destaque com fundo circular suave
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -29,7 +27,7 @@ class ApplicationFieldEmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.folder_off_outlined, // Ícone que remete à pasta vazia
+              Icons.folder_off_outlined,
               size: 40,
               color: colors.primary.withOpacity(0.5),
             ),
@@ -37,7 +35,7 @@ class ApplicationFieldEmptyState extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Título principal claro e direto
+          // Título principal
           const Text(
             "Nenhum campo encontrado",
             style: TextStyle(
@@ -49,7 +47,6 @@ class ApplicationFieldEmptyState extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // Subtítulo orientando o usuário sobre o que fazer a seguir
           Text(
             "Tente ajustar os filtros da sua pesquisa para encontrar o que procura.",
             style: TextStyle(

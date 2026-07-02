@@ -18,13 +18,12 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      // 1. Fundo claro padrão para destacar os cards brancos
       backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: colors.primary,
         automaticallyImplyLeading: false,
-        toolbarHeight: 80, // Aumentado levemente para o subtítulo
+        toolbarHeight: 80,
         centerTitle: false,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
@@ -74,7 +73,6 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
           ],
         ),
       ),
-      // 2. Protegemos as cores dos componentes, mas mantivemos o seu SharedBackground
       body: SharedBackground(
         child: Obx(() {
           if (controller.isLoadingList.value &&
@@ -117,7 +115,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
 
                         const SizedBox(height: 20),
 
-                        // 3. Lista de Áreas renderizada ANTES da barra de seleção
+                        // 3. Lista de Áreas renderizada
                         if (controller.applicationFields.isEmpty)
                           const ApplicationFieldEmptyState()
                         else
@@ -141,7 +139,6 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
 
                         const SizedBox(height: 20),
 
-                        // 4. Barra de Seleção na posição correta (fim da lista)
                         ApplicationFieldSelectionBar(controller: controller),
 
                         const SizedBox(height: 24),
@@ -173,7 +170,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
             Text(
               controller.errorMessage.value,
               style: TextStyle(
-                color: colors.primary, // Ajustado para contrastar com fundo claro
+                color: colors.primary,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
