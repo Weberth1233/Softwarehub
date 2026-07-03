@@ -2,15 +2,15 @@ part of '../process_detail_page.dart';
 
 extension _ProcessDetailPageMenu on _ProcessDetailPageState {
   Widget _buildDesktopSideMenu(
-    BuildContext context,
-    ProcessResponseEntity entity,
-    ProcessDetailController controller,
-  ) {
+      BuildContext context,
+      ProcessResponseEntity entity,
+      ProcessDetailController controller,
+      ) {
     void showApproveDialog(BuildContext context, ProcessResponseEntity entity) {
       Get.defaultDialog(
         title: "Confirmar finalização do processo",
         middleText:
-            "Tem certeza que deseja finalizar o processo \"${entity.title}\"?",
+        "Tem certeza que deseja finalizar o processo \"${entity.title}\"?",
         textConfirm: "Confirmar",
         textCancel: "Cancelar",
         confirmTextColor: Colors.white,
@@ -18,221 +18,206 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
         onConfirm: _isApproving
             ? null
             : () async {
-                Get.back();
+          Get.back();
 
-                await this._runAction(
-                  setLoading: (value) => _isApproving = value,
-                  action: () async {
-                    await controller.uploadStatusProcess(
-                      entity.id,
-                      "FINALIZADO",
-                    );
-                  },
-                );
-              },
+          await this._runAction(
+            setLoading: (value) => _isApproving = value,
+            action: () async {
+              await controller.uploadStatusProcess(
+                entity.id,
+                "FINALIZADO",
+              );
+            },
+          );
+        },
       );
     }
 
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.onSecondary,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Seções",
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: colors.tertiary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colors.primary.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Tipo da Propriedade Intelectual",
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.secondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  entity.ipType.name,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.tertiary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          this._buildDesktopMenuItem(
-            context,
-            index: 0,
-            icon: Icons.person_outline,
-            title: "SOLICITANTE",
-            subtitle: "Quem criou o processo",
-          ),
-          const SizedBox(height: 10),
-          this._buildDesktopMenuItem(
-            context,
-            index: 1,
-            icon: Icons.group_outlined,
-            title: "MEMBROS",
-            subtitle: "Vinculados ao processo",
-          ),
-          const SizedBox(height: 10),
-          this._buildDesktopMenuItem(
-            context,
-            index: 2,
-            icon: Icons.group_outlined,
-            title: "MEMBROS EXTERNOS",
-            subtitle: "Vinculados externos ao processo",
-          ),
-          const SizedBox(height: 10),
-          this._buildDesktopMenuItem(
-            context,
-            index: 3,
-            icon: Icons.list_alt_outlined,
-            title: "DADOS DO PROCESSO",
-            subtitle: "Formulário preenchido",
-          ),
-          const SizedBox(height: 10),
-          this._buildDesktopMenuItem(
-            context,
-            index: 4,
-            icon: Icons.attach_file_outlined,
-            title: "ANEXOS",
-            subtitle: "Arquivos do processo",
-          ),
-          const SizedBox(height: 10),
-          this._buildDesktopMenuItem(
-            context,
-            index: 5,
-            icon: Icons.approval,
-            title: "CORREÇÃO",
-            subtitle: "Correções do processo",
-          ),
-          const SizedBox(height: 10),
-          this._buildDesktopMenuItem(
-            context,
-            index: 6,
-            icon: Icons.category_outlined,
-            title: "CLASSIFICAÇÃO DE NICE",
-            subtitle: "Classe vinculada ao processo",
-          ),
-          const SizedBox(height: 10),
-          this._buildDesktopMenuItem(
-            context,
-            index: 7,
-            icon: Icons.pie_chart_outline,
-            title: "DISTRIBUIÇÃO DE COTAS",
-            subtitle: "Percentuais de royalties",
-          ),
+    // A variável cardDecoration foi removida daqui,
+    // pois o ProcessDetailCard já cuida de todo o visual!
 
-          if (controller.isAdmin) ...[
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 12),
-            Text(
-              "Ações Administrativas",
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.secondary,
-                fontWeight: FontWeight.bold,
-                fontSize: 19,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        // CARD DE SEÇÕES
+        ProcessDetailCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 16, top: 4),
+                child: Text(
+                  "Seções",
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: colors.tertiary,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
+              _buildDesktopMenuItem(
+                context,
+                index: 0,
+                icon: Icons.person_outline,
+                title: "SOLICITANTE",
+                subtitle: "Quem criou o processo",
+              ),
+              const SizedBox(height: 4),
+              _buildDesktopMenuItem(
+                context,
+                index: 1,
+                icon: Icons.group_outlined,
+                title: "MEMBROS",
+                subtitle: "Equipe interna",
+              ),
+              const SizedBox(height: 4),
+              _buildDesktopMenuItem(
+                context,
+                index: 2,
+                icon: Icons.group_add_outlined,
+                title: "MEMBROS EXTERNOS",
+                subtitle: "Convidados e parceiros",
+              ),
+              const SizedBox(height: 4),
+              _buildDesktopMenuItem(
+                context,
+                index: 3,
+                icon: Icons.description_outlined,
+                title: "DADOS DO PROCESSO",
+                subtitle: "Informações gerais",
+              ),
+              const SizedBox(height: 4),
+              _buildDesktopMenuItem(
+                context,
+                index: 4,
+                icon: Icons.attach_file_outlined,
+                title: "ANEXOS",
+                subtitle: "Arquivos e documentos",
+              ),
+              const SizedBox(height: 4),
+              _buildDesktopMenuItem(
+                context,
+                index: 5,
+                icon: Icons.edit_outlined,
+                title: "CORREÇÃO",
+                subtitle: "Ajustes necessários",
+              ),
+              const SizedBox(height: 4),
+              _buildDesktopMenuItem(
+                context,
+                index: 6,
+                icon: Icons.sell_outlined,
+                title: "CLASSIFICAÇÃO DE NICE",
+                subtitle: "Classes e produtos",
+              ),
+              const SizedBox(height: 4),
+              _buildDesktopMenuItem(
+                context,
+                index: 7,
+                icon: Icons.pie_chart_outline,
+                title: "DISTRIBUIÇÃO DE COTAS",
+                subtitle: "Percentuais de royalties",
+              ),
+            ],
+          ),
+        ),
+
+        // CARD DE AÇÕES ADMINISTRATIVAS
+        if (controller.isAdmin) ...[
+          const SizedBox(height: 16),
+          ProcessDetailCard(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Text(
+                  "Ações Administrativas",
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.tertiary,
+                    fontSize: 19,
+                  ),
+                ),
+                const SizedBox(height: 5),
                 ElevatedButton(
                   onPressed: _isClassifying
                       ? null
                       : () async {
-                          final result = await Get.toNamed(
-                            AppRoutes.processApplicationFieldById(entity.id),
+                    final result = await Get.toNamed(
+                      AppRoutes.processApplicationFieldById(entity.id),
+                    );
+
+                    if (result != null && result is List) {
+                      final selectedIds = result
+                          .map((item) => int.tryParse(item.toString()))
+                          .whereType<int>()
+                          .toList();
+
+                      if (selectedIds.isEmpty) {
+                        AppToast.error(
+                          "Selecione pelo menos um campo de aplicação.",
+                        );
+                        return;
+                      }
+
+                      await this._runAction(
+                        setLoading: (value) => _isClassifying = value,
+                        action: () async {
+                          await controller.classifyProcess(
+                            entity.id,
+                            selectedIds,
+                            isEdit: true,
                           );
-
-                          if (result != null && result is List) {
-                            final selectedIds = result
-                                .map((item) => int.tryParse(item.toString()))
-                                .whereType<int>()
-                                .toList();
-
-                            print(
-                              "Campos selecionados na edição: $selectedIds",
-                            );
-
-                            if (selectedIds.isEmpty) {
-                              AppToast.error(
-                                "Selecione pelo menos um campo de aplicação.",
-                              );
-                              return;
-                            }
-
-                            await this._runAction(
-                              setLoading: (value) => _isClassifying = value,
-                              action: () async {
-                                await controller.classifyProcess(
-                                  entity.id,
-                                  selectedIds,
-                                  isEdit: true,
-                                );
-                              },
-                            );
-                          }
                         },
+                      );
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
+                    backgroundColor: const Color(0XFF004093),
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 2,
-                      horizontal: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                    child: Text(
-                      _isClassifying
-                          ? "Classificando..."
-                          : "Classificação de Nice",
-                      style: TextStyle(
-                        color: colors.onSecondary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    elevation: 2,
+                  ),
+                  child: Text(
+                    _isClassifying
+                        ? "Classificando..."
+                        : "Classificação de Nice",
+                    style: TextStyle(
+                      color: colors.onSecondary,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: entity.status == "FINALIZADO" || _isApproving
                       ? null
                       : () {
-                          showApproveDialog(context, entity);
-                        },
+                    showApproveDialog(context, entity);
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: const Color(0xFF0CCA52),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    elevation: 2,
                   ),
                   child: Text(
                     _isApproving ? "Aprovando..." : "Aprovar",
-                    style: TextStyle(color: colors.onSecondary),
+                    style: TextStyle(
+                      color: colors.onSecondary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
+                const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () async {
                     final result = await Get.toNamed(
@@ -241,56 +226,65 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
                     );
 
                     if (result != null && result is int) {
-                      print("Atualizando o processo");
                       await controller.fetchProcess(result);
                     }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
                   ),
                   child: Text(
                     "Devolver",
-                    style: TextStyle(color: colors.onSecondary),
+                    style: TextStyle(
+                      color: colors.onSecondary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
   }
 
   Widget _buildDesktopMenuItem(
-    BuildContext context, {
-    required int index,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
+      BuildContext context, {
+        required int index,
+        required IconData icon,
+        required String title,
+        required String subtitle,
+      }) {
     final colors = Theme.of(context).colorScheme;
     final isSelected = _selectedIndex == index;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       onTap: () => setState(() => _selectedIndex = index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? colors.primary.withOpacity(0.10) : null,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? colors.primary.withOpacity(0.35)
-                : Colors.black.withOpacity(0.06),
-          ),
+          color: isSelected ? const Color(0xFFF3F4F6) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 26,
-              color: isSelected ? colors.primary : colors.secondary,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.white : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isSelected ? colors.primary : colors.secondary,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -301,20 +295,23 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
                     title,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w900,
-                      color: colors.tertiary,
+                      color: isSelected ? colors.tertiary : colors.secondary.withOpacity(0.8),
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: colors.secondary),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.secondary.withOpacity(0.6),
+                    ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: colors.secondary),
+            Icon(
+              Icons.chevron_right,
+              color: isSelected ? colors.primary : Colors.transparent,
+            ),
           ],
         ),
       ),
@@ -322,11 +319,11 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
   }
 
   Widget _buildMobileMenuItem(
-    BuildContext context, {
-    required int index,
-    required IconData icon,
-    required String title,
-  }) {
+      BuildContext context, {
+        required int index,
+        required IconData icon,
+        required String title,
+      }) {
     final colors = Theme.of(context).colorScheme;
     final isSelected = _selectedIndex == index;
 
@@ -349,12 +346,12 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
             ),
             boxShadow: isSelected
                 ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ]
                 : [],
           ),
           child: Row(

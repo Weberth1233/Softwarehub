@@ -1,44 +1,30 @@
 part of '../process_detail_page.dart';
 
 extension _ProcessDetailPageLayout on _ProcessDetailPageState {
-  Widget _buildWideMasterDetail(
-    BuildContext context,
-    ProcessResponseEntity entity,
-    ProcessDetailController controller,
-    double availableWidth,
-  ) {
-    final colors = Theme.of(context).colorScheme;
-    const maxLayoutWidth = 1500.0;
-    final totalWidth = availableWidth < maxLayoutWidth
-        ? availableWidth
-        : maxLayoutWidth;
-    const menuWidth = 300.0;
-    const gap = 24.0;
-    final panelWidth = totalWidth - menuWidth - gap;
 
+  // ===========================================================================
+  // LAYOUT DESKTOP (Telas Grandes)
+  // ===========================================================================
+  Widget _buildWideMasterDetail(
+      BuildContext context,
+      ProcessResponseEntity entity,
+      ProcessDetailController controller,
+      double availableWidth, // Mantemos a assinatura para não quebrar a page principal
+      ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: menuWidth,
+          width: 400,
           child: this._buildDesktopSideMenu(context, entity, controller),
         ),
-        const SizedBox(width: gap),
-        SizedBox(
-          width: panelWidth,
-          child: Container(
+
+        const SizedBox(width: 24),
+
+        // Utilizando o componente padronizado para o card de conteúdo
+        Expanded(
+          child: ProcessDetailCard(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: colors.onSecondary,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
             child: this._buildSelectedContent(context, entity),
           ),
         ),
@@ -47,15 +33,15 @@ extension _ProcessDetailPageLayout on _ProcessDetailPageState {
   }
 
   Widget _buildNarrowMasterDetail(
-    BuildContext context,
-    ProcessResponseEntity entity,
-    ProcessDetailController controller,
-  ) {
+      BuildContext context,
+      ProcessResponseEntity entity,
+      ProcessDetailController controller,
+      ) {
     void showApproveDialog(BuildContext context, ProcessResponseEntity entity) {
       Get.defaultDialog(
         title: "Confirmar finalização do processo",
         middleText:
-            "Tem certeza que deseja finalizar o processo \"${entity.title}\"?",
+        "Tem certeza que deseja finalizar o processo \"${entity.title}\"?",
         textConfirm: "Confirmar",
         textCancel: "Cancelar",
         confirmTextColor: Colors.white,
@@ -63,18 +49,18 @@ extension _ProcessDetailPageLayout on _ProcessDetailPageState {
         onConfirm: _isApproving
             ? null
             : () async {
-                Get.back();
+          Get.back();
 
-                await this._runAction(
-                  setLoading: (value) => _isApproving = value,
-                  action: () async {
-                    await controller.uploadStatusProcess(
-                      entity.id,
-                      "FINALIZADO",
-                    );
-                  },
-                );
-              },
+          await this._runAction(
+            setLoading: (value) => _isApproving = value,
+            action: () async {
+              await controller.uploadStatusProcess(
+                entity.id,
+                "FINALIZADO",
+              );
+            },
+          );
+        },
       );
     }
 
@@ -84,13 +70,10 @@ extension _ProcessDetailPageLayout on _ProcessDetailPageState {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        // Utilizando o componente para o card do Tipo de Propriedade no Mobile
+        ProcessDetailCard(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colors.onSecondary,
-            borderRadius: BorderRadius.circular(16),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -171,123 +154,113 @@ extension _ProcessDetailPageLayout on _ProcessDetailPageState {
         ),
         const SizedBox(height: 16),
 
-        Container(
+        // Área de Conteúdo Principal (Mobile) refatorada com o componente
+        ProcessDetailCard(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: colors.onSecondary,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
           child: this._buildSelectedContent(context, entity),
         ),
 
+        // Ações Administrativas (No final da página no Mobile)
         if (controller.isAdmin) ...[
           const SizedBox(height: 24),
           Text(
             "Ações Administrativas",
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colors.onSecondary,
-              fontWeight: FontWeight.bold,
+              color: colors.tertiary,
+              fontWeight: FontWeight.w900,
             ),
           ),
           const SizedBox(height: 12),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: entity.status == "FINALIZADO" || _isApproving
-                      ? null
-                      : () {
-                          showApproveDialog(context, entity);
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Text(
-                    _isApproving ? "Aprovando..." : "Aprovar",
-                    style: TextStyle(
-                      color: colors.onSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _isClassifying
-                      ? null
-                      : () async {
-                          final result = await Get.toNamed(
-                            AppRoutes.processApplicationFieldById(entity.id),
-                          );
+              ElevatedButton(
+                onPressed: _isClassifying
+                    ? null
+                    : () async {
+                  final result = await Get.toNamed(
+                    AppRoutes.processApplicationFieldById(entity.id),
+                  );
 
-                          if (result is List<int>) {
-                            await this._runAction(
-                              setLoading: (value) => _isClassifying = value,
-                              action: () async {
-                                await controller.classifyProcess(
-                                  entity.id,
-                                  result,
-                                );
-                              },
-                            );
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 20,
-                    ),
-                    child: Text(
-                      _isClassifying
-                          ? "Classificando..."
-                          : "Classificação de Nice",
-                      style: TextStyle(
-                        color: colors.onSecondary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final result = await Get.toNamed(
-                      AppRoutes.processJustificationById(entity.id),
-                      arguments: {'processId': entity.id},
+                  if (result is List<int>) {
+                    await this._runAction(
+                      setLoading: (value) => _isClassifying = value,
+                      action: () async {
+                        await controller.classifyProcess(
+                          entity.id,
+                          result,
+                        );
+                      },
                     );
-
-                    if (result != null && result is int) {
-                      print("Atualizando o processo");
-                      await controller.fetchProcess(result);
-                    }
-                  },
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    "Devolver",
-                    style: TextStyle(
-                      color: colors.onSecondary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  _isClassifying
+                      ? "Classificando..."
+                      : "Classificação de Nice",
+                  style: TextStyle(
+                    color: colors.onSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: entity.status == "FINALIZADO" || _isApproving
+                    ? null
+                    : () {
+                  showApproveDialog(context, entity);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF22C55E),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  _isApproving ? "Aprovando..." : "Aprovar",
+                  style: TextStyle(
+                    color: colors.onSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () async {
+                  final result = await Get.toNamed(
+                    AppRoutes.processJustificationById(entity.id),
+                    arguments: {'processId': entity.id},
+                  );
+
+                  if (result != null && result is int) {
+                    await controller.fetchProcess(result);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  "Devolver",
+                  style: TextStyle(
+                    color: colors.onSecondary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
