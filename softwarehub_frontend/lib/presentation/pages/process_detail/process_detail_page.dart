@@ -8,7 +8,6 @@ import '../../shared/utils/app_toast.dart';
 import '../../shared/widgets/shared_background.dart'; // Novo fundo importado aqui
 import 'controllers/process_detail_controller.dart';
 
-// As partes (parts) devem sempre vir depois de todos os imports
 part 'widgets/process_detail_layout.dart';
 part 'widgets/process_detail_menu.dart';
 part 'widgets/process_detail_content.dart';
