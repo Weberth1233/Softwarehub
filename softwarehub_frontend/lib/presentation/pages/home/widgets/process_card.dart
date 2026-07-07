@@ -49,7 +49,7 @@ class ProcessCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16), // Espaçamento da borda azul externa
             decoration: BoxDecoration(
-              color: _buttonBlue, // Azul de fundo do card principal
+              color: Color(0xFFCBD5E1),
               borderRadius: BorderRadius.circular(_outerRadius),
               boxShadow: [
                 BoxShadow(
