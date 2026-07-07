@@ -5,7 +5,7 @@ import '../../../domain/entities/process/process_response_entity.dart';
 import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
 import '../../core/routes/app_routes.dart';
 import '../../shared/utils/app_toast.dart';
-import '../../shared/widgets/shared_background.dart'; // Novo fundo importado aqui
+import '../../shared/widgets/shared_background.dart';
 import 'controllers/process_detail_controller.dart';
 
 part 'widgets/process_detail_layout.dart';
@@ -76,11 +76,11 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    // Nova cor de fundo baseada no design (um azul/cinza bem claro)
+
     final backgroundColor = const Color(0xFFE8EDF2);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: const Color(0xFFCBD5E1),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: colors.primary,

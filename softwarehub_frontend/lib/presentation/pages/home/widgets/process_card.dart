@@ -12,6 +12,18 @@ class ProcessCard extends StatelessWidget {
 
   final HomeController processController = Get.find<HomeController>();
 
+  static const double _cardWidth = 440;
+  static const double _cardHeight = 250;
+  static const double _outerRadius = 10;
+  static const double _innerRadius = 5;
+
+  // Cores estruturais do card
+  static const Color _orange = Color(0xFFCBD5E1);
+  static const Color _titleColor = Color(0xFF0F172A);
+  static const Color _subtitleColor = Color(0xFF1E293B);
+  static const Color _buttonBlue = Color(0XFF004093);
+  static const Color _buttonRed = Color(0xFFDC2626);
+
   @override
   Widget build(BuildContext context) {
     final colorTheme = Theme.of(context).colorScheme;
@@ -27,279 +39,246 @@ class ProcessCard extends StatelessWidget {
     final bool hasJustifications =
         justificationCount > 0 && item.statusLabel == "Em correção";
 
-    String getFirstTwoNames(String? fullName) {
-      if (fullName == null || fullName.trim().isEmpty) {
-        return "Usuário";
-      }
-
-      final names = fullName.trim().split(RegExp(r'\s+'));
-
-      if (names.length >= 2) {
-        return "${names[0]} ${names[1]}";
-      }
-
-      return names.first;
-    }
-
-    return SizedBox(
-      width: 400,
-      height: 220,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.20),
-              blurRadius: 18,
-              spreadRadius: 1,
-              offset: const Offset(0, 8),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 4,
-              spreadRadius: 0,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-
-        child: InkWell(
-          onTap: () {
-            Get.toNamed(
-              AppRoutes.processDetailById(item.id),
-              preventDuplicates: false,
-            );
-          },
-          child: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(color: colorTheme.onSecondary),
-              ),
-
-              Positioned(
-                right: -10,
-                bottom: -10,
-                child: Icon(
-                  Icons.folder_copy_rounded,
-                  size: 120,
-                  color: colorTheme.onSurface.withValues(alpha: 0.3),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: _cardWidth,
+          height: _cardHeight,
+          child: Container(
+            padding: const EdgeInsets.all(16), // Espaçamento da borda azul externa
+            decoration: BoxDecoration(
+              color: _buttonBlue, // Azul de fundo do card principal
+              borderRadius: BorderRadius.circular(_outerRadius),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 6),
                 ),
+              ],
+            ),
+            child: PhysicalShape(
+              color: Colors.white,
+              clipper: const _FolderTabClipper(
+                radius: _innerRadius,
               ),
-
-              Positioned(
-                bottom: 20,
-                right: 10,
-                child: _actionButton(
-                  context: context,
-                  icon: Icons.delete_outline,
-                  color: colorTheme.onSurface,
-                  tooltip: "Excluir processo",
-                  onTap: () {
-                    _showDeleteDialog(context);
-                  },
-                ),
-              ),
-
-              /// EDIT BUTTON
-              Positioned(
-                bottom: 20,
-                right: 50,
-                child: _actionButton(
-                  context: context,
-                  icon: Icons.edit_outlined,
-                  color: colorTheme.onSurface,
-                  tooltip: "Editar processo",
+              elevation: 8.0,
+              shadowColor: Colors.black.withOpacity(0.7),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
                   onTap: () {
                     Get.toNamed(
-                      AppRoutes.process,
-                      arguments: {'isEditMode': true, 'processId': item.id},
+                      AppRoutes.processDetailById(item.id),
+                      preventDuplicates: false,
                     );
                   },
-                ),
-              ),
-              if (hasJustifications)
-                Positioned(
-                  bottom: 20,
-                  right: 90,
-                  child: _actionButton(
-                    context: context,
-                    icon: Icons.notifications_active_outlined,
-                    color: Colors.orange,
-                    tooltip:
-                        "$justificationCount justificativa(s) vinculada(s) ao processo",
-                    badgeCount: justificationCount,
-                    onTap: () {
-                      Get.toNamed(
-                        AppRoutes.processDetailById(item.id),
-                        preventDuplicates: false,
-                        arguments: {'initialSectionIndex': 5},
-                      );
-                    },
-                  ),
-                ),
-
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorTheme.onSurface,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.20),
-                            blurRadius: 18,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 8),
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 4,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        item.ipType.name.toUpperCase(),
-                        style: textTheme.bodySmall!.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    Text(
-                      item.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodyLarge!.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    Row(
-                      spacing: 20,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          "#${item.id.toString()}",
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          getFirstTwoNames(item.creator.fullName),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              size: 14,
-                              color: colorTheme.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              dateFormatted,
-                              style: textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // TAG DE IDENTIFICAÇÃO (LARANJA)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _orange,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  item.ipType.name.toUpperCase(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
                               ),
+
+                              const SizedBox(height: 18),
+
+                              // TÍTULO DO PROCESSO
+                              Text(
+                                item.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 24,
+                                  height: 1.2,
+                                  color: _titleColor,
+                                ),
+                              ),
+
+                              const SizedBox(height: 6),
+
+                              // ID PROCESS
+                              Text(
+                                "#${item.id}",
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                  color: _subtitleColor,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              // DATA DE CRIAÇÃO
+                              Text(
+                                "Data de criação $dateFormatted",
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                  color: _subtitleColor,
+                                ),
+                              ),
+
+                              const Spacer(),
+
+                              // Tag de Status (Posicionada na base esquerda)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(item.status),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  item.statusLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        // 👉 COLUNA DA DIREITA: Apenas os botões de ação empilhados
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _actionButton(
+                              context: context,
+                              icon: Icons.delete_rounded,
+                              backgroundColor: _buttonRed,
+                              tooltip: "Excluir processo",
+                              onTap: () {
+                                _showDeleteDialog(context);
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            _actionButton(
+                              context: context,
+                              icon: Icons.edit_rounded,
+                              backgroundColor: _buttonBlue,
+                              tooltip: "Editar processo",
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.process,
+                                  arguments: {
+                                    'isEditMode': true,
+                                    'processId': item.id,
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            _actionButton(
+                              context: context,
+                              icon: Icons.format_list_bulleted_rounded,
+                              backgroundColor: _buttonBlue,
+                              tooltip: hasJustifications
+                                  ? "$justificationCount justificativa(s) vinculada(s) ao processo"
+                                  : "Ver detalhes do processo",
+                              badgeCount:
+                              hasJustifications ? justificationCount : null,
+                              onTap: () {
+                                Get.toNamed(
+                                  AppRoutes.processDetailById(item.id),
+                                  preventDuplicates: false,
+                                  arguments: hasJustifications
+                                      ? {'initialSectionIndex': 5}
+                                      : null,
+                                );
+                              },
                             ),
                           ],
                         ),
                       ],
                     ),
-
-                    Divider(color: Colors.white.withOpacity(0.15)),
-
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(item.status),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            item.statusLabel,
-                            style: context.textTheme.bodyMedium!.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
   Widget _actionButton({
     required BuildContext context,
     required IconData icon,
-    required Color color,
+    required Color backgroundColor,
     required String tooltip,
     required VoidCallback onTap,
     int? badgeCount,
   }) {
     final bool hasBadge = badgeCount != null && badgeCount > 0;
-    final colorTheme = Theme.of(context).colorScheme;
 
     return Tooltip(
       message: tooltip,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              width: 37,
+              height: 37,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(8),
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: colorTheme.tertiary, size: 20),
+              child: Icon(icon, color: Colors.white, size: 22),
             ),
-
             if (hasBadge)
               Positioned(
-                top: -7,
-                right: -7,
+                top: -4,
+                right: -4,
                 child: Container(
                   constraints: const BoxConstraints(
                     minWidth: 18,
                     minHeight: 18,
                   ),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
+                    horizontal: 4,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
@@ -329,7 +308,7 @@ class ProcessCard extends StatelessWidget {
     Get.defaultDialog(
       title: "Confirmar exclusão",
       middleText:
-          "Tem certeza que deseja excluir o processo \"${item.title}\"?",
+      "Tem certeza que deseja excluir o processo \"${item.title}\"?",
       textConfirm: "Excluir",
       textCancel: "Cancelar",
       confirmTextColor: Colors.white,
@@ -345,30 +324,55 @@ class ProcessCard extends StatelessWidget {
     switch (status) {
       case "PENDENTE_DISTRIBUICAO_COTAS":
         return const Color.fromARGB(255, 228, 206, 11);
-
       case "COTAS_DISTRIBUIDAS":
         return Colors.blue;
-
       case "CORRECAO":
         return Colors.red;
-
       case "CORRIGIDO":
         return Colors.orange;
-
       case "CLASSIFICADO":
         return Colors.purple;
-
       case "FINALIZADO":
         return const Color.fromARGB(255, 54, 149, 57);
-
       case "INATIVO":
         return Colors.grey;
-
       case "PENDENTE_DOCUMENTACAO":
         return Colors.black;
-
       default:
         return Colors.grey;
     }
+  }
+}
+
+/// Clipper responsável pelo efeito "Aba de Pasta" do Figma.
+class _FolderTabClipper extends CustomClipper<Path> {
+  final double radius;
+
+  const _FolderTabClipper({required this.radius});
+
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    final double tabWidth = size.width * 0.52;
+    final double slopeWidth = size.width * 0.08;
+    final double tabDrop = 24.0;
+
+    path.moveTo(0, radius);
+    path.arcToPoint(Offset(radius, 0), radius: Radius.circular(radius));
+    path.lineTo(tabWidth, 0);
+    path.lineTo(tabWidth + slopeWidth, tabDrop);
+    path.lineTo(size.width - radius, tabDrop);
+    path.arcToPoint(Offset(size.width, tabDrop + radius), radius: Radius.circular(radius));
+    path.lineTo(size.width, size.height - radius);
+    path.arcToPoint(Offset(size.width - radius, size.height), radius: Radius.circular(radius));
+    path.lineTo(radius, size.height);
+    path.arcToPoint(Offset(0, size.height - radius), radius: Radius.circular(radius));
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant _FolderTabClipper oldClipper) {
+    return oldClipper.radius != radius;
   }
 }

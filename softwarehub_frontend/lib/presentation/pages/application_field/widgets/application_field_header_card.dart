@@ -26,11 +26,20 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15), // Tom neutro e suave
+            blurRadius: 10,                        // Espalhamento da sombra
+            spreadRadius: 0,                       // Expansão da sombra
+            offset: const Offset(0, 8),            // Deslocamento: Eixo X(0), Eixo Y(4)
+          ),
+        ],
+
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- PARTE SUPERIOR: Cabeçalho com Ícone ---
+
           Row(
             children: [
               Container(
@@ -76,7 +85,6 @@ class ApplicationFieldHeaderCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          //  Cards de Estatísticas
           isDesktop
               ? Row(
             children: [

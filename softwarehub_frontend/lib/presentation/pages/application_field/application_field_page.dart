@@ -18,7 +18,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+      backgroundColor: const Color(0xFFCBD5E1),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: colors.primary,
@@ -34,12 +34,12 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
               width: 46,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: colors.onSecondary.withOpacity(0.15),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  icon: Icon(Icons.arrow_back, color: colors.onSecondary),
+                  icon: Icon(Icons.arrow_back, color: colors.primary),
                   onPressed: () => Get.back(),
                 ),
               ),
@@ -63,7 +63,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
             }),
             const SizedBox(height: 2),
             Text(
-              "Gerencie áreas e campos cadastrados",
+              "Selecione áreas e campos cadastrados",
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colors.onSecondary.withOpacity(0.8),
                 fontSize: 14,

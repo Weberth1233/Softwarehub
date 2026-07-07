@@ -22,6 +22,17 @@ class ApplicationFieldSelectionBar extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: Colors.grey.shade200),
+
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              spreadRadius: 0,
+              offset: const Offset(0, 8),
+            ),
+          ],
+
         ),
         child: Wrap(
           spacing: 16,

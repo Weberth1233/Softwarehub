@@ -37,6 +37,17 @@ class _ApplicationFieldAreaTileState extends State<ApplicationFieldAreaTile> {
           color: Colors.grey.shade200,
           width: 1,
         ),
+
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 10,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+        ],
+
       ),
       child: Theme(
         data: theme.copyWith(
