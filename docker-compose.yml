@@ -5,27 +5,35 @@ services:
     image: postgres:16.3
     container_name: nitsrpidb
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
+      POSTGRES_USER: nitsrpi_user
       POSTGRES_DB: nitsrpi
-    ports:                
-      - "5432:5432"
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - nitsrpi-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nitsrpi_user -d nitsrpi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4:8.9
     container_name: pgadmin4-NIT
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin_password
+    secrets:
+      - pgadmin_password
     ports:
-      - "15432:80"
+      - "127.0.0.1:15432:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - nitsrpi-network
     restart: unless-stopped
@@ -36,36 +44,39 @@ services:
       dockerfile: Dockerfile
     container_name: nitsrpi-backend
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - nitsrpi-network
     restart: unless-stopped
-    env_file:
-      - ./softwarehub-backend/.env
     environment:
-      JWT_SECRET: my-secret-key
       SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nitsrpi
+      SPRING_DATASOURCE_USERNAME: nitsrpi_user
+      SPRING_CONFIG_IMPORT: optional:configtree:/run/secrets/
+    secrets:
+      - source: db_password
+        target: spring.datasource.password
+      - source: jwt_secret
+        target: jwt.secret
     volumes:
       - ./softwarehub-backend/uploads:/app/uploads
 
-  # frontend:
-  #  build:
-  #    context: ./softwarehub_frontend # Caminho para a pasta do Flutter
-  #    dockerfile: Dockerfile
-  #  container_name: nitsrpi-frontend
-  #  ports:
-  #    - "80:80" # Acessível em http://localhost
-  #  depends_on:
-  #    - backend
-  #  networks:
-  #    - nitsrpi-network
-  #  restart: unless-stopped
-    
 networks:
   nitsrpi-network:
     driver: bridge
-
+ 
 volumes:
   pgdata:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+
+  pgadmin_password:
+    file: ./secrets/pgadmin_password.txt
+
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt

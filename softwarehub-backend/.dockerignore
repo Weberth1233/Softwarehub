@@ -1,0 +1,11 @@
+.env
+*.env
+secrets/
+.git
+.gitignore
+target/
+logs/
+*.log
+.idea/
+.vscode/
+.DS_Store

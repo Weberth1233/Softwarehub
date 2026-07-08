@@ -1,19 +1,21 @@
 #server:
 #  port: 8081
 
-# Configurações Customizadas do Sistema
 file:
   upload-dir: ./uploads
 
-# Configurações do Spring FrameworkprocessOptional
 spring:
+  config:
+    import: optional:configtree:/run/secrets/
+
   application:
     name: srpi
+
   mail:
-    host: smtp-relay.brevo.com'
+    host: smtp-relay.brevo.com
     port: 587
     username: a374cd001@smtp-brevo.com
-    password: ${SENDINBLUE_SMTP_KEY}
+    password: ${sendinblue.smtp.key}
     properties:
       mail:
         smtp:
@@ -21,34 +23,27 @@ spring:
           starttls:
             enable: true
 
-  # Banco de Dados PostgreSQL
   datasource:
-#    url: jdbc:postgresql://localhost:5432/nitsrpi
     url: jdbc:postgresql://postgres:5432/nitsrpi
-    username: postgres
-    password: postgres
+    #    url: jdbc:postgresql://localhost:5432/nitsrpi
+    username: nitsrpi_user
     driver-class-name: org.postgresql.Driver
 
-  # Configurações de JPA e Hibernate
   jpa:
     show-sql: true
     hibernate:
-      # Como você está usando 'none', lembre-se de criar as tabelas manualmente no banco
-     ddl-auto: update
-    #  ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  # Configuração de Upload de Arquivos
   servlet:
     multipart:
       enabled: true
-      max-file-size: 10MB      # Tamanho máximo de CADA arquivo
-      max-request-size: 10MB   # Tamanho máximo da REQUISIÇÃO total
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-# Configuração de Logs (Opcional, ajuda a debugar erros de banco)
 logging:
   level:
     org.hibernate.SQL: DEBUG
@@ -57,7 +52,4 @@ logging:
 api:
   security:
     token:
-      secret: ${JWT_SECRET:my-secret-key}
-
-
-
+      secret: ${jwt.secret}

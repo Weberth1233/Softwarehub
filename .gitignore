@@ -1,3 +1,4 @@
 .vscode/
-.env
 secrets/
+.env
+softwarehub-backend/.env
