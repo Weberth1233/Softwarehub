@@ -17,7 +17,7 @@ class IpTypesRemoteDataSourceImpl implements IIpTypesRemoteDataSource {
   @override
   Future<List<IpTypeEntity>> getList() {
     return helper.getList<IpTypeEntity>(
-      url: "${BaseUrl.urlWithHttp}/ip_types",
+      url: "${BaseUrl.urlWithHttp}/ip-types",
       fromJson: (json){
         return IpTypeModel.fromJson(json).toEntity();
       },
