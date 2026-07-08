@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'percentage_field.dart';
 import 'share_form_model.dart';
 

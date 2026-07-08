@@ -19,186 +19,193 @@ class ProcessRoyaltyDistributionPage
 
     // 1. O Container cor sólida
     return Container(
-        color: const Color(0xFFCBD5E1),
+      color: const Color(0xFFCBD5E1),
 
-        child: SharedBackground(
+      child: SharedBackground(
 
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
 
-      // 1. Nova AppBar Branca com Subtítulo
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: ThemeColor.primaryColor,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 80,
-        title: Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: brandBlue),
-                onPressed: () {
-                  final process = controller.process.value;
-                  if (process != null) {
-                    Get.back(result: process.id);
-                  } else {
-                    Get.back();
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+          // 1. Nova AppBar Branca com Subtítulo
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: ThemeColor.primaryColor,
+            automaticallyImplyLeading: false,
+            toolbarHeight: 80,
+            title: Row(
               children: [
-                const Text(
-                  "Distribuição de cotas",
-                  style: TextStyle(
+                Container(
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: brandBlue),
+                    onPressed: () {
+                      final process = controller.process.value;
+                      if (process != null) {
+                        Get.back(result: process.id);
+                      } else {
+                        Get.back();
+                      }
+                    },
                   ),
                 ),
-                Text(
-                  "Defina o percentual de cada participante",
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 14,
-                  ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Distribuição de cotas",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Defina o percentual de cada participante",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        child: Form(
-          key: controller.formKey,
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      // 2. Novo Dashboard Superior
-                      Obx(
-                        () => _TopDashboard(
-                          processId: controller.processId,
-                          processTitle: controller.processTitle,
-                          totalPercentage: controller.totalPercentage,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-
-                      const _InfoBanners(),
-                      const SizedBox(height: 24),
-
-                      // 4. Container de Colaboradores
-                      Container(
-                        decoration: BoxDecoration(
-                          color: bgLightBlue,
-                          border: Border.all(
-                            color: Colors.blue.withOpacity(0.3),
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text(
-                                "Defina o percentual de cada colaborador",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                   fontWeight: FontWeight.w700,
-                                  color: textDark,
-                                ),
-                              ),
+          ),
+          body: SafeArea(
+            child: Form(
+              key: controller.formKey,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          // 2. Novo Dashboard Superior
+                          Obx(
+                                () => _TopDashboard(
+                              processId: controller.processId,
+                              processTitle: controller.processTitle,
+                              totalPercentage: controller.totalPercentage,
                             ),
-                            const Divider(height: 1, color: Colors.blue),
-                            Obx(() {
-                              if (controller.isLoading.value) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(32.0),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                              }
-                              if (controller.shares.isEmpty) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(32.0),
-                                  child: Center(
-                                    child: Text("Nenhuma cota encontrada."),
-                                  ),
-                                );
-                              }
+                          ),
+                          const SizedBox(height: 16),
 
-                              // Filtramos a universidade pois ela já está no banner estático
-                              final editableShares = controller.shares
-                                  .where((s) => s.type != ShareType.university)
-                                  .toList();
 
-                              return ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: editableShares.length,
-                                separatorBuilder: (_, __) =>
+                          const _InfoBanners(),
+                          const SizedBox(height: 24),
+
+                          // 4. Container de Colaboradores
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: Colors.blue.withOpacity(0.3),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Text(
+                                    "Defina o percentual de cada colaborador",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: textDark,
+                                    ),
+                                  ),
+                                ),
+                                const Divider(height: 1, color: Colors.blue),
+                                Obx(() {
+                                  if (controller.isLoading.value) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(32.0),
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
+                                  if (controller.shares.isEmpty) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(32.0),
+                                      child: Center(
+                                        child: Text("Nenhuma cota encontrada."),
+                                      ),
+                                    );
+                                  }
+
+                                  // Filtramos a universidade pois ela já está no banner estático
+                                  final editableShares = controller.shares
+                                      .where((s) => s.type != ShareType.university)
+                                      .toList();
+
+                                  return ListView.separated(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: editableShares.length,
+                                    separatorBuilder: (_, __) =>
                                     const Divider(height: 1),
-                                itemBuilder: (context, index) {
-                                  final share = editableShares[index];
-                                  // Pegamos o index real no controller para os métodos funcionarem
-                                  final realIndex = controller.shares.indexOf(
-                                    share,
-                                  );
+                                    itemBuilder: (context, index) {
+                                      final share = editableShares[index];
+                                      // Pegamos o index real no controller para os métodos funcionarem
+                                      final realIndex = controller.shares.indexOf(
+                                        share,
+                                      );
 
-                                  return _CollaboratorRow(
-                                    share: share,
-                                    onSliderChanged: (val) =>
-                                        controller.updatePercentage(
-                                          realIndex,
-                                          val,
-                                          fromText: false,
-                                        ),
-                                    onTextChanged: (val) =>
-                                        controller.updatePercentage(
-                                          realIndex,
-                                          val,
-                                          fromText: true,
-                                        ),
+                                      return _CollaboratorRow(
+                                        share: share,
+                                        onSliderChanged: (val) =>
+                                            controller.updatePercentage(
+                                              realIndex,
+                                              val,
+                                              fromText: false,
+                                            ),
+                                        onTextChanged: (val) =>
+                                            controller.updatePercentage(
+                                              realIndex,
+                                              val,
+                                              fromText: true,
+                                            ),
+                                      );
+                                    },
                                   );
-                                },
-                              );
-                            }),
-                          ],
-                        ),
+                                }),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  // 5. Novo BottomBar Fixo
+                  Obx(
+                        () => _BottomActionbar(
+                      isValid: controller.isTotalValid,
+                      isLoading: controller.isLoading.value,
+                      onSubmit: controller.submit,
+                    ),
+                  ),
+                ],
               ),
-              // 5. Novo BottomBar Fixo
-              Obx(
-                () => _BottomActionbar(
-                  isValid: controller.isTotalValid,
-                  isLoading: controller.isLoading.value,
-                  onSubmit: controller.submit,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-            ),
-        ),
     );
   }
 }
@@ -236,9 +243,9 @@ class _TopDashboard extends StatelessWidget {
         border: Border.all(color: dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -429,12 +436,12 @@ class _TopDashboard extends StatelessWidget {
 
 
   Widget _buildLegendRow(
-    IconData icon,
-    String label,
-    String value,
-    Color iconColor,
-    Color bgColor,
-  ) {
+      IconData icon,
+      String label,
+      String value,
+      Color iconColor,
+      Color bgColor,
+      ) {
     return Row(
       children: [
         Container(
@@ -500,9 +507,16 @@ class _InfoBanners extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
 
               decoration: BoxDecoration(
-                color: leftBgColor,
+                color: Colors.white,
                 border: Border.all(color: ThemeColor.primaryColor, width: 1.0),
                 borderRadius: BorderRadius.circular(6),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
 
               child: Row(
@@ -644,6 +658,13 @@ class _InfoBanners extends StatelessWidget {
                 color: const Color(0xFFFEF2F2),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: const Color(0xFFFCA5A5), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Container(
 
@@ -737,6 +758,13 @@ class _CollaboratorRow extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: dividerColor, width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       child: IntrinsicHeight(
@@ -1109,6 +1137,13 @@ class _BottomActionbar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1154,13 +1189,13 @@ class _BottomActionbar extends StatelessWidget {
             onPressed: (isLoading || !isValid) ? null : onSubmit,
             icon: isLoading
                 ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
                 : const Icon(Icons.save_outlined, color: Colors.white),
             label: Text(
               isLoading ? "Salvando..." : "Salvar distribuição",
