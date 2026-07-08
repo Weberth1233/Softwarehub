@@ -92,7 +92,7 @@ class StatusLabel extends StatelessWidget {
             return Container(
               height: 70,
               width: 260,
-              padding: const EdgeInsets.only(left: 20, right: 6),
+              padding: const EdgeInsets.only(left: 16, right: 12),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(10),
@@ -115,33 +115,39 @@ class StatusLabel extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(getStatusIcon(item.status), size: 30,),
+                      padding: const EdgeInsets.all(5.0),
+                      child: Icon(getStatusIcon(item.status), size: 20, color: colorTheme.surface),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.statusLabel,
-                          style: textTheme.bodyMedium!.copyWith(
-                            color: colorTheme.surface,
+
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            item.statusLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis, // Corta com "..."
+                            style: textTheme.bodyMedium!.copyWith(
+                              color: colorTheme.surface,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                        item.amount.toString().padLeft(2, '0'),
-                        style: textTheme.bodyMedium!.copyWith(
-                            color: colorTheme.surface,
+                          const SizedBox(height: 2),
+                          Text(
+                            item.amount.toString().padLeft(2, '0'),
+                            style: textTheme.bodyMedium!.copyWith(
+                              color: colorTheme.surface.withValues(alpha: 0.85),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          
+                        ],
                       ),
-                      ],
                     ),
                   ),
-                 
                 ],
               ),
             );

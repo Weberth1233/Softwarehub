@@ -17,82 +17,152 @@ class ApplicationFieldSearchCard extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: colors.onSecondary,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+
+
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 10,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
           ),
         ],
+
       ),
-      child: TextField(
-        controller: controller.searchController,
-        onSubmitted: controller.searchByName,
-        decoration: InputDecoration(
-          labelText: 'Pesquisar campo',
-          hintText: 'Ex: Administração',
-          prefixIcon: Icon(
-            Icons.search,
-            color: colors.primary,
-          ),
-          labelStyle: TextStyle(
-            color: colors.secondary,
-            fontWeight: FontWeight.w600,
-          ),
-          hintStyle: TextStyle(
-            color: colors.secondary.withOpacity(0.7),
-          ),
-          filled: true,
-          fillColor: colors.primary.withOpacity(0.04),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(
-              color: Colors.black.withOpacity(0.06),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // --- CABEÇALHO DO CARD ---
+          const Text(
+            "Pesquisar campos",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1E293B),
+              letterSpacing: -0.5,
             ),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(
-              color: Colors.black.withOpacity(0.06),
+          const SizedBox(height: 4),
+          Text(
+            "Encontre áreas ou campos por nome",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
             ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(
-              color: colors.primary.withOpacity(0.45),
-              width: 1.4,
-            ),
-          ),
-          suffixIcon: Obx(() {
-            final hasSearch = controller.search.value.isNotEmpty;
 
-            if (hasSearch) {
-              return IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: colors.secondary,
+          const SizedBox(height: 24),
+
+          // --- CAMPO DE PESQUISA COM BOTÃO EXPLÍCITO ---
+          const Text(
+            "Buscar por nome",
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF334155),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.searchController,
+                  onSubmitted: controller.searchByName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF1E293B),
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Digite o nome do campo...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.grey.shade400,
+                      size: 20,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: colors.primary,
+                        width: 1.5,
+                      ),
+                    ),
+                    suffixIcon: Obx(() {
+                      final hasSearch = controller.search.value.isNotEmpty;
+
+                      if (hasSearch) {
+                        return IconButton(
+                          icon: Icon(
+                            Icons.close,
+                            color: Colors.grey.shade600,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            controller.clearSearch();
+                            controller.searchController.clear();
+                          },
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+                  ),
                 ),
-                onPressed: controller.clearSearch,
-              );
-            }
-
-            return IconButton(
-              icon: Icon(
-                Icons.search,
-                color: colors.primary,
               ),
-              onPressed: () {
-                controller.searchByName(
-                  controller.searchController.text,
-                );
-              },
-            );
-          }),
-        ),
+
+              const SizedBox(width: 12),
+
+              SizedBox(
+                height: 46,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    controller.searchByName(controller.searchController.text);
+                  },
+                  icon: const Icon(Icons.search, size: 17),
+                  label: const Text(
+                    "Buscar",
+                    style: TextStyle(fontWeight: FontWeight.w400, fontSize: 17),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

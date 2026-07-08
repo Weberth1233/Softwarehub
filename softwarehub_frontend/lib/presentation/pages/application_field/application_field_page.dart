@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../shared/widgets/diagonal_lines_painter.dart';
+import '../../shared/widgets/shared_background.dart';
 import 'controllers/application_field_controller.dart';
 import 'widgets/application_field_area_tile.dart';
 import 'widgets/application_field_empty_state.dart';
@@ -18,11 +18,12 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
     final colors = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFCBD5E1),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: colors.primary,
         automaticallyImplyLeading: false,
-        toolbarHeight: 70,
+        toolbarHeight: 80,
         centerTitle: false,
         leading: Padding(
           padding: const EdgeInsets.only(left: 12),
@@ -33,8 +34,8 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
               width: 46,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: colors.onSecondary,
-                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
@@ -45,105 +46,112 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
             ),
           ),
         ),
-        title: Obx(() {
-          return Text(
-            controller.screenTitle,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: colors.onSecondary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.2,
-              fontSize: 20,
-            ),
-          );
-        }),
-      ),
-      backgroundColor: colors.primary,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: DiagonalLinesPainter(
-                color: colors.onSecondary.withOpacity(0.04),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Obx(() {
+              return Text(
+                controller.screenTitle,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: colors.onSecondary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                  fontSize: 20,
+                ),
+              );
+            }),
+            const SizedBox(height: 2),
+            Text(
+              "Selecione áreas e campos cadastrados",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSecondary.withOpacity(0.8),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
               ),
             ),
-          ),
-          Obx(() {
-            if (controller.isLoadingList.value &&
-                controller.applicationFields.isEmpty) {
-              return Center(
-                child: CircularProgressIndicator(color: colors.onSecondary),
-              );
-            }
+          ],
+        ),
+      ),
+      body: SharedBackground(
+        child: Obx(() {
+          if (controller.isLoadingList.value &&
+              controller.applicationFields.isEmpty) {
+            return Center(
+              child: CircularProgressIndicator(color: colors.primary),
+            );
+          }
 
-            if (controller.errorMessage.value.isNotEmpty &&
-                controller.applicationFields.isEmpty) {
-              return _buildErrorState(context);
-            }
+          if (controller.errorMessage.value.isNotEmpty &&
+              controller.applicationFields.isEmpty) {
+            return _buildErrorState(context);
+          }
 
-            final grouped = controller.groupedByApplicationArea;
-            final areas = grouped.keys.toList();
+          final grouped = controller.groupedByApplicationArea;
+          final areas = grouped.keys.toList();
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final isDesktop = constraints.maxWidth >= 900;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isDesktop = constraints.maxWidth >= 900;
 
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1100),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          ApplicationFieldHeaderCard(
-                            totalAreas: areas.length,
-                            totalFields: controller.applicationFields.length,
-                            isDesktop: isDesktop,
+              return SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ApplicationFieldHeaderCard(
+                          totalAreas: areas.length,
+                          totalFields: controller.applicationFields.length,
+                          totalSelected: controller.selectedFieldIds.length,
+                          isDesktop: isDesktop,
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        ApplicationFieldSearchCard(controller: controller),
+
+                        const SizedBox(height: 20),
+
+                        // 3. Lista de Áreas renderizada
+                        if (controller.applicationFields.isEmpty)
+                          const ApplicationFieldEmptyState()
+                        else
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: areas.length,
+                            separatorBuilder: (_, __) =>
+                            const SizedBox(height: 16),
+                            itemBuilder: (context, index) {
+                              final areaName = areas[index];
+                              final fields = grouped[areaName] ?? [];
+
+                              return ApplicationFieldAreaTile(
+                                areaName: areaName,
+                                fields: fields,
+                                controller: controller,
+                              );
+                            },
                           ),
 
-                          const SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
-                          ApplicationFieldSearchCard(controller: controller),
+                        ApplicationFieldSelectionBar(controller: controller),
 
-                          const SizedBox(height: 14),
+                        const SizedBox(height: 24),
 
-                          ApplicationFieldSelectionBar(controller: controller),
-
-                          const SizedBox(height: 20),
-
-                          if (controller.applicationFields.isEmpty)
-                            const ApplicationFieldEmptyState()
-                          else
-                            ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: areas.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 12),
-                              itemBuilder: (context, index) {
-                                final areaName = areas[index];
-                                final fields = grouped[areaName] ?? [];
-
-                                return ApplicationFieldAreaTile(
-                                  areaName: areaName,
-                                  fields: fields,
-                                  controller: controller,
-                                );
-                              },
-                            ),
-
-                          const SizedBox(height: 20),
-
-                          ApplicationFieldPagination(controller: controller),
-                        ],
-                      ),
+                        ApplicationFieldPagination(controller: controller),
+                      ],
                     ),
                   ),
-                );
-              },
-            );
-          }),
-        ],
+                ),
+              );
+            },
+          );
+        }),
       ),
     );
   }
@@ -162,7 +170,7 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
             Text(
               controller.errorMessage.value,
               style: TextStyle(
-                color: colors.onSecondary,
+                color: colors.primary,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
@@ -170,11 +178,11 @@ class ApplicationFieldPage extends GetView<ApplicationFieldController> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => controller.fetchApplicationFields(),
-              style: TextButton.styleFrom(backgroundColor: colors.onSecondary),
+              style: TextButton.styleFrom(backgroundColor: colors.primary),
               child: Text(
                 "Tentar novamente",
                 style: TextStyle(
-                  color: colors.primary,
+                  color: colors.onSecondary,
                   fontWeight: FontWeight.w700,
                 ),
               ),

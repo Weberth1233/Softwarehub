@@ -5,8 +5,9 @@ import '../../../domain/entities/process/process_response_entity.dart';
 import '../../../domain/entities/user/user_educational_institution_link_entity.dart';
 import '../../core/routes/app_routes.dart';
 import '../../shared/utils/app_toast.dart';
-import '../../shared/widgets/diagonal_lines_painter.dart';
+import '../../shared/widgets/shared_background.dart';
 import 'controllers/process_detail_controller.dart';
+
 part 'widgets/process_detail_layout.dart';
 part 'widgets/process_detail_menu.dart';
 part 'widgets/process_detail_content.dart';
@@ -20,7 +21,6 @@ part 'widgets/process_detail_status.dart';
 part 'widgets/process_detail_shared.dart';
 part 'widgets/process_detail_formatters.dart';
 part 'widgets/process_detail_status_ui.dart';
-
 
 class ProcessDetailPage extends StatefulWidget {
   const ProcessDetailPage({super.key});
@@ -76,7 +76,11 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
+
+    final backgroundColor = const Color(0xFFE8EDF2);
+
     return Scaffold(
+      backgroundColor: const Color(0xFFCBD5E1),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: colors.primary,
@@ -114,11 +118,11 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           ),
         ),
       ),
-      backgroundColor: colors.primary,
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
+          return Center(
+            // Cor alterada para primary para dar contraste no fundo claro
+            child: CircularProgressIndicator(color: colors.primary),
           );
         }
 
@@ -133,7 +137,8 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                   const SizedBox(height: 16),
                   Text(
                     controller.errorMessage.value,
-                    style: TextStyle(color: colors.onSecondary),
+                    // Cor alterada para onBackground para ficar legível no fundo claro
+                    style: TextStyle(color: colors.onBackground),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -144,11 +149,12 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
                       }
                     },
                     style: TextButton.styleFrom(
-                      backgroundColor: colors.onSecondary,
+                      // Cores invertidas no botão para combinar com o tema claro
+                      backgroundColor: colors.primary,
                     ),
                     child: Text(
                       "Tentar novamente",
-                      style: TextStyle(color: colors.primary),
+                      style: TextStyle(color: colors.onPrimary),
                     ),
                   ),
                 ],
@@ -161,7 +167,8 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           return Center(
             child: Text(
               "Processo não encontrado.",
-              style: TextStyle(color: colors.onSecondary),
+              // Cor alterada para onBackground
+              style: TextStyle(color: colors.onBackground),
             ),
           );
         }
@@ -169,62 +176,85 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
         final entity = controller.process.value!;
         final dateFormatted = this._formatCreatedAt(entity.createdAt);
 
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: CustomPaint(
-                painter: DiagonalLinesPainter(
-                  color: colors.onSecondary.withOpacity(0.04),
-                ),
-              ),
-            ),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isDesktop = constraints.maxWidth >= 900;
+        // O SharedBackground envolve todo o layout dinâmico
+        return SharedBackground(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isDesktop = constraints.maxWidth >= 900;
 
-                return SingleChildScrollView(
+              return SingleChildScrollView(
+                child: Padding(
+                  // Essa margem de 32px de cada lado é o que dá o respiro do Figma
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-                        child: this._buildProcessStatusBar(
-                          context,
-                          entity,
-                          dateFormatted,
-                          isDesktop,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1600),
-                            child: isDesktop
-                                ? this._buildWideMasterDetail(
-                                    context,
-                                    entity,
-                                    controller,
-                                    constraints.maxWidth,
-                                  )
-                                : this._buildNarrowMasterDetail(
-                                    context,
-                                    entity,
-                                    controller,
-                                  ),
-                          ),
-                        ),
+                      const SizedBox(height: 24),
+                      // 1. Cabeçalho Superior (agora vai esticar junto)
+                      this._buildProcessStatusBar(
+                        context,
+                        entity,
+                        dateFormatted,
+                        isDesktop,
                       ),
                       const SizedBox(height: 24),
+                      // 2. Menu e Conteúdo (sem ConstrainedBox)
+                      isDesktop
+                          ? this._buildWideMasterDetail(
+                        context,
+                        entity,
+                        controller,
+                        constraints.maxWidth,
+                      )
+                          : this._buildNarrowMasterDetail(
+                        context,
+                        entity,
+                        controller,
+                      ),
+                      const SizedBox(height: 32),
                     ],
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              );
+            },
+          ),
         );
       }),
+    );
+  }
+}
+class ProcessDetailCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final double? width;
+  final Color? backgroundColor;
+
+  const ProcessDetailCard({
+    super.key,
+    required this.child,
+    this.padding,
+    this.width,
+    this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Container(
+      width: width,
+      padding: padding ?? const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? colors.onSecondary,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

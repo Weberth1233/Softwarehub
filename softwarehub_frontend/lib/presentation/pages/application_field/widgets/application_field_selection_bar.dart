@@ -17,60 +17,126 @@ class ApplicationFieldSelectionBar extends StatelessWidget {
 
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: colors.onSecondary,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+
+
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 10),
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              spreadRadius: 0,
+              offset: const Offset(0, 8),
             ),
           ],
+
         ),
         child: Wrap(
-          spacing: 12,
-          runSpacing: 12,
+          spacing: 16,
+          runSpacing: 16,
           crossAxisAlignment: WrapCrossAlignment.center,
           alignment: WrapAlignment.spaceBetween,
           children: [
+
+            // --- PARTE ESQUERDA: Ícone e Contagem ---
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.checklist_outlined, color: colors.primary),
-                const SizedBox(width: 12),
-                Text(
-                  selectedCount == 0
-                      ? "Nenhum campo selecionado"
-                      : "$selectedCount campo(s) selecionado(s)",
-                  style: TextStyle(
-                    color: colors.tertiary,
-                    fontWeight: FontWeight.w800,
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colors.primary,
+                    shape: BoxShape.circle,
                   ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Selecionados",
+                      style: TextStyle(
+                        color: colors.primary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Text(
+                      selectedCount == 0
+                          ? "Nenhum campo selecionado"
+                          : "$selectedCount campos selecionados",
+                      style: TextStyle(
+                        color: colors.primary.withOpacity(0.7),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
 
-            ElevatedButton.icon(
-              onPressed: selectedCount == 0
-                  ? null
-                  : controller.confirmSelection,
-              icon: const Icon(Icons.check),
-              label: Text(controller.confirmButtonText),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: colors.onSecondary,
-                disabledBackgroundColor: colors.secondary.withOpacity(0.25),
-                disabledForegroundColor: colors.secondary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
+            // --- PARTE DIREITA: Botões de Ação ---
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+
+                // 1. Botão de Limpar
+                OutlinedButton(
+                  onPressed: selectedCount == 0
+                      ? null
+                      : () {
+                    controller.selectedFieldIds.clear();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.primary,
+                    side: BorderSide(
+                      color: selectedCount == 0
+                          ? Colors.grey.shade300
+                          : colors.primary.withOpacity(0.5),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Limpar seleção",
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+
+                // 2. Botão de Confirmar
+                ElevatedButton(
+                  onPressed: selectedCount == 0
+                      ? null
+                      : controller.confirmSelection,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.primary,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade300,
+                    disabledForegroundColor: Colors.grey.shade500,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Confirma seleção",
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
