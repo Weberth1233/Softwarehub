@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/auth/password_reset/controllers/password_reset_controller.dart';
-
 import '../../../shared/widgets/custom_text_field.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/widgets/shared_background.dart';
 
 class PasswordResetPage extends StatefulWidget {
   const PasswordResetPage({super.key});
@@ -86,199 +86,160 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
         ),
       ),
 
-      // ===== CORPO DA PÁGINA (COM BACKGROUND TEXTURIZADO) =====
-      body: Stack(
-        children: [
-          // 1. Textura de fundo (Diagonal Lines)
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _DiagonalLinesPainter(
-                color: Colors.black.withOpacity(0.04), // Textura sutil
+
+      body: SharedBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+                border: Border.all(color: Colors.grey.shade200, width: 1),
               ),
-            ),
-          ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-          // 2. Conteúdo Central (Cartão)
-          Center(
-            child: SingleChildScrollView(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 500),
-                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                padding: const EdgeInsets.all(40),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.08),
+                      shape: BoxShape.circle,
                     ),
-                  ],
-                  border: Border.all(color: Colors.grey.shade200, width: 1),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, // Altura dinâmica
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Ícone de destaque
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: _primaryColor.withOpacity(0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.vpn_key_outlined,
-                        size: 36,
-                        color: _primaryColor,
-                      ),
+                    child: const Icon(
+                      Icons.vpn_key_outlined,
+                      size: 36,
+                      color: _primaryColor,
                     ),
-                    const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 24),
 
-                    Text(
-                      "Criar nova senha",
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                  Text(
+                    "Criar nova senha",
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Informe o código que enviamos para o seu e-mail e digite sua nova senha.",
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                        height: 1.4,
-                      ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Informe o código que enviamos para o seu e-mail e digite sua nova senha.",
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey.shade600,
+                      height: 1.4,
                     ),
-                    const SizedBox(height: 32),
+                  ),
+                  const SizedBox(height: 32),
 
-                    CustomTextField(
-                      controller: _tokenController,
-                      label: "Código recebido",
-                      prefixIcon: const Icon(Icons.numbers_rounded),
-                    ),
-                    const SizedBox(height: 20),
-                    CustomTextField(
-                      controller: _newPasswordController,
-                      label: "Nova senha",
-                      obscureText: true,
-                      prefixIcon: const Icon(Icons.lock_outline),
-                    ),
-                    const SizedBox(height: 32),
+                  CustomTextField(
+                    controller: _tokenController,
+                    label: "Código recebido",
+                    prefixIcon: const Icon(Icons.numbers_rounded),
+                  ),
+                  const SizedBox(height: 20),
+                  CustomTextField(
+                    controller: _newPasswordController,
+                    label: "Nova senha",
+                    obscureText: true,
+                    prefixIcon: const Icon(Icons.lock_outline),
+                  ),
+                  const SizedBox(height: 32),
 
-                    // Botão Enviar
-                    Obx(
-                          () => SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _primaryColor,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                  // Botão Enviar
+                  Obx(
+                        () => SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          onPressed: passwordResetController.loading.value
-                              ? null
-                              : () {
-                            passwordResetController.passwordReset(
-                              _tokenController.text,
-                              _newPasswordController.text,
-                            );
-                            _tokenController.clear();
-                            _newPasswordController.clear();
-                          },
-                          icon: passwordResetController.loading.value
-                              ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                              : const Icon(Icons.check_circle_outline, size: 20),
-                          label: Text(
-                            passwordResetController.loading.value
-                                ? "Salvando..."
-                                : "Redefinir Senha",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
+                        ),
+                        onPressed: passwordResetController.loading.value
+                            ? null
+                            : () {
+                          passwordResetController.passwordReset(
+                            _tokenController.text,
+                            _newPasswordController.text,
+                          );
+                          _tokenController.clear();
+                          _newPasswordController.clear();
+                        },
+                        icon: passwordResetController.loading.value
+                            ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                            : const Icon(Icons.check_circle_outline, size: 20),
+                        label: Text(
+                          passwordResetController.loading.value
+                              ? "Salvando..."
+                              : "Redefinir Senha",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
                           ),
                         ),
                       ),
                     ),
+                  ),
 
-                    // Mensagem de retorno
-                    Obx(() {
-                      final message = passwordResetController.message.value;
-                      if (message.isEmpty) return const SizedBox.shrink();
+                  // Mensagem de retorno
+                  Obx(() {
+                    final message = passwordResetController.message.value;
+                    if (message.isEmpty) return const SizedBox.shrink();
 
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 24),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.green.shade200),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.check_circle_outline, color: Colors.green.shade700, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  message,
-                                  style: TextStyle(
-                                    color: Colors.green.shade800,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle_outline, color: Colors.green.shade700, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                message,
+                                style: TextStyle(
+                                  color: Colors.green.shade800,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      );
-                    }),
-                  ],
-                ),
+                      ),
+                    );
+                  }),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
-}
-
-// =======================
-// Custom Painter: Linhas Diagonais
-// =======================
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-
-  _DiagonalLinesPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-    const spacing = 80.0;
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

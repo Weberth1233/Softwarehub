@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../infra/datasources/auth_local_datasource.dart';
 import '../../shared/utils/responsive.dart';
-import '../../shared/widgets/shared_background.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/widgets/shared_background.dart';
 import '../users/controllers/user_logged_controller.dart';
 import 'controllers/home_controller.dart';
 import 'widgets/custom_menu.dart';

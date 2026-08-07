@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="f8257618-1329-4d8d-a065-e148448811e8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/login/login_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/login/login_page.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/password_reset/forgot_password_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/password_reset/forgot_password_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/password_reset/password_reset_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/auth/password_reset/password_reset_page.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/home/home_page.dart" beforeDir="false" afterPath="$PROJECT_DIR$/softwarehub_frontend/lib/presentation/pages/home/home_page.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -154,7 +155,7 @@
       <workItem from="1783429689126" duration="8447000" />
       <workItem from="1783513763682" duration="3770000" />
       <workItem from="1785238286802" duration="6735000" />
-      <workItem from="1786118169415" duration="2810000" />
+      <workItem from="1786118169415" duration="3901000" />
     </task>
     <servers />
   </component>

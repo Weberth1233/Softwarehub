@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nit_sgpi_frontend/presentation/pages/auth/password_reset/controllers/forgot_password_controller.dart';
 import 'package:nit_sgpi_frontend/presentation/shared/widgets/custom_text_field.dart';
+import 'package:nit_sgpi_frontend/presentation/shared/widgets/shared_background.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -13,7 +14,6 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
   final forgotPasswordController = Get.find<ForgotPasswordController>();
-
 
   static const Color _primaryColor = Color(0xFF004294);
 
@@ -84,215 +84,178 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ),
 
 
-      body: Stack(
-        children: [
-          // 1. Textura de fundo (Diagonal Lines)
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _DiagonalLinesPainter(
-                color: Colors.black.withOpacity(0.04), // Textura sutil
+      body: SharedBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(40),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+                border: Border.all(color: Colors.grey.shade200, width: 1),
               ),
-            ),
-          ),
-
-
-          Center(
-            child: SingleChildScrollView(
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 500),
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                padding: const EdgeInsets.all(40),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.08),
+                      shape: BoxShape.circle,
                     ),
-                  ],
-                  border: Border.all(color: Colors.grey.shade200, width: 1),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: _primaryColor.withOpacity(0.08),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.lock_reset_rounded,
-                        size: 36,
-                        color: _primaryColor,
-                      ),
+                    child: const Icon(
+                      Icons.lock_reset_rounded,
+                      size: 36,
+                      color: _primaryColor,
                     ),
-                    const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 24),
 
-                    Text(
-                      "Esqueceu sua senha?",
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                  Text(
+                    "Esqueceu sua senha?",
+                    style: textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Digite o seu e-mail cadastrado no sistema. Nós enviaremos um código para você recuperar o acesso.",
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                        height: 1.4,
-                      ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Digite o seu e-mail cadastrado no sistema. Nós enviaremos um código para você recuperar o acesso.",
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey.shade600,
+                      height: 1.4,
                     ),
-                    const SizedBox(height: 32),
+                  ),
+                  const SizedBox(height: 32),
 
-                    CustomTextField(
-                      controller: _emailController,
-                      label: "E-mail",
-                      prefixIcon: const Icon(Icons.mail_outline),
-                    ),
-                    const SizedBox(height: 24),
+                  CustomTextField(
+                    controller: _emailController,
+                    label: "E-mail",
+                    prefixIcon: const Icon(Icons.mail_outline),
+                  ),
+                  const SizedBox(height: 24),
 
-                    // Botão Enviar
-                    Obx(
-                          () => SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                  // Botão Enviar
+                  Obx(
+                        () => SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          onPressed: forgotPasswordController.loading.value
-                              ? null
-                              : () {
-                            forgotPasswordController.forgotPassword(
-                              _emailController.text,
-                            );
-                            _emailController.clear();
-                          },
-                          child: forgotPasswordController.loading.value
-                              ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white, // Melhor contraste com o botão azul
-                            ),
-                          )
-                              : const Text(
-                            "Enviar Código",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
+                        ),
+                        onPressed: forgotPasswordController.loading.value
+                            ? null
+                            : () {
+                          forgotPasswordController.forgotPassword(
+                            _emailController.text,
+                          );
+                          _emailController.clear();
+                        },
+                        child: forgotPasswordController.loading.value
+                            ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                            : const Text(
+                          "Enviar Código",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
                           ),
                         ),
                       ),
                     ),
+                  ),
 
-                    // Mensagem de retorno dinâmico
-                    Obx(() {
-                      final message = forgotPasswordController.message.value;
-                      if (message.isEmpty) return const SizedBox.shrink();
+                  // Mensagem de retorno dinâmico
+                  Obx(() {
+                    final message = forgotPasswordController.message.value;
+                    if (message.isEmpty) return const SizedBox.shrink();
 
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 24),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.green.shade200),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.check_circle_outline, color: Colors.green.shade700, size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      message,
-                                      style: TextStyle(
-                                        color: Colors.green.shade800,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: _primaryColor,
-                                    foregroundColor: Colors.white,
-                                    elevation: 0,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Get.toNamed("/password-reset");
-                                  },
-                                  icon: const Icon(Icons.password_rounded, size: 20),
-                                  label: const Text(
-                                    "Clique aqui para criar nova senha",
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 24),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green.shade200),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.check_circle_outline, color: Colors.green.shade700, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    message,
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 15,
-                                      letterSpacing: 0.5,
+                                      color: Colors.green.shade800,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _primaryColor,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Get.toNamed("/password-reset");
+                                },
+                                icon: const Icon(Icons.password_rounded, size: 20),
+                                label: const Text(
+                                  "Clique aqui para criar nova senha",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      );
-                    }),
-                  ],
-                ),
+                      ),
+                    );
+                  }),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
-}
-
-class _DiagonalLinesPainter extends CustomPainter {
-  final Color color;
-
-  _DiagonalLinesPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-    const spacing = 80.0;
-    for (double i = -size.height; i < size.width; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

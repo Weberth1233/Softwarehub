@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
             Color(0xFFC79E33), // ouro velho/mostarda (transição direta, sem branco)
             Color(0xFFFBC02D), // dourado (base)
           ],
-          // Dando mais espaço para o azul antes de iniciar a transição para o dourado
+
           stops: [0.0, 0.60, 0.85, 1.0],
         ),
       ),
