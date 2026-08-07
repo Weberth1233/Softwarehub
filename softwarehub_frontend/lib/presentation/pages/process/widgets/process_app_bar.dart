@@ -42,7 +42,7 @@ class ProcessAppBar extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              isEditMode ? "Editar Processo" : "Cadastro de Processo",
+              isEditMode ? "Editar processo" : "Cadastro de processo",
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleLarge?.copyWith(

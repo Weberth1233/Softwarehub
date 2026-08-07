@@ -109,7 +109,7 @@ class _ProcessDetailPageState extends State<ProcessDetailPage> {
           ),
         ),
         title: Text(
-          "Detalhes do Processo",
+          "Detalhes do processo",
           style: theme.textTheme.headlineSmall?.copyWith(
             color: colors.onSecondary,
             fontWeight: FontWeight.w700,

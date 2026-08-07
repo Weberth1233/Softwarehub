@@ -46,147 +46,138 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: UnifiedBackgroundPainter(
-                color: theme.colorScheme.primary.withOpacity(0.08),
-                icon: Icons.rocket_launch_outlined,
-              ),
-            ),
-          ),
-          Scrollbar(
+
+      body: SharedBackground(
+        child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          interactive: true,
+          child: SingleChildScrollView(
             controller: _scrollController,
-            thumbVisibility: true,
-            interactive: true,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Padding(
-                padding: Responsive.getPadding(context),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    Container(
-                      padding: const EdgeInsets.all(33),
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.40),
-                            blurRadius: 8,
-                            offset: const Offset(0, 9),
-                          ),
-                        ],
-                        border: Border.all(
-                          color: Colors.grey.withOpacity(0.2),
-                          width: 1,
+            child: Padding(
+              padding: Responsive.getPadding(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(33),
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.40),
+                          blurRadius: 8,
+                          offset: const Offset(0, 9),
                         ),
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
+                      ],
+                      border: Border.all(
+                        color: Colors.grey.withOpacity(0.2),
+                        width: 1,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          HeaderCard(processController: processController,),
-                          const SizedBox(height: 32),
-                          StatusLabel(processController: processController),
-                          const SizedBox(height: 32),
-                          const FilterCard(),
-                          const SizedBox(height: 24),
-                          Obx(() {
-                            final list = processController.processes.toList();
-                            if (processController.isLoadingList.value) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            if (list.isEmpty) {
-                              return Center(
-                                child: Text(
-                                  "Sem resultados!",
-                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                    color: theme.colorScheme.error,
-                                  ),
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        HeaderCard(processController: processController,),
+                        const SizedBox(height: 32),
+                        StatusLabel(processController: processController),
+                        const SizedBox(height: 32),
+                        const FilterCard(),
+                        const SizedBox(height: 24),
+                        Obx(() {
+                          final list = processController.processes.toList();
+                          if (processController.isLoadingList.value) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (list.isEmpty) {
+                            return Center(
+                              child: Text(
+                                "Sem resultados!",
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.error,
                                 ),
-                              );
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Wrap(
-                                    spacing: 20,
-                                    runSpacing: 20,
-                                    children: list
-                                        .map((item) => ProcessCard(item: item))
-                                        .toList(),
-                                  ),
+                              ),
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: Wrap(
+                                  spacing: 20,
+                                  runSpacing: 20,
+                                  children: list
+                                      .map((item) => ProcessCard(item: item))
+                                      .toList(),
                                 ),
-                                const SizedBox(height: 20),
-                                Obx(() {
-                                  final current =
-                                      processController.currentPage.value;
-                                  final total =
-                                      processController.totalPages.value;
-                                  if (total <= 1) return const SizedBox();
-                                  return Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: current > 0
-                                            ? processController.previousPage
-                                            : null,
-                                        child: Text(
-                                          "Anterior",
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Text(
-                                        "Página ${current + 1} de $total",
+                              ),
+                              const SizedBox(height: 20),
+                              Obx(() {
+                                final current =
+                                    processController.currentPage.value;
+                                final total =
+                                    processController.totalPages.value;
+                                if (total <= 1) return const SizedBox();
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: current > 0
+                                          ? processController.previousPage
+                                          : null,
+                                      child: Text(
+                                        "Anterior",
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      ElevatedButton(
-                                        onPressed: current < total - 1
-                                            ? processController.nextPage
-                                            : null,
-                                        child: Text(
-                                          "Próxima",
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
                                         ),
                                       ),
-                                    ],
-                                  );
-                                }),
-                              ],
-                            );
-                          }),
-                        ],
-                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Text(
+                                      "Página ${current + 1} de $total",
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    ElevatedButton(
+                                      onPressed: current < total - 1
+                                          ? processController.nextPage
+                                          : null,
+                                      child: Text(
+                                        "Próxima",
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }),
+                            ],
+                          );
+                        }),
+                      ],
                     ),
-                    const SizedBox(height: 32),
-                    const Footer(),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 32),
+                  const Footer(),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

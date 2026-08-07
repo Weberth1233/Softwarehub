@@ -1,4 +1,4 @@
-// ADICIONE ESSE WIDGET NO FINAL DO ARQUIVO
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';

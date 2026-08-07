@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../../domain/entities/ip_type_entity.dart';
 import '../../core/routes/app_routes.dart';
 import '../../shared/utils/responsive.dart';
-import '../../shared/widgets/diagonal_lines_painter.dart';
+import '../../shared/widgets/shared_background.dart';
 import '../process/models/first_stage_process.dart';
 import 'controllers/ip_types_controller.dart';
 import 'models/second_stage_process.dart';
@@ -26,7 +26,7 @@ class IpTypesPage extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: Color(0xFFCBD5E1),
+      backgroundColor: const Color(0xFFCBD5E1),
       appBar: AppBar(
         elevation: 0,
         backgroundColor: _backgroundColor,
@@ -74,148 +74,116 @@ class IpTypesPage extends StatelessWidget {
         ),
       ),
 
-      body: Stack(
-        children: [
-          // Textura de Fundo
-          Positioned.fill(
-            child: CustomPaint(
-              painter: DiagonalLinesPainter(
-                color: Colors.black.withOpacity(0.04),
-              ),
-            ),
-          ),
 
-          // Conteúdo Principal
-          Positioned.fill(
-            child: Padding(
-              padding: Responsive.getPadding(context),
-              child: Obx(() {
-                if (ipTypesController.isLoading.value) {
-                  return const LoadingState();
-                }
+      body: SharedBackground(
+        child: Padding(
+          padding: Responsive.getPadding(context),
+          child: Obx(() {
+            if (ipTypesController.isLoading.value) {
+              return const LoadingState();
+            }
 
-                final list = ipTypesController.ipTypes.toList();
-                if (list.isEmpty) {
-                  return const EmptyState(
-                    title: "Sem resultados",
-                    message: "Nenhuma categoria disponível no momento.",
-                  );
-                }
+            final list = ipTypesController.ipTypes.toList();
+            if (list.isEmpty) {
+              return const EmptyState(
+                title: "Sem resultados",
+                message: "Nenhuma categoria disponível no momento.",
+              );
+            }
 
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final w = constraints.maxWidth;
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final w = constraints.maxWidth;
 
-                    // Grid responsiva
-                    final int columns = w >= 1100
-                        ? 4
-                        : w >= 840
-                        ? 3
-                        : w >= 600
-                        ? 2
-                        : 1;
+                // Grid responsiva
+                final int columns = w >= 1100
+                    ? 4
+                    : w >= 840
+                    ? 3
+                    : w >= 600
+                    ? 2
+                    : 1;
 
-                    return Scrollbar(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(
-                          4,
-                          24,
-                          4,
-                          32,
-                        ), // Aumentei o padding superior para descolar do AppBar
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: Container(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 600,
+                return Scrollbar(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(4, 24, 4, 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 600),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.touch_app_rounded,
+                                  size: 20,
+                                  color: _backgroundColor.withOpacity(0.7),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.9),
-                                  borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(
-                                    color: Colors.grey.shade200,
+                                const SizedBox(width: 10),
+                                Flexible(
+                                  child: Text(
+                                    "Escolha e clique em uma categoria para avançar.",
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: _backgroundColor.withOpacity(0.9),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.touch_app_rounded,
-                                      size: 20,
-                                      color: _backgroundColor.withOpacity(0.7),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Flexible(
-                                      child: Text(
-                                        "Escolha e clique em uma categoria para avançar.",
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: _backgroundColor.withOpacity(
-                                            0.9,
-                                          ),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              ],
                             ),
-                            const SizedBox(height: 32),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
 
-                            ResponsiveGrid(
-                              columns: columns,
-                              gap: 20,
-                              children: list.map((item) {
-                                return IpTypeCard(
-                                  title: item.name,
-                                  dominantColor: _backgroundColor,
-                                  onTap: () {
-                                    final secondStageProcess =
-                                        SecondStageProcess(
-                                          firstStageProcess: auxProcess,
-                                          item: item,
-                                          isEdit: auxProcess.isEdit,
-                                          originalIpTypeId:
-                                              auxProcess.originalIpTypeId,
-                                          originalFormData:
-                                              auxProcess.originalFormData,
-                                        );
+                        ResponsiveGrid(
+                          columns: columns,
+                          gap: 20,
+                          children: list.map((item) {
+                            return IpTypeCard(
+                              title: item.name,
+                              dominantColor: _backgroundColor,
+                              onTap: () {
+                                final secondStageProcess = SecondStageProcess(
+                                  firstStageProcess: auxProcess,
+                                  item: item,
+                                  isEdit: auxProcess.isEdit,
+                                  originalIpTypeId:
+                                  auxProcess.originalIpTypeId,
+                                  originalFormData: auxProcess.originalFormData,
+                                );
 
-                                    Get.toNamed(
-                                      AppRoutes.consentTermCheck,
-                                      arguments: {
-                                        'ipTypeId': secondStageProcess.item.id,
-                                        'nextRoute': AppRoutes.ipTypesForm,
-                                        'nextArguments': secondStageProcess,
-                                      },
-                                    );
-
-                                  
+                                Get.toNamed(
+                                  AppRoutes.consentTermCheck,
+                                  arguments: {
+                                    'ipTypeId': secondStageProcess.item.id,
+                                    'nextRoute': AppRoutes.ipTypesForm,
+                                    'nextArguments': secondStageProcess,
                                   },
                                 );
-                              }).toList(),
-                            ),
-                          ],
+                              },
+                            );
+                          }).toList(),
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                  ),
                 );
-              }),
-            ),
-          ),
-        ],
+              },
+            );
+          }),
+        ),
       ),
     );
   }
 }
-
-
-
-

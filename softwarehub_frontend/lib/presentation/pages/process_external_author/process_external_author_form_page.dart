@@ -6,7 +6,7 @@ import '../../shared/utils/app_toast.dart';
 import '../../shared/utils/responsive.dart';
 import '../../shared/utils/validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/diagonal_lines_painter.dart';
+import '../../shared/widgets/shared_background.dart';
 import 'controllers/process_external_author_controller.dart';
 
 class ProcessExternalAuthorFormPage extends StatefulWidget {
@@ -23,7 +23,7 @@ class _ProcessExternalAuthorFormPageState
   final _formKey = GlobalKey<FormState>();
 
   final ExternalAuthorEntity? editingEntity =
-      Get.arguments as ExternalAuthorEntity?;
+  Get.arguments as ExternalAuthorEntity?;
 
   late final TextEditingController fullNameController;
   late final TextEditingController emailController;
@@ -92,26 +92,22 @@ class _ProcessExternalAuthorFormPageState
     final colors = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFCBD5E1), // Cor original mantida
+      backgroundColor: const Color(0xFFCBD5E1),
       appBar: _buildAppBar(colors, theme),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          _buildBackground(colors),
-          SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: Responsive.getPadding(context).left,
-              vertical: 32,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: _buildFormCard(colors, theme),
-              ),
+      body: SharedBackground(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive.getPadding(context).left,
+            vertical: 32,
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: _buildFormCard(colors, theme),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -142,21 +138,13 @@ class _ProcessExternalAuthorFormPageState
                   ? "Editar colaborador externo"
                   : "Formulário para cadastro de colaborador externo",
               style: theme.textTheme.titleLarge?.copyWith(
-                color: colors.onPrimary, // Cor original mantida
+                color: colors.onPrimary,
                 fontWeight: FontWeight.bold,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBackground(ColorScheme colors) {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: DiagonalLinesPainter(color: colors.primary.withOpacity(0.05)),
       ),
     );
   }
@@ -169,9 +157,7 @@ class _ProcessExternalAuthorFormPageState
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(
-              0.05,
-            ), // Cor da sombra original mantida
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -182,7 +168,6 @@ class _ProcessExternalAuthorFormPageState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Novo layout do cabeçalho interno do Card (sem alterar cores)
             Row(
               children: [
                 Container(
@@ -255,7 +240,6 @@ class _ProcessExternalAuthorFormPageState
                     hintText: "000.000.000-00",
                     keyboardType: TextInputType.number,
                     inputFormatters: [InputMasks.cpf],
-
                     validator: Validators.cpf,
                     prefixIcon: const Icon(Icons.badge_outlined),
                   ),
@@ -264,7 +248,7 @@ class _ProcessExternalAuthorFormPageState
             ),
             const SizedBox(height: 40),
             Obx(
-              () => SizedBox(
+                  () => SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
@@ -274,20 +258,20 @@ class _ProcessExternalAuthorFormPageState
                       : const Icon(Icons.check_circle_outline),
                   label: controller.isLoading.value
                       ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
                       : Text(
-                          isEditing ? 'Salvar Alterações' : 'Salvar Cadastro',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    isEditing ? 'Salvar Alterações' : 'Salvar Cadastro',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primary,
                     foregroundColor: colors.onPrimary,

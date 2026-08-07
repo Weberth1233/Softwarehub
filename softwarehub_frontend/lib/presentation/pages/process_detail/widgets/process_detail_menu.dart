@@ -135,7 +135,7 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  "Ações Administrativas",
+                  "Ações administrativas",
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: colors.tertiary,
@@ -187,7 +187,7 @@ extension _ProcessDetailPageMenu on _ProcessDetailPageState {
                   child: Text(
                     _isClassifying
                         ? "Classificando..."
-                        : "Classificação de Nice",
+                        : "Classificação de nice",
                     style: TextStyle(
                       color: colors.onSecondary,
                       fontWeight: FontWeight.bold,

@@ -21,7 +21,7 @@ class HeaderCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Painel de Processos",
+                "Painel de processos",
                 style: theme.textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
@@ -30,7 +30,7 @@ class HeaderCard extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                "Sistema de Gestão de Propriedade Intelectual",
+                "Sistema de gestão de propriedade intelectual",
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 17,
                   color: theme.colorScheme.primary,

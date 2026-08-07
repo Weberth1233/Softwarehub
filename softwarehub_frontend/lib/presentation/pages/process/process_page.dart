@@ -6,7 +6,7 @@ import '../../core/routes/app_routes.dart';
 import '../../shared/theme/theme_color.dart';
 import '../../shared/utils/app_toast.dart';
 import '../../shared/utils/responsive.dart';
-import '../../shared/widgets/diagonal_lines_painter.dart';
+import '../../shared/widgets/shared_background.dart';
 import 'controllers/process_controller.dart';
 import 'models/first_stage_process.dart';
 import 'widgets/collaborators_section.dart';
@@ -142,7 +142,7 @@ class _ProcessPageState extends State<ProcessPage> {
         process?.royaltyDistributions
             .where((distribution) => distribution.status == "ACTIVE")
             .toList() ??
-        [];
+            [];
 
     final activeRoyaltyDistribution = activeRoyaltyDistributions.isNotEmpty
         ? activeRoyaltyDistributions.first
@@ -195,103 +195,94 @@ class _ProcessPageState extends State<ProcessPage> {
     return Scaffold(
       appBar: ProcessAppBar(isEditMode: isEditMode),
       backgroundColor: const Color(0xFFCBD5E1),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: DiagonalLinesPainter(
-                color: Colors.black.withOpacity(0.03),
-              ),
-            ),
+      body: SharedBackground(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            Responsive.getPadding(context).left,
+            20,
+            Responsive.getPadding(context).right,
+            24,
           ),
-          SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              Responsive.getPadding(context).left,
-              20,
-              Responsive.getPadding(context).right,
-              24,
-            ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1400),
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isDesktop = constraints.maxWidth >= 1050;
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1400),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isDesktop = constraints.maxWidth >= 1050;
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          ProcessPageHeader(isEditMode: isEditMode),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ProcessPageHeader(isEditMode: isEditMode),
 
-                          const SizedBox(height: 30),
+                        const SizedBox(height: 30),
 
-                          ProcessTitleField(
-                            controller: titleController,
-                            errorText: _titleError,
-                          ),
+                        ProcessTitleField(
+                          controller: titleController,
+                          errorText: _titleError,
+                        ),
 
-                          const SizedBox(height: 45),
+                        const SizedBox(height: 45),
 
-                          CollaboratorsSection(
-                            isDesktop: isDesktop,
-                            userController: userController,
-                            searchController: searchController,
-                            externalAuthors: listExternalAuthor,
-                            hasCollaboratorError: _hasCollaboratorError,
-                            onUserChanged: _handleUserChanged,
-                            onManageExternals: _handleManageExternals,
-                          ),
+                        CollaboratorsSection(
+                          isDesktop: isDesktop,
+                          userController: userController,
+                          searchController: searchController,
+                          externalAuthors: listExternalAuthor,
+                          hasCollaboratorError: _hasCollaboratorError,
+                          onUserChanged: _handleUserChanged,
+                          onManageExternals: _handleManageExternals,
+                        ),
 
-                          const SizedBox(height: 26),
+                        const SizedBox(height: 26),
 
-                          Align(
-                            alignment: Alignment.center,
-                            child: SizedBox(
-                              width: 220,
-                              height: 44,
-                              child: ElevatedButton(
-                                onPressed: _handleNext,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: ThemeColor.primaryColor,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: SizedBox(
+                            width: 220,
+                            height: 44,
+                            child: ElevatedButton(
+                              onPressed: _handleNext,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ThemeColor.primaryColor,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Text(
-                                  "Próximo",
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                      ),
+                              ),
+                              child: Text(
+                                "Próximo",
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      );
-                    },
-                  ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

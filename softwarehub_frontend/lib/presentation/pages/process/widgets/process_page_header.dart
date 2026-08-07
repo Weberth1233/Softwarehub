@@ -16,7 +16,7 @@ class ProcessPageHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isEditMode ? "Editar seu Processo" : "Cadastre seu Processo",
+          isEditMode ? "Editar seu processo" : "Cadastre seu processo",
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w900,
             color: Colors.black87,

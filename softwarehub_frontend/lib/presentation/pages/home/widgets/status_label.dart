@@ -38,37 +38,6 @@ class StatusLabel extends StatelessWidget {
     }
   }
 
-  IconData getStatusIcon(String status) {
-    switch (status) {
-      case "PENDENTE_DISTRIBUICAO_COTAS":
-        return Icons.pending;
-
-      case "COTAS_DISTRIBUIDAS":
-        return Icons.pie_chart_outline;
-
-      case "CORRECAO":
-        return Icons.approval;
-
-      case "CORRIGIDO":
-        return Icons.task_alt_rounded;
-
-      case "CLASSIFICADO":
-        return Icons.category_outlined;
-
-      case "FINALIZADO":
-        return Icons.check_circle_outline;
-
-      case "INATIVO":
-        return Icons.pie_chart_outline;
-
-      case "PENDENTE_DOCUMENTACAO":
-        return Icons.document_scanner;
-
-      default:
-        return Icons.g_mobiledata;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -90,9 +59,9 @@ class StatusLabel extends StatelessWidget {
             final color = getStatusColor(item.status);
 
             return Container(
-              height: 70,
+              constraints: const BoxConstraints(minHeight: 70),
               width: 260,
-              padding: const EdgeInsets.only(left: 16, right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(10),
@@ -107,44 +76,41 @@ class StatusLabel extends StatelessWidget {
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.02),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Icon(getStatusIcon(item.status), size: 20, color: colorTheme.surface),
+                  // Texto do Status (lado esquerdo)
+                  Expanded(
+                    child: Text(
+                      item.statusLabel,
+                      softWrap: true,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorTheme.surface,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 12),
 
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            item.statusLabel,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis, // Corta com "..."
-                            style: textTheme.bodyMedium!.copyWith(
-                              color: colorTheme.surface,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.amount.toString().padLeft(2, '0'),
-                            style: textTheme.bodyMedium!.copyWith(
-                              color: colorTheme.surface.withValues(alpha: 0.85),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                  // Círculo com o número de processos (lado direito - posição oposta)
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: colorTheme.surface,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.12),
+                          blurRadius: 3,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      item.amount.toString().padLeft(2, '0'),
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

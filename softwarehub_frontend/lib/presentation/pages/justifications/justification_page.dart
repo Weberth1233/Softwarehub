@@ -60,7 +60,7 @@ class JustificationPage extends GetView<JustificationController> {
           ),
         ),
         title: Text(
-          isEditMode ? "Editar Justificativa" : "Justificativa",
+          isEditMode ? "Editar justificativa" : "Justificativa",
           style: theme.textTheme.headlineSmall?.copyWith(
             color: colors.onSecondary,
             fontWeight: FontWeight.w700,

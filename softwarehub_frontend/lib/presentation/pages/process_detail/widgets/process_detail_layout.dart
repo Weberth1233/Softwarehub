@@ -165,7 +165,7 @@ extension _ProcessDetailPageLayout on _ProcessDetailPageState {
         if (controller.isAdmin) ...[
           const SizedBox(height: 24),
           Text(
-            "Ações Administrativas",
+            "Ações administrativas",
             style: theme.textTheme.titleMedium?.copyWith(
               color: colors.tertiary,
               fontWeight: FontWeight.w900,
@@ -206,7 +206,7 @@ extension _ProcessDetailPageLayout on _ProcessDetailPageState {
                 child: Text(
                   _isClassifying
                       ? "Classificando..."
-                      : "Classificação de Nice",
+                      : "Classificação de nice",
                   style: TextStyle(
                     color: colors.onSecondary,
                     fontWeight: FontWeight.bold,
