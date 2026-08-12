@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../../../shared/widgets/diagonal_lines_painter.dart';
 import 'controllers/login_controller.dart';
 import 'widgets/action_buttons.dart';
@@ -14,10 +13,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController(
-    text: 'lucas.fernandes@emailteste.com',
-  );
-  final _passwordController = TextEditingController(text: 'Lucas2026');
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   final loginController = Get.find<LoginController>();
 
