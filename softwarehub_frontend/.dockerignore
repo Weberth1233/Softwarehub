@@ -1,0 +1,29 @@
+# Flutter/Dart
+.dart_tool
+.packages
+.pub-cache
+build
+coverage
+
+# Gradle/Android
+android/.gradle
+android/gradle
+.gradle
+**/.gradle
+**/*.lock
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# Git
+.git
+.gitignore
+
+# Sistemas operacionais
+.DS_Store
+Thumbs.db
+
+# Outros
+README.md

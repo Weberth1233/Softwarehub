@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   postgres:
@@ -66,10 +66,23 @@ services:
     volumes:
       - ./softwarehub-backend/uploads:/app/uploads
 
+  frontend:
+    build:
+      context: ./softwarehub_frontend
+      dockerfile: Dockerfile
+    container_name: nitsrpi-frontend
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - backend
+    networks:
+      - nitsrpi-network
+    restart: unless-stopped
+
 networks:
   nitsrpi-network:
     driver: bridge
- 
+
 volumes:
   pgdata:
 
